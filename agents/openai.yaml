@@ -1,7 +1,7 @@
 interface:
   display_name: "666 Workflow Router"
-  short_description: "Routes Codex project work to the smallest useful skill, role, gate, or thread."
-  default_prompt: "Use $666 to choose the smallest safe workflow route for this Codex project task before editing or dispatching."
+  short_description: "Routes Codex project work by skill, role, gate, thread, and context pressure."
+  default_prompt: "Use $666 to choose the smallest safe workflow route and context handoff point for this Codex project task."
 
 policy:
   allow_implicit_invocation: true

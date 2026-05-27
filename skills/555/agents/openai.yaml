@@ -1,7 +1,7 @@
 interface:
   display_name: "555 Five-Agent Loop"
-  short_description: "Runs Codex project work through live Git anchoring, adversarial review, delegation, and evidence closure."
-  default_prompt: "Use $555 to run this Codex project milestone or review through the five-agent evidence loop."
+  short_description: "Runs Codex project work through live Git anchoring, adversarial review, delegation, evidence closure, and context guard."
+  default_prompt: "Use $555 to run this Codex project milestone or review through the five-agent evidence loop with context-pressure protection."
 
 policy:
   allow_implicit_invocation: true

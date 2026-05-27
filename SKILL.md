@@ -1,6 +1,6 @@
 ---
 name: "666"
-description: General Codex project workflow router for choosing the smallest useful combination of skills, roles, threads, gates, and Git checks. Use when the user says 666, 技能融合, 工作流提效, 封装工作流, 总控路由, 如何推进, 是否开555, 是否审计, 是否核心质疑者, or asks to coordinate multiple Codex project skills, repos, gates, dirty worktrees, or worker threads.
+description: General Codex project workflow router for choosing the smallest useful combination of skills, roles, threads, gates, Git checks, and context-pressure handoff. Use when the user says 666, 技能融合, 工作流提效, 封装工作流, 总控路由, 如何推进, 是否开555, 是否审计, 是否核心质疑者, 上下文高, 接力, 切线程, 压缩, or asks to coordinate multiple Codex project skills, repos, gates, dirty worktrees, or worker threads.
 ---
 
 # 666
@@ -12,6 +12,7 @@ Use `666` as the upstream Codex project workflow router. It decides what should 
 - whether to answer directly, stay read-only, edit, dispatch a worker, run an audit, challenge a claim, or escalate to `555`;
 - which existing skill should be loaded next;
 - which gate and Git boundaries apply;
+- whether context pressure requires a handoff before more work;
 - how to avoid overusing full five-agent flow on small tasks.
 
 `666` does not replace `555`. It decides whether `555` is needed.
@@ -23,6 +24,7 @@ Strong trigger:
 - User explicitly says `666`.
 - User asks for skill fusion, workflow efficiency, packaging workflows, route selection, or how to proceed.
 - User asks whether to use `555`, Core Challenger, Audit Specialist, automation, handoff, or a custom worker.
+- User mentions high context, background load, compression, compacting, handoff, new thread, thread switch, `7.5/10`, `70%`, or `75%`.
 - The task spans multiple project repos, threads, gates, or workstreams.
 
 Medium trigger:
@@ -30,6 +32,7 @@ Medium trigger:
 - A progress report exposes stale evidence, dirty drift, owner-decision blockers, or live Git contradictions.
 - A milestone, release-readiness, done claim, architecture claim, or acceptance claim needs routing.
 - There are competing lanes such as runtime, contract, UI, KB, QA, packaging, audit, or handoff.
+- A long task is about to start in a thread with substantial history or prior compaction.
 - The user asks to combine local memory, current Git state, and prior thread decisions.
 
 Do not auto-trigger for:
@@ -48,6 +51,7 @@ Before selecting a path, establish the smallest needed facts:
 3. Live branch, HEAD, and dirty state when Git matters.
 4. Whether remote freshness matters.
 5. Whether the newest user message narrows or overrides older handoff text.
+6. Whether context pressure should block new large work.
 
 Trust actual file, Git, process, and artifact state over memory, screenshots, reports, or handoff packets.
 
@@ -63,6 +67,34 @@ Choose the smallest level that can complete the task:
 - `L5 dispatch`: use an available thread-dispatch skill for copy-ready controller/worker routing, restart, standby, archive, or handoff packets.
 
 If a lower level is enough, do not escalate.
+
+## Context Pressure Guard
+
+Codex may compact context outside the skill's control. `666` protects continuity before that happens.
+
+Use this scale before starting large work:
+
+- `C0 normal`: continue normally.
+- `C1 elevated`: keep the task narrow; avoid opening new long work unless the user explicitly asks.
+- `C2 high`: produce a checkpoint or handoff before continuing; prefer a fresh thread for major work.
+- `C3 critical`: stop starting new tasks; report any running command state and generate a copy-ready handoff.
+
+Trigger `C2` or `C3` when the user says context is high, background is high, thread is near limit, compression happened, handoff is needed, or usage is around `7.5/10`, `70%`, or `75%`.
+
+At `C2` or `C3`, the handoff must include:
+
+- current goal;
+- workspace path;
+- branch, HEAD, and dirty state when Git matters;
+- completed work;
+- unfinished work;
+- commands/tests and results;
+- decisions and constraints;
+- risks or blockers;
+- next smallest gate;
+- reminder to trust live Git/file state over the handoff packet.
+
+Do not start `555`, long audits, broad refactors, packaging, release review, or cross-repo sync at `C2` or `C3` until the handoff/checkpoint is complete.
 
 ## Skill Selection Map
 
@@ -133,6 +165,7 @@ For controller-ready cross-thread text, use the available thread-dispatch or han
 
 - Do not treat `666` as permission to widen scope.
 - Do not run full `555` for every small task.
+- Do not start large work when context pressure is high; checkpoint or hand off first.
 - Do not create subagents or automations unless the task genuinely requires them.
 - Do not turn audits into cleanup.
 - Do not mutate Git state unless the user explicitly opens that gate.

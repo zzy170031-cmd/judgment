@@ -1,6 +1,6 @@
 ---
 name: "555"
-description: Unified Codex project five-agent operating mode for live Git anchoring, lane routing, adversarial review, backend delegation, evidence verification, progress-watch escalation, and copy-ready controller/worker reporting. Use when the user says 五代理, 五代理闭环, 对抗审查, 红队, Core Challenger, 后端代码委派, 总控分线程, milestone/release confidence, or asks to combine project workflow skills into one execution loop.
+description: Unified Codex project five-agent operating mode for live Git anchoring, lane routing, adversarial review, backend delegation, evidence verification, progress-watch escalation, context-pressure protection, and copy-ready controller/worker reporting. Use when the user says 五代理, 五代理闭环, 对抗审查, 红队, Core Challenger, 后端代码委派, 总控分线程, milestone/release confidence, or asks to combine project workflow skills into one execution loop.
 ---
 
 # 555
@@ -46,6 +46,20 @@ Rules:
 - Trust actual Git/file/process/artifact state over packets, screenshots, prior reports, or local tracking refs.
 - If a live remote commit is absent locally, report stale tracking refs.
 - Do not clean, reset, stash, commit, push, or edit unrelated dirty files unless the user explicitly opens that gate.
+
+## Context Pressure Before Loop
+
+Before starting a full five-agent loop, check whether the current thread is too context-heavy for reliable execution.
+
+If the user mentions high context, background load, compression, handoff, new thread, thread switch, `7.5/10`, `70%`, or `75%`:
+
+- do not start new five-agent work yet;
+- finish or report the state of any running command;
+- produce a copy-ready handoff/checkpoint first;
+- include goal, workspace, branch, HEAD, dirty state, completed work, unfinished work, commands/tests, decisions, constraints, risks, and next gate;
+- tell the next thread to trust live Git/file state over the handoff packet.
+
+If context pressure is elevated but not critical, keep the loop narrow and avoid adding side investigations or extra worker threads.
 
 ## Mode Selection
 
@@ -207,6 +221,7 @@ For recurring progress checks:
 A0 may close the loop only after:
 
 - Live branch/HEAD/dirty state is known.
+- Context pressure was checked before any large loop or handoff-sensitive action.
 - The active route and allowed scope are stated.
 - Delegated jobs have returned actual results, not pending notifications.
 - Review claims were checked against files/tests/artifacts.

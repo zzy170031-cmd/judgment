@@ -7,7 +7,7 @@ This repository contains general Codex project workflow governance skills. It ke
 这个仓库现在是一个通用 Codex 项目双技能包：
 
 - `666`：上游工作流路由器。负责判断当前 Codex 项目任务应该直接回答、只读锚定、调用专用技能、启用审计者、启用核心质疑者、升级到 `555`，还是生成跨线程调度指令。
-- `555`：下游五代理闭环。负责重大任务、对抗审查、后端委派、证据验证、progress-watch 升级和 release confidence 审查。
+- `555`：下游五代理闭环。负责重大任务、对抗审查、后端委派、证据验证、progress-watch 升级、上下文压力保护和 release confidence 审查。
 
 两者互补，但运行时保持独立。`666` 不复制 `555` 的全文，也不默认启动 `555`；它只在证据和任务风险达到升级条件时调用 `555`。
 
@@ -19,6 +19,7 @@ This repository contains general Codex project workflow governance skills. It ke
 - 用户明确提到 `666`、技能融合、工作流提效、封装工作流、总控路由、如何推进。
 - 需要判断是否启动 `555`、Core Challenger、Audit Specialist、automation、handoff 或 worker thread。
 - progress-watch 或审查发现 stale evidence、dirty drift、owner blocker、真实 Git 状态冲突。
+- 线程上下文压力升高，用户提到上下文高、背景信息高、压缩、接力、切线程、7.5/10、70% 或 75%。
 
 使用 `555`：
 
@@ -33,7 +34,19 @@ This repository contains general Codex project workflow governance skills. It ke
 - `666` 默认选择最小执行层级，避免小任务被包装成重流程。
 - `555` 在确有必要时提供完整的五席闭环和证据验证。
 - Core Challenger、Audit Specialist、handoff、runtime repair、contract gate 等能力按需组合。
+- 高上下文时先生成 checkpoint / handoff，再决定是否继续或切线程。
 - 在 dirty worktree 中先做 ownership 判断，防止误清理、误提交、误覆盖其他线程或用户改动。
+
+### 上下文压力保护
+
+`666` 和 `555` 不假设自己能控制平台压缩。它们的职责是在压缩或接力前保护连续性：
+
+- `C0 normal`：正常推进。
+- `C1 elevated`：保持任务窄，不主动开长任务。
+- `C2 high`：先输出 checkpoint / handoff，再继续。
+- `C3 critical`：停止新任务，只报告运行状态并生成接力包。
+
+接力包必须包含当前目标、workspace、branch/HEAD/dirty、已完成、未完成、命令/测试结果、约束、风险、下一步，并提醒下一线程以 live Git / file state 为准。
 
 ### 安装路径
 
@@ -75,7 +88,7 @@ E:\codex\codex-skill-666
 This repository is now a general Codex project two-skill pack:
 
 - `666`: upstream workflow router. It decides whether a Codex project task should be answered directly, anchored read-only, routed to a narrow skill, sent to an auditor, challenged by Core Challenger behavior, escalated to `555`, or dispatched across threads.
-- `555`: downstream five-agent execution loop. It handles major tasks, adversarial review, backend delegation, evidence verification, progress-watch escalation, and release-confidence review.
+- `555`: downstream five-agent execution loop. It handles major tasks, adversarial review, backend delegation, evidence verification, progress-watch escalation, context-pressure protection, and release-confidence review.
 
 They are designed to work together while staying independent at runtime. `666` does not inline `555` and does not run it by default. It escalates only when the task evidence and risk justify the heavier loop.
 
@@ -87,6 +100,7 @@ Use `666` when:
 - The user explicitly mentions `666`, skill fusion, workflow efficiency, workflow packaging, routing, or how to proceed.
 - The task needs a decision about whether to use `555`, Core Challenger, Audit Specialist, automation, handoff, or worker threads.
 - A progress watch or review exposes stale evidence, dirty drift, owner blockers, or contradictions in live Git state.
+- The thread has high context pressure, prior compaction, or a handoff/new-thread request.
 
 Use `555` when:
 
@@ -101,7 +115,19 @@ Use `555` when:
 - Uses `666` to choose the smallest execution level, so small tasks do not trigger heavyweight workflows.
 - Uses `555` only when the evidence supports a full five-agent loop.
 - Composes Core Challenger, Audit Specialist, handoff, runtime repair, and contract gates only when needed.
+- Produces a checkpoint or handoff before large work when context pressure is high.
 - Adds a dirty-worktree ownership checkpoint before cleanup, commit, reset, packaging, or sync actions.
+
+### Context Pressure Guard
+
+The skills do not control platform-level compaction. They protect continuity before compaction or thread transfer:
+
+- `C0 normal`: continue normally.
+- `C1 elevated`: keep scope narrow.
+- `C2 high`: produce a checkpoint or handoff before continuing.
+- `C3 critical`: stop starting new work, report running command state, and generate a handoff.
+
+The handoff must include goal, workspace, branch/HEAD/dirty state, completed work, unfinished work, commands/tests, constraints, risks, next gate, and a reminder to trust live Git/file state over the packet.
 
 ## Repository Layout
 
