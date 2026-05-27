@@ -1,19 +1,19 @@
 ---
 name: "555"
-description: Unified Hope five-agent operating mode for live Git anchoring, lane routing, adversarial review, backend delegation, evidence verification, progress-watch escalation, and copy-ready controller/worker reporting. Use when the user says 五代理, 五代理闭环, 对抗审查, 红队, Core Challenger, 后端代码委派, 总控分线程, milestone/release confidence, or asks to combine Hope workflow skills into one execution loop.
+description: Unified Codex project five-agent operating mode for live Git anchoring, lane routing, adversarial review, backend delegation, evidence verification, progress-watch escalation, and copy-ready controller/worker reporting. Use when the user says 五代理, 五代理闭环, 对抗审查, 红队, Core Challenger, 后端代码委派, 总控分线程, milestone/release confidence, or asks to combine project workflow skills into one execution loop.
 ---
 
 # 555
 
 ## Purpose
 
-Run Hope work as one closed governance loop: anchor live state, assign the right seat, execute or review within scope, verify from actual evidence, and report in a paste-ready format.
+Run Codex project work as one closed governance loop: anchor live state, assign the right seat, execute or review within scope, verify from actual evidence, and report in a paste-ready format.
 
 This skill supersedes scattered five-agent instructions for the current task. Use the older narrow skills only as supporting references when needed.
 
 ## The Five Seats
 
-Use exactly five seats for non-trivial Hope work:
+Use exactly five seats for non-trivial project work:
 
 1. `A0 总控架构席`: main decision-maker, route owner, scope controller, final acceptor.
 2. `A1 实现委派席`: implementation worker for backend multi-file or bounded lane work.
@@ -61,10 +61,11 @@ Do not run the full closed loop for trivial single-file edits, small docs-only u
 
 ## Development Skill Handoff
 
-Use these narrower development skills when they match the task:
+Use narrower project-specific skills when they match the task:
 
-- `hope-runtime-repair`: runtime.rs, validator, fallback, storyboard row materialization, source-role/person fidelity, and targeted Rust verification gates.
-- `hope-contract-gate`: docs-only contract/schema/field-boundary gates and implementation handoff checklists.
+- Runtime/implementation repair skill: runtime paths, validators, fallback reasons, row materialization, or targeted verification gates.
+- Contract/spec gate skill: docs-only contract, schema, field-boundary, API, or downstream checklist work.
+- UI, packaging, QA, documentation, or repository-specific skills when they are narrower than this generic five-agent loop.
 
 Return to `555` when the task needs multi-agent review, backend delegation, red-team critique, or controller/worker dispatch.
 
@@ -199,7 +200,7 @@ For recurring progress checks:
 
 - Keep normal watch output compact: what changed, branch status, latest commits, uncommitted changes, risks/blockers.
 - Escalate to this five-agent loop only when the watch exposes a milestone claim, release-readiness claim, stale evidence contradiction, owner-decision blocker, or backend multi-file action request.
-- Refresh `C:\Users\Administrator\.codex\automations\hope-progress-watch\memory.md` only when the watch deliverable requires it.
+- Refresh a project-specific automation memory or checkpoint file only when the watch deliverable requires it.
 
 ## Acceptance Standard
 

@@ -1,12 +1,12 @@
 # Judgment Skills Pack
 
-This repository contains Hope workflow governance skills for Codex. It is intended to keep routing, five-agent review, evidence checks, and dirty-worktree safety under version control.
+This repository contains general Codex project workflow governance skills. It keeps routing, five-agent review, evidence checks, and dirty-worktree safety under version control for use across projects.
 
 ## 中文说明
 
-这个仓库现在是一个双技能包：
+这个仓库现在是一个通用 Codex 项目双技能包：
 
-- `666`：上游工作流路由器。负责判断当前任务应该直接回答、只读锚定、调用专用技能、启用审计者、启用核心质疑者、升级到 `555`，还是生成跨线程调度指令。
+- `666`：上游工作流路由器。负责判断当前 Codex 项目任务应该直接回答、只读锚定、调用专用技能、启用审计者、启用核心质疑者、升级到 `555`，还是生成跨线程调度指令。
 - `555`：下游五代理闭环。负责重大任务、对抗审查、后端委派、证据验证、progress-watch 升级和 release confidence 审查。
 
 两者互补，但运行时保持独立。`666` 不复制 `555` 的全文，也不默认启动 `555`；它只在证据和任务风险达到升级条件时调用 `555`。
@@ -15,7 +15,7 @@ This repository contains Hope workflow governance skills for Codex. It is intend
 
 使用 `666`：
 
-- 需要在多个 Hope 仓库、线程、gate 或工作面之间选择推进路线。
+- 需要在多个项目仓库、线程、gate 或工作面之间选择推进路线。
 - 用户明确提到 `666`、技能融合、工作流提效、封装工作流、总控路由、如何推进。
 - 需要判断是否启动 `555`、Core Challenger、Audit Specialist、automation、handoff 或 worker thread。
 - progress-watch 或审查发现 stale evidence、dirty drift、owner blocker、真实 Git 状态冲突。
@@ -72,9 +72,9 @@ E:\codex\codex-skill-666
 
 ## English
 
-This repository is now a two-skill pack:
+This repository is now a general Codex project two-skill pack:
 
-- `666`: upstream workflow router. It decides whether a Hope task should be answered directly, anchored read-only, routed to a narrow skill, sent to an auditor, challenged by Core Challenger behavior, escalated to `555`, or dispatched across threads.
+- `666`: upstream workflow router. It decides whether a Codex project task should be answered directly, anchored read-only, routed to a narrow skill, sent to an auditor, challenged by Core Challenger behavior, escalated to `555`, or dispatched across threads.
 - `555`: downstream five-agent execution loop. It handles major tasks, adversarial review, backend delegation, evidence verification, progress-watch escalation, and release-confidence review.
 
 They are designed to work together while staying independent at runtime. `666` does not inline `555` and does not run it by default. It escalates only when the task evidence and risk justify the heavier loop.
@@ -83,7 +83,7 @@ They are designed to work together while staying independent at runtime. `666` d
 
 Use `666` when:
 
-- A task spans multiple Hope repositories, threads, gates, or workstreams.
+- A task spans multiple project repositories, threads, gates, or workstreams.
 - The user explicitly mentions `666`, skill fusion, workflow efficiency, workflow packaging, routing, or how to proceed.
 - The task needs a decision about whether to use `555`, Core Challenger, Audit Specialist, automation, handoff, or worker threads.
 - A progress watch or review exposes stale evidence, dirty drift, owner blockers, or contradictions in live Git state.
@@ -111,10 +111,10 @@ SKILL.md                      # Compatibility entrypoint, same role as skills/66
 agents/openai.yaml            # Compatibility UI metadata for root 666 entrypoint
 skills/
   666/
-    SKILL.md                  # Hope workflow router
+    SKILL.md                  # Codex project workflow router
     agents/openai.yaml
   555/
-    SKILL.md                  # Hope five-agent evidence loop
+    SKILL.md                  # Codex project five-agent evidence loop
     agents/openai.yaml
 ```
 

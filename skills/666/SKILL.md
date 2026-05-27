@@ -1,13 +1,13 @@
 ---
 name: "666"
-description: Hope workflow efficiency router for choosing the smallest useful combination of skills, roles, threads, gates, and Git checks. Use when the user says 666, 技能融合, 工作流提效, 封装工作流, 总控路由, 如何推进, 是否开555, 是否审计, 是否核心质疑者, or asks to coordinate multiple Hope skills, repos, gates, dirty worktrees, or worker threads.
+description: General Codex project workflow router for choosing the smallest useful combination of skills, roles, threads, gates, and Git checks. Use when the user says 666, 技能融合, 工作流提效, 封装工作流, 总控路由, 如何推进, 是否开555, 是否审计, 是否核心质疑者, or asks to coordinate multiple Codex project skills, repos, gates, dirty worktrees, or worker threads.
 ---
 
 # 666
 
 ## Purpose
 
-Use `666` as the upstream Hope workflow router. It decides what should happen next before the work becomes heavy:
+Use `666` as the upstream Codex project workflow router. It decides what should happen next before the work becomes heavy:
 
 - whether to answer directly, stay read-only, edit, dispatch a worker, run an audit, challenge a claim, or escalate to `555`;
 - which existing skill should be loaded next;
@@ -23,7 +23,7 @@ Strong trigger:
 - User explicitly says `666`.
 - User asks for skill fusion, workflow efficiency, packaging workflows, route selection, or how to proceed.
 - User asks whether to use `555`, Core Challenger, Audit Specialist, automation, handoff, or a custom worker.
-- The task spans multiple Hope repos, threads, gates, or workstreams.
+- The task spans multiple project repos, threads, gates, or workstreams.
 
 Medium trigger:
 
@@ -56,22 +56,23 @@ Trust actual file, Git, process, and artifact state over memory, screenshots, re
 Choose the smallest level that can complete the task:
 
 - `L0 direct`: answer directly; no repo work and no extra skill body.
-- `L1 anchor`: use `hope-readonly-git-anchor` for branch, HEAD, dirty files, and smallest safe gate.
-- `L2 narrow skill`: use one focused skill, such as `hope-runtime-repair`, `hope-contract-gate`, `hope-progress-watch`, or `thread-handoff`.
+- `L1 anchor`: use a project-specific Git anchor skill when available; otherwise run live branch, HEAD, dirty-file, and remote-freshness checks directly.
+- `L2 narrow skill`: use one focused skill, such as runtime repair, contract/spec gate, progress watch, thread handoff, packaging, QA, or a project-specific skill.
 - `L3 specialist`: activate Core Challenger or Audit Specialist behavior for falsification, evidence review, or dirty ownership classification.
 - `L4 555`: escalate to full five-agent loop for major claims, backend multi-file delegation, release confidence, cross-module contracts, or adversarial review.
-- `L5 dispatch`: use `hope-thread-dispatch` for copy-ready controller/worker routing, restart, standby, archive, or handoff packets.
+- `L5 dispatch`: use an available thread-dispatch skill for copy-ready controller/worker routing, restart, standby, archive, or handoff packets.
 
 If a lower level is enough, do not escalate.
 
-## Existing Skill Map
+## Skill Selection Map
 
-- `hope-readonly-git-anchor`: standby, sync, review, readiness, or handoff needs live Git truth.
-- `hope-progress-watch`: recurring progress reports and checkpoint comparisons.
-- `thread-handoff`: high context, thread transfer, or next-thread packet.
-- `hope-thread-dispatch`: controller-to-worker instructions and worker-to-controller reports.
-- `hope-contract-gate`: docs-only contract, schema, field boundary, or downstream checklist work.
-- `hope-runtime-repair`: bounded runtime fixes, validators, fallback reasons, row materialization, and Rust verification.
+- Git anchor skill: standby, sync, review, readiness, or handoff needs live Git truth.
+- Progress-watch or monitoring skill: recurring progress reports and checkpoint comparisons.
+- Thread handoff skill: high context, thread transfer, or next-thread packet.
+- Thread dispatch skill: controller-to-worker instructions and worker-to-controller reports.
+- Contract/spec gate skill: docs-only contract, schema, field boundary, or downstream checklist work.
+- Runtime/implementation repair skill: bounded implementation fixes and targeted verification.
+- Project-specific skills: prefer the current repo's established skill or rule file when it is narrower than this generic router.
 - `555`: full closed loop with five seats, Core Challenger pressure, Audit Specialist verification, backend delegation, or release-confidence review.
 
 Load only the selected downstream skill bodies. Do not bulk-load every skill just because `666` triggered.
@@ -126,7 +127,7 @@ For routing decisions, answer compactly:
 - 下一步最小 gate：
 ```
 
-For controller-ready cross-thread text, use `hope-thread-dispatch` and follow the global copy-ready format.
+For controller-ready cross-thread text, use the available thread-dispatch or handoff skill and follow the active copy-ready format.
 
 ## Forbidden
 
@@ -135,4 +136,4 @@ For controller-ready cross-thread text, use `hope-thread-dispatch` and follow th
 - Do not create subagents or automations unless the task genuinely requires them.
 - Do not turn audits into cleanup.
 - Do not mutate Git state unless the user explicitly opens that gate.
-- Do not paste secrets, raw KB rows, raw `prompt_body`, `source_register`, or overlay JSON.
+- Do not paste secrets, raw knowledge-base rows, raw model prompts, private source registers, or sensitive overlay JSON.
