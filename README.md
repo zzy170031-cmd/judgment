@@ -6,7 +6,7 @@ This repository contains general Codex project workflow governance skills. It ke
 
 这个仓库现在是一个通用 Codex 项目双技能包：
 
-- `666`：上游工作流路由器。负责判断当前 Codex 项目任务应该直接回答、只读锚定、调用专用技能、启用审计者、启用核心质疑者、升级到 `555`，还是生成跨线程调度指令。
+- `666`：上游工作流路由器。负责判断当前 Codex 项目任务应该直接回答、只读锚定、调用专用技能、启用审计者、启用核心质疑者、升级到 `555`、生成跨线程调度指令，还是评估重复工作是否值得封装。
 - `555`：下游五代理闭环。负责重大任务、对抗审查、后端委派、证据验证、progress-watch 升级、上下文压力保护和 release confidence 审查。
 
 两者互补，但运行时保持独立。`666` 不复制 `555` 的全文，也不默认启动 `555`；它只在证据和任务风险达到升级条件时调用 `555`。
@@ -20,6 +20,7 @@ This repository contains general Codex project workflow governance skills. It ke
 - 需要判断是否启动 `555`、Core Challenger、Audit Specialist、automation、handoff 或 worker thread。
 - progress-watch 或审查发现 stale evidence、dirty drift、owner blocker、真实 Git 状态冲突。
 - 线程上下文压力升高，用户提到上下文高、背景信息高、压缩、接力、切线程、7.5/10、70% 或 75%。
+- 用户询问重复流程是否值得封装为 skill、automation、subagent，或是否应该扩展现有资产。
 
 使用 `555`：
 
@@ -35,6 +36,7 @@ This repository contains general Codex project workflow governance skills. It ke
 - `555` 在确有必要时提供完整的五席闭环和证据验证。
 - Core Challenger、Audit Specialist、handoff、runtime repair、contract gate 等能力按需组合。
 - 高上下文时先生成 checkpoint / handoff，再决定是否继续或切线程。
+- 先用证据筛选封装候选，只创建高置信、窄范围、可验证的缺失资产。
 - 在 dirty worktree 中先做 ownership 判断，防止误清理、误提交、误覆盖其他线程或用户改动。
 
 ### 上下文压力保护
@@ -47,6 +49,25 @@ This repository contains general Codex project workflow governance skills. It ke
 - `C3 critical`：停止新任务，只报告运行状态并生成接力包。
 
 接力包必须包含当前目标、workspace、branch/HEAD/dirty、已完成、未完成、命令/测试结果、约束、风险、下一步，并提醒下一线程以 live Git / file state 为准。
+
+### 封装候选评估
+
+`666` 在用户询问“是否可以进化/封装/自动化”时先输出候选短名单，而不是直接创建新资产。
+
+行动标准：
+
+- 至少出现两次，或明确会复发且重复成本高。
+- 输入稳定、步骤可复现、输出或停止条件清晰。
+- 能明显提升速度、质量、一致性或可靠性。
+- 现有技能、自动化、子代理、规则或脚本没有充分覆盖。
+
+最小形式：
+
+- `Skill`：可复用流程或 playbook。
+- `Automation`：周期检查、报告、提醒或监控。
+- `Subagent`：边界明确的专家角色或调查任务。
+- `Extend existing`：扩展现有技能、自动化、脚本或规则。
+- `Skip`：一次性、模糊、敏感、证据不足或已有覆盖。
 
 ### 安装路径
 
@@ -87,7 +108,7 @@ E:\codex\codex-skill-666
 
 This repository is now a general Codex project two-skill pack:
 
-- `666`: upstream workflow router. It decides whether a Codex project task should be answered directly, anchored read-only, routed to a narrow skill, sent to an auditor, challenged by Core Challenger behavior, escalated to `555`, or dispatched across threads.
+- `666`: upstream workflow router. It decides whether a Codex project task should be answered directly, anchored read-only, routed to a narrow skill, sent to an auditor, challenged by Core Challenger behavior, escalated to `555`, dispatched across threads, or evaluated as a packaging candidate.
 - `555`: downstream five-agent execution loop. It handles major tasks, adversarial review, backend delegation, evidence verification, progress-watch escalation, context-pressure protection, and release-confidence review.
 
 They are designed to work together while staying independent at runtime. `666` does not inline `555` and does not run it by default. It escalates only when the task evidence and risk justify the heavier loop.
@@ -101,6 +122,7 @@ Use `666` when:
 - The task needs a decision about whether to use `555`, Core Challenger, Audit Specialist, automation, handoff, or worker threads.
 - A progress watch or review exposes stale evidence, dirty drift, owner blockers, or contradictions in live Git state.
 - The thread has high context pressure, prior compaction, or a handoff/new-thread request.
+- The user asks whether repeated work should become a skill, automation, subagent, extension, or skip.
 
 Use `555` when:
 
@@ -116,6 +138,7 @@ Use `555` when:
 - Uses `555` only when the evidence supports a full five-agent loop.
 - Composes Core Challenger, Audit Specialist, handoff, runtime repair, and contract gates only when needed.
 - Produces a checkpoint or handoff before large work when context pressure is high.
+- Filters packaging candidates by evidence before creating or extending assets.
 - Adds a dirty-worktree ownership checkpoint before cleanup, commit, reset, packaging, or sync actions.
 
 ### Context Pressure Guard
@@ -128,6 +151,19 @@ The skills do not control platform-level compaction. They protect continuity bef
 - `C3 critical`: stop starting new work, report running command state, and generate a handoff.
 
 The handoff must include goal, workspace, branch/HEAD/dirty state, completed work, unfinished work, commands/tests, constraints, risks, next gate, and a reminder to trust live Git/file state over the packet.
+
+### Packaging Candidate Gate
+
+When the user asks whether a workflow can be evolved, packaged, automated, or delegated, `666` first produces a compact shortlist instead of creating new assets immediately.
+
+Act only when the candidate:
+
+- occurred at least twice, or is clearly likely to recur and costly to repeat;
+- has stable inputs, repeatable steps, and a clear output or stopping condition;
+- materially improves speed, quality, consistency, or reliability;
+- is not already adequately covered.
+
+Choose the smallest form: `Skill`, `Automation`, `Subagent`, `Extend existing`, or `Skip`.
 
 ## Repository Layout
 

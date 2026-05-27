@@ -1,6 +1,6 @@
 ---
 name: "666"
-description: General Codex project workflow router for choosing the smallest useful combination of skills, roles, threads, gates, Git checks, and context-pressure handoff. Use when the user says 666, 技能融合, 工作流提效, 封装工作流, 总控路由, 如何推进, 是否开555, 是否审计, 是否核心质疑者, 上下文高, 接力, 切线程, 压缩, or asks to coordinate multiple Codex project skills, repos, gates, dirty worktrees, or worker threads.
+description: General Codex project workflow router for choosing the smallest useful combination of skills, roles, threads, gates, Git checks, context-pressure handoff, and packaging candidates. Use when the user says 666, 技能融合, 工作流提效, 封装工作流, 总控路由, 如何推进, 是否开555, 是否审计, 是否核心质疑者, 上下文高, 接力, 切线程, 压缩, 是否值得封装, or asks to coordinate multiple Codex project skills, repos, gates, dirty worktrees, or worker threads.
 ---
 
 # 666
@@ -13,6 +13,7 @@ Use `666` as the upstream Codex project workflow router. It decides what should 
 - which existing skill should be loaded next;
 - which gate and Git boundaries apply;
 - whether context pressure requires a handoff before more work;
+- whether repeated work deserves packaging as a skill, automation, subagent, extension, or skip;
 - how to avoid overusing full five-agent flow on small tasks.
 
 `666` does not replace `555`. It decides whether `555` is needed.
@@ -25,6 +26,7 @@ Strong trigger:
 - User asks for skill fusion, workflow efficiency, packaging workflows, route selection, or how to proceed.
 - User asks whether to use `555`, Core Challenger, Audit Specialist, automation, handoff, or a custom worker.
 - User mentions high context, background load, compression, compacting, handoff, new thread, thread switch, `7.5/10`, `70%`, or `75%`.
+- User asks whether repeated work should be packaged, evolved, automated, delegated, or skipped.
 - The task spans multiple project repos, threads, gates, or workstreams.
 
 Medium trigger:
@@ -33,6 +35,7 @@ Medium trigger:
 - A milestone, release-readiness, done claim, architecture claim, or acceptance claim needs routing.
 - There are competing lanes such as runtime, contract, UI, KB, QA, packaging, audit, or handoff.
 - A long task is about to start in a thread with substantial history or prior compaction.
+- A workflow appears repeated, time-consuming, error-prone, context-heavy, or in need of consistent output.
 - The user asks to combine local memory, current Git state, and prior thread decisions.
 
 Do not auto-trigger for:
@@ -52,6 +55,7 @@ Before selecting a path, establish the smallest needed facts:
 4. Whether remote freshness matters.
 5. Whether the newest user message narrows or overrides older handoff text.
 6. Whether context pressure should block new large work.
+7. Whether the task is asking for packaging candidate evaluation rather than immediate implementation.
 
 Trust actual file, Git, process, and artifact state over memory, screenshots, reports, or handoff packets.
 
@@ -95,6 +99,47 @@ At `C2` or `C3`, the handoff must include:
 - reminder to trust live Git/file state over the handoff packet.
 
 Do not start `555`, long audits, broad refactors, packaging, release review, or cross-repo sync at `C2` or `C3` until the handoff/checkpoint is complete.
+
+## Packaging Candidate Gate
+
+Use this gate when the user asks whether a workflow can be packaged, evolved, automated, delegated, or reused.
+
+Review available evidence in this order:
+
+1. Recent Codex sessions, task summaries, and the current thread.
+2. Codex memories and rollout summaries, if available.
+3. Existing skills, custom agents, automations, and repo-local rules.
+4. External activity records such as Chronicle only as discovery signals; confirm important facts in the relevant source system.
+
+Look broadly for work that is repeated, time-consuming, error-prone, context-heavy, or benefits from a consistent process. Include coding, research, writing, planning, communication, operations, analysis, and administration.
+
+Only create or extend a packaged asset when the candidate:
+
+- occurred at least twice, or is clearly likely to recur and costly to repeat;
+- has stable inputs, a repeatable procedure, and a clear output or stopping condition;
+- materially improves speed, quality, consistency, or reliability;
+- is not already adequately covered by an existing skill, automation, subagent, rule, or script.
+
+Choose the smallest appropriate form:
+
+- `Skill`: reusable workflow or playbook.
+- `Automation`: scheduled or recurring check, report, reminder, or monitor.
+- `Subagent`: bounded specialist role or investigation task suitable for delegation.
+- `Extend existing`: improve a current skill, automation, script, or rule instead of duplicating it.
+- `Skip`: too one-off, ambiguous, sensitive, poorly evidenced, or already covered.
+
+First produce a compact shortlist:
+
+```text
+Packaging candidates:
+- repeated workflow:
+- evidence / dates:
+- frequency / confidence:
+- recommended form:
+- why worth or not worth packaging:
+```
+
+Then create or extend only the high-confidence missing items. Keep them narrow, practical, source-aware, and easy to validate. Do not create speculative, overlapping, or overly broad assets.
 
 ## Skill Selection Map
 
@@ -155,6 +200,7 @@ For routing decisions, answer compactly:
 - 推荐层级：L0 / L1 / L2 / L3 / L4 / L5
 - 启用技能 / 角色：
 - 不启用的内容：
+- 封装候选：
 - 禁止事项：
 - 下一步最小 gate：
 ```
@@ -166,6 +212,7 @@ For controller-ready cross-thread text, use the available thread-dispatch or han
 - Do not treat `666` as permission to widen scope.
 - Do not run full `555` for every small task.
 - Do not start large work when context pressure is high; checkpoint or hand off first.
+- Do not package speculative, overlapping, sensitive, or poorly evidenced workflows.
 - Do not create subagents or automations unless the task genuinely requires them.
 - Do not turn audits into cleanup.
 - Do not mutate Git state unless the user explicitly opens that gate.
