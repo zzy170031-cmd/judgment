@@ -1,34 +1,65 @@
-# 666 - Hope Workflow Router
+# Judgment Skills Pack
+
+This repository contains Hope workflow governance skills for Codex. It is intended to keep routing, five-agent review, evidence checks, and dirty-worktree safety under version control.
 
 ## 中文说明
 
-`666` 是一个 Hope 工作流提效总控技能。它不直接替代任何已有技能，而是在任务开始时判断应该使用哪个最小可行路径：直接回答、只读锚定、调用单一专用技能、启用核心质疑者、启用审计者、升级到 `555` 五代理闭环，或生成跨线程调度指令。
+这个仓库现在是一个双技能包：
+
+- `666`：上游工作流路由器。负责判断当前任务应该直接回答、只读锚定、调用专用技能、启用审计者、启用核心质疑者、升级到 `555`，还是生成跨线程调度指令。
+- `555`：下游五代理闭环。负责重大任务、对抗审查、后端委派、证据验证、progress-watch 升级和 release confidence 审查。
+
+两者互补，但运行时保持独立。`666` 不复制 `555` 的全文，也不默认启动 `555`；它只在证据和任务风险达到升级条件时调用 `555`。
 
 ### 适合使用的场景
+
+使用 `666`：
 
 - 需要在多个 Hope 仓库、线程、gate 或工作面之间选择推进路线。
 - 用户明确提到 `666`、技能融合、工作流提效、封装工作流、总控路由、如何推进。
 - 需要判断是否启动 `555`、Core Challenger、Audit Specialist、automation、handoff 或 worker thread。
 - progress-watch 或审查发现 stale evidence、dirty drift、owner blocker、真实 Git 状态冲突。
-- 重大验收、release confidence、done claim、架构方向判断需要先做证据路由。
+
+使用 `555`：
+
+- 用户明确提到五代理、五代理闭环、对抗审查、红队、Core Challenger、后端代码委派、总控分线程。
+- 重大验收、release confidence、done claim、架构方向判断需要完整证据闭环。
+- 任务跨 runtime、contracts、storage、schemas、validators、artifacts 或多仓库。
+- 需要读写分离的后端委派、二轮裁定、证据验证和最终收口。
 
 ### 它如何提效
 
 - 先锚定真实 Git / 文件 / gate 状态，再决定是否行动。
-- 默认选择最小执行层级，避免小任务被包装成重流程。
-- 把 Core Challenger、Audit Specialist、`555`、handoff、runtime repair、contract gate 等能力按需组合。
+- `666` 默认选择最小执行层级，避免小任务被包装成重流程。
+- `555` 在确有必要时提供完整的五席闭环和证据验证。
+- Core Challenger、Audit Specialist、handoff、runtime repair、contract gate 等能力按需组合。
 - 在 dirty worktree 中先做 ownership 判断，防止误清理、误提交、误覆盖其他线程或用户改动。
 
-### 与 `555` 的关系
+### 安装路径
 
-`666` 是上游路由器，负责判断要不要升级；`555` 是下游五代理闭环，负责在重大任务、对抗审查、后端委派、release confidence 等场景中执行完整治理流程。
+推荐从子目录安装：
 
-### 本机安装
+```text
+skills/666
+skills/555
+```
+
+当前仓库根目录也保留了一个兼容入口：
+
+```text
+SKILL.md
+agents/openai.yaml
+```
+
+根目录入口等同于 `666`，用于兼容早期单技能安装方式。后续标准路径以 `skills/666` 和 `skills/555` 为准。
+
+### 本机当前安装
 
 本机全局安装路径：
 
 ```text
 C:\Users\Administrator\.codex\skills\666\SKILL.md
+C:\Users\Administrator\.codex\skills\555\SKILL.md
 ```
 
 Git 源仓库：
@@ -41,35 +72,59 @@ E:\codex\codex-skill-666
 
 ## English
 
-`666` is a Hope workflow efficiency router. It does not replace existing skills. Instead, it decides the smallest useful route before the task becomes heavy: answer directly, anchor live Git state, use one focused skill, invoke Core Challenger behavior, invoke Audit Specialist behavior, escalate to the `555` five-agent loop, or prepare cross-thread dispatch.
+This repository is now a two-skill pack:
+
+- `666`: upstream workflow router. It decides whether a Hope task should be answered directly, anchored read-only, routed to a narrow skill, sent to an auditor, challenged by Core Challenger behavior, escalated to `555`, or dispatched across threads.
+- `555`: downstream five-agent execution loop. It handles major tasks, adversarial review, backend delegation, evidence verification, progress-watch escalation, and release-confidence review.
+
+They are designed to work together while staying independent at runtime. `666` does not inline `555` and does not run it by default. It escalates only when the task evidence and risk justify the heavier loop.
 
 ### When to use it
+
+Use `666` when:
 
 - A task spans multiple Hope repositories, threads, gates, or workstreams.
 - The user explicitly mentions `666`, skill fusion, workflow efficiency, workflow packaging, routing, or how to proceed.
 - The task needs a decision about whether to use `555`, Core Challenger, Audit Specialist, automation, handoff, or worker threads.
 - A progress watch or review exposes stale evidence, dirty drift, owner blockers, or contradictions in live Git state.
-- A milestone, release-confidence claim, done claim, architecture direction, or acceptance decision needs evidence-based routing first.
+
+Use `555` when:
+
+- The user explicitly asks for five-agent flow, adversarial review, red-team review, Core Challenger review, backend delegation, or controller-to-worker routing.
+- A milestone, release-confidence claim, done claim, architecture direction, or acceptance decision needs a full evidence loop.
+- The task crosses runtime, contracts, storage, schemas, validators, artifacts, or multiple repositories.
+- Backend delegation, second-round adjudication, evidence verification, and final closure are required.
 
 ### What it improves
 
 - Anchors the task to live Git, file state, and gate boundaries before acting.
-- Chooses the smallest execution level by default, so small tasks do not trigger heavyweight workflows.
-- Composes existing capabilities such as Core Challenger, Audit Specialist, `555`, handoff, runtime repair, and contract gates only when needed.
+- Uses `666` to choose the smallest execution level, so small tasks do not trigger heavyweight workflows.
+- Uses `555` only when the evidence supports a full five-agent loop.
+- Composes Core Challenger, Audit Specialist, handoff, runtime repair, and contract gates only when needed.
 - Adds a dirty-worktree ownership checkpoint before cleanup, commit, reset, packaging, or sync actions.
-
-### Relationship with `555`
-
-`666` is the upstream router. It decides whether escalation is necessary. `555` is the downstream closed-loop execution mode for major work, adversarial review, backend delegation, and release-confidence decisions.
 
 ## Repository Layout
 
 ```text
-SKILL.md             # Installable Codex skill entrypoint
-README.md            # Bilingual repository description
-agents/openai.yaml   # UI-facing skill metadata
+README.md
+SKILL.md                      # Compatibility entrypoint, same role as skills/666
+agents/openai.yaml            # Compatibility UI metadata for root 666 entrypoint
+skills/
+  666/
+    SKILL.md                  # Hope workflow router
+    agents/openai.yaml
+  555/
+    SKILL.md                  # Hope five-agent evidence loop
+    agents/openai.yaml
+```
+
+## Install Paths
+
+```text
+skills/666
+skills/555
 ```
 
 ## Current Scope
 
-This repository is intentionally small. The runtime skill logic lives in `SKILL.md`; the README exists for GitHub presentation and human review.
+The runtime skill logic stays in each `SKILL.md`. The README and `agents/openai.yaml` files are for GitHub presentation and UI metadata.

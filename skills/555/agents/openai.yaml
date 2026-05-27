@@ -1,0 +1,7 @@
+interface:
+  display_name: "555 Five-Agent Loop"
+  short_description: "Runs Hope work through live Git anchoring, adversarial review, delegation, and evidence closure."
+  default_prompt: "Use $555 to run this Hope milestone or review through the five-agent evidence loop."
+
+policy:
+  allow_implicit_invocation: true
