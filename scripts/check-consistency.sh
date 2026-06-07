@@ -19,10 +19,10 @@ cmp -s agents/openai.yaml skills/666/agents/openai.yaml \
 
 for skill in slash-work-planner work-planner needs-solution-designer work-splitter; do
   cmp -s "skills/$skill/SKILL.md" "plugins/work-splitter/skills/$skill/SKILL.md" \
-    || fail "plugin copy for $skill/SKILL.md is out of sync"
+    || fail "plugin copy for $skill/SKILL.md is out of sync; run scripts/sync-plugin-skills.sh"
 
   cmp -s "skills/$skill/agents/openai.yaml" "plugins/work-splitter/skills/$skill/agents/openai.yaml" \
-    || fail "plugin copy for $skill/agents/openai.yaml is out of sync"
+    || fail "plugin copy for $skill/agents/openai.yaml is out of sync; run scripts/sync-plugin-skills.sh"
 done
 
 maintainer_path_pattern="/Users"/"/buyu"

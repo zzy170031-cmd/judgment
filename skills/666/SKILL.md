@@ -210,6 +210,15 @@ Choose the smallest appropriate form:
 - `Extend existing`: improve a current skill, automation, script, or rule instead of duplicating it.
 - `Skip`: too one-off, ambiguous, sensitive, poorly evidenced, or already covered.
 
+When the recommended form is `Skill` or `Extend existing`, apply the local skill quality standard in `rules/skill-quality-standard.md`:
+
+- assign one dominant category: router, launcher, planner, discovery, decomposition, verification, or packaging;
+- prefer progressive disclosure: short `SKILL.md`, heavier examples in `references/`, `templates/`, or scripts;
+- add gotchas and forbidden actions when they prevent repeated mistakes;
+- prefer deterministic scripts for sync, validation, packaging, or smoke checks;
+- add a verification step that can fail;
+- do not broaden a skill merely because an external article contains a useful idea.
+
 First produce a compact shortlist:
 
 ```text

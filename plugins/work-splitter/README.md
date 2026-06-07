@@ -2,6 +2,8 @@
 
 `work-planner` is a local Codex plugin package for turning fuzzy work into an execution-ready Codex plan.
 
+This plugin is proprietary and intended only for personal/internal use by the repository owner and explicitly authorized collaborators. It is not open source. See [LICENSE](LICENSE).
+
 It combines:
 
 - `slash-work-planner`: `/` launcher. Normalizes slash-prefixed user input and routes it to `work-planner`, `666`, or `555` when appropriate.

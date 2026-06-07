@@ -26,6 +26,7 @@ It does not replace:
 - `666`: the upstream router that decides whether this planning skill is needed.
 - `555`: the evidence and adversarial assurance loop for high-risk milestones.
 - `XA/XB`: the development standards in `~/.codex/rules/xa-xb-standard.md`.
+- `rules/skill-quality-standard.md`: the local standard for creating, splitting, auditing, or improving skills.
 
 ## Trigger Policy
 
@@ -97,6 +98,18 @@ P0 Intake
   -> P3 Work split
   -> P4 Route to execution / worker / 555
   -> P5 Evidence and next gate
+```
+
+When planning a skill or plugin improvement, add this gate:
+
+```text
+Skill quality gate
+  -> primary category
+  -> trigger clarity
+  -> progressive disclosure
+  -> scripts/templates/references needed
+  -> gotchas and forbidden actions
+  -> verification that can fail
 ```
 
 ### P0 Intake

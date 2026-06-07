@@ -2,6 +2,10 @@
 
 This repository contains general Codex project workflow governance skills and local plugin sources. It keeps routing, work decomposition, five-agent review, XA/XB development gates, AI/Agent safety rules, evidence checks, and dirty-worktree safety under version control for use across projects.
 
+## License And Use
+
+This repository is not open source. It is a proprietary personal/internal Codex workflow pack for the repository owner and explicitly authorized collaborators only. See [LICENSE](LICENSE).
+
 ## 中文说明
 
 这个仓库现在是一个通用 Codex 项目工作流治理包：
@@ -13,9 +17,12 @@ This repository contains general Codex project workflow governance skills and lo
 - `work-splitter`：工作拆分智能体。负责把已澄清的任务拆成执行线路、Agent 小组、子任务契约、分线程策略和 555 升级判断。
 - `555`：下游五代理闭环。负责重大任务、对抗审查、后端委派、证据验证、progress-watch 升级、上下文压力保护和 release confidence 审查。
 - `rules/xa-xb-standard.md`：XA/XB AI-assisted development 本地标准，定义非游戏产品和游戏产品从开发、测试、发布到运营反馈的统一 Gate。
+- `rules/skill-quality-standard.md`：本地 skill 质量标准，约束新建/拆分/审计/改进 skill 时的分类、渐进披露、脚本化和验证要求。
 - `plugins/work-splitter`：`work-splitter` 的本地插件源码，包含 `.codex-plugin/plugin.json`。
 
 这些资产互补，但运行时保持独立。`666` 不复制 `555` 的全文，也不默认启动 `555`；它会在需要完整规划时路由到 `work-planner`，由 `work-planner` 判断是否需要 `needs-solution-designer` 或 `work-splitter`，并在证据和任务风险达到升级条件时调用 `555`。
+
+许可说明：本仓库暂时不开源，仅限仓库所有者和明确授权协作者个人/内部使用。公开可见不等于授予复用、分发、商用或二次发布权限，具体边界见 [LICENSE](LICENSE)。
 
 命名说明：插件目录和 manifest `name` 目前仍保留 `work-splitter`，用于兼容早期本地安装路径；插件展示名和主入口已经是 `Work Planner` / `work-planner`。如果未来不再需要兼容旧路径，可以整体迁移为 `plugins/work-planner`。
 
@@ -155,6 +162,12 @@ Git 源仓库：
 bash scripts/check-consistency.sh
 ```
 
+修改根目录 `skills/*` 后，可用下面的脚本同步插件内嵌副本：
+
+```bash
+bash scripts/sync-plugin-skills.sh
+```
+
 GitHub Actions 会在 push 和 pull request 时运行同一检查。
 
 ## English
@@ -167,6 +180,7 @@ This repository is now a general Codex project workflow governance pack:
 - `work-splitter`: dedicated decomposition agent. It turns clear large work into XA/XB gates, lanes, Agent groups, subtask contracts, thread strategy, and 555 escalation decisions.
 - `555`: downstream five-agent execution loop. It handles major tasks, adversarial review, backend delegation, evidence verification, progress-watch escalation, context-pressure protection, and release-confidence review.
 - `rules/xa-xb-standard.md`: local XA/XB AI-assisted development standard.
+- `rules/skill-quality-standard.md`: local quality standard for creating, splitting, auditing, or improving skills.
 - `plugins/work-splitter`: local plugin source for `work-splitter`, including `.codex-plugin/plugin.json`.
 
 They are designed to work together while staying independent at runtime. `666` routes, `work-planner` plans the full path, `needs-solution-designer` clarifies fuzzy needs, `work-splitter` decomposes clear work, XA/XB defines the development gates, and `555` provides evidence assurance when risk justifies the heavier loop.
@@ -249,6 +263,7 @@ SKILL.md                      # Compatibility entrypoint, same role as skills/66
 agents/openai.yaml            # Compatibility UI metadata for root 666 entrypoint
 rules/
   xa-xb-standard.md           # XA/XB AI-assisted development standard
+  skill-quality-standard.md   # Local skill design and maintenance standard
 skills/
   666/
     SKILL.md                  # Codex project workflow router
@@ -298,6 +313,7 @@ The runtime skill logic stays in each `SKILL.md`. The README and `agents/openai.
 
 ```bash
 bash scripts/check-consistency.sh
+bash scripts/sync-plugin-skills.sh
 ```
 
-This check validates `plugin.json`, confirms root compatibility files match `skills/666`, confirms plugin-packaged skills match root skills, and blocks maintainer-local absolute paths from public repository files.
+The consistency check validates `plugin.json`, confirms root compatibility files match `skills/666`, confirms plugin-packaged skills match root skills, and blocks maintainer-local absolute paths from public repository files. The sync script copies canonical `skills/*` into the plugin package.
