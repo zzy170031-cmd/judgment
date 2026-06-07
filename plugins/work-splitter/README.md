@@ -4,12 +4,14 @@
 
 It combines:
 
+- `slash-work-planner`: `/` launcher. Normalizes slash-prefixed user input and routes it to `work-planner`, `666`, or `555` when appropriate.
 - `work-planner`: main entrypoint. Aligns needs clarification, Codex Plan mode, work splitting, XA/XB gates, thread strategy, and 555 escalation.
 - `needs-solution-designer`: clarifies fuzzy needs, separates confirmed facts from assumptions, checks reuse, and produces a solution blueprint.
 - `work-splitter`: splits clear work into lanes, Agent groups, subtask contracts, thread strategy, and 555-prep packets.
 
 ## What It Does
 
+- Lets the user launch planning with `/`, such as `/我要做一个产品，先帮我规划`.
 - Clarifies fuzzy ideas before decomposition.
 - Maps unresolved choices to Codex Plan mode behavior.
 - Routes work into `XA`, `XB`, or general workflow.
@@ -75,6 +77,7 @@ skills/work-planner/SKILL.md
 Supporting skills:
 
 ```text
+skills/slash-work-planner/SKILL.md
 skills/needs-solution-designer/SKILL.md
 skills/work-splitter/SKILL.md
 ```

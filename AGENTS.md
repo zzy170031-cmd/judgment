@@ -81,6 +81,7 @@ Detailed local standard: `/Users/buyu/.codex/rules/xa-xb-standard.md`.
 
 Flow routing:
 
+- Slash launcher: when the user starts a message with `/` and it is not a clearly built-in Codex slash command, treat `/` as the local Work Planner launcher. Strip the first `/`, preserve the rest as the planning request, and route through `slash-work-planner` -> `work-planner`. If the remaining text is empty, ask what task should be planned or split.
 - Use `XA` for non-game products: App, Web, SaaS, internal systems, tools, macOS apps, AI-enabled products, and productized workflows.
 - Use `XB` for games: prototypes, indie games, mobile games, online games, content production, release, and LiveOps.
 - Do not include market research, competitor research, advertising, or commercial sizing in XA/XB unless the user explicitly asks.

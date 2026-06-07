@@ -1,6 +1,6 @@
 ---
 name: "666"
-description: General Codex project workflow router for choosing the smallest useful combination of skills, work-planner needs clarification, work-splitter decomposition, XA/XB development gates, AI/Agent safety requirements, roles, threads, Git checks, Codex-maxxing operating rules, right-side browser/artifact review, context-pressure handoff, 555 escalation, and packaging candidates. Use when the user says 666, work-planner, needs-solution-designer, work-splitter, 计划模式, 需求分析, 需求解析, 需求澄清, 工作拆分, 拆任务, 拆工, 分工, 编组, 任务切分, XA, XB, 产品侧开发上线, 游戏侧开发上线, AI开发流程, Agent编组, 技能融合, 工作流提效, Codex maxxing, 榨干 Codex, 封装工作流, 总控路由, 如何推进, 是否开555, 是否审计, 是否核心质疑者, 上下文高, 接力, 切线程, 压缩, 是否值得封装, or asks to coordinate multiple Codex project skills, repos, gates, dirty worktrees, browser previews, artifacts, recurring heartbeats, or worker threads.
+description: General Codex project workflow router for choosing the smallest useful combination of skills, slash-work-planner / launcher handling, work-planner needs clarification, work-splitter decomposition, XA/XB development gates, AI/Agent safety requirements, roles, threads, Git checks, Codex-maxxing operating rules, right-side browser/artifact review, context-pressure handoff, 555 escalation, and packaging candidates. Use when the user starts a message with / for planning, or says 666, work-planner, needs-solution-designer, work-splitter, 计划模式, 需求分析, 需求解析, 需求澄清, 工作拆分, 拆任务, 拆工, 分工, 编组, 任务切分, XA, XB, 产品侧开发上线, 游戏侧开发上线, AI开发流程, Agent编组, 技能融合, 工作流提效, Codex maxxing, 榨干 Codex, 封装工作流, 总控路由, 如何推进, 是否开555, 是否审计, 是否核心质疑者, 上下文高, 接力, 切线程, 压缩, 是否值得封装, or asks to coordinate multiple Codex project skills, repos, gates, dirty worktrees, browser previews, artifacts, recurring heartbeats, or worker threads.
 ---
 
 # 666
@@ -26,6 +26,7 @@ Use `666` as the upstream Codex project workflow router. It decides what should 
 
 Strong trigger:
 
+- User message starts with `/` and is not a clearly built-in Codex slash command. Use `slash-work-planner` to normalize the request, then route to `work-planner`, `666`, or `555` as appropriate.
 - User explicitly says `666`.
 - User explicitly says `work-planner`, `needs-solution-designer`, `work-splitter`, 计划模式, 需求分析, 需求解析, 需求澄清, 工作拆分, 拆任务, 拆工, 分工, 编组, 任务切分, 子任务, 分线程, 开发线路, 如何拆, or 先做什么后做什么.
 - User explicitly says `XA`, `XB`, 产品侧开发上线, 游戏侧开发上线, AI开发流程, Agent编组, or asks to set up a standard development line.

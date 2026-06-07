@@ -7,6 +7,7 @@ This repository contains general Codex project workflow governance skills and lo
 这个仓库现在是一个通用 Codex 项目工作流治理包：
 
 - `666`：上游工作流路由器。负责判断当前 Codex 项目任务应该直接回答、只读锚定、调用专用技能、启用审计者、启用核心质疑者、升级到 `555`、生成跨线程调度指令，还是评估重复工作是否值得封装。
+- `slash-work-planner`：`/` 启动器。负责把 `/...` 形式的输入规范化，然后转交给 `work-planner`、`666` 或必要时的 `555`。
 - `work-planner`：完整的计划入口。负责把前期需求解析、Codex Plan mode 对齐、拆工、XA/XB Gate、分线程策略和 555 升级判断串成一条稳定链路。
 - `needs-solution-designer`：需求分析/需求解析智能体。负责把模糊想法、客户需求或流程痛点澄清成已确认事实、工作假设、复用判断和方案蓝图。
 - `work-splitter`：工作拆分智能体。负责把已澄清的任务拆成执行线路、Agent 小组、子任务契约、分线程策略和 555 升级判断。
@@ -29,9 +30,16 @@ This repository contains general Codex project workflow governance skills and lo
 
 使用 `work-planner`：
 
+- 用户用 `/` 开头发起规划，例如 `/我要做一个产品，先帮我规划开发线路`。
 - 用户明确提到计划模式、需求分析、需求解析、需求澄清、工作拆分、拆任务、开发计划、开发线路、如何推进。
 - 一个任务同时包含“需求还没完全清楚”和“需要拆成执行线路”。
 - 需要把用户想法对齐到 Codex Plan mode，再决定是否进入实现、分线程或 555。
+
+使用 `slash-work-planner`：
+
+- 用户输入 `/`、`/plan`、`/work`、`/work-planner`、`/规划`、`/计划`、`/需求`、`/拆工`、`/666` 或自然语言 `/...`。
+- `/` 后没有内容时，只追问要规划或拆分什么任务。
+- `/666` 转到 `666`，`/555` 只在明确要求审计、对抗审查、上线信心或证据闭环时转到 `555`。
 
 使用 `needs-solution-designer`：
 
@@ -98,6 +106,7 @@ This repository contains general Codex project workflow governance skills and lo
 
 ```text
 skills/666
+skills/slash-work-planner
 skills/work-planner
 skills/needs-solution-designer
 skills/work-splitter

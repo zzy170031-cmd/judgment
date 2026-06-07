@@ -1,0 +1,7 @@
+interface:
+  display_name: "Slash Work Planner"
+  short_description: "Uses / as a local launcher for Work Planner planning, requirements clarification, work splitting, and 666/555 routing."
+  default_prompt: "Use / followed by a task to launch Work Planner. Normalize the slash text, then clarify the need, align with Codex Plan mode, split work if ready, and route to 666 or 555 only when requested or justified."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,7 +1,7 @@
 {
   "name": "work-splitter",
   "version": "0.1.0",
-  "description": "Complete Codex work planning plugin that combines needs clarification, Codex Plan mode alignment, work decomposition, XA/XB gates, Agent groups, subtask contracts, thread strategy, and 555 escalation decisions.",
+  "description": "Complete Codex work planning plugin that can be launched with / and combines needs clarification, Codex Plan mode alignment, work decomposition, XA/XB gates, Agent groups, subtask contracts, thread strategy, and 555 escalation decisions.",
   "author": {
     "name": "buyu"
   },
@@ -12,6 +12,8 @@
     "codex",
     "workflow",
     "planning",
+    "slash",
+    "launcher",
     "requirements",
     "decomposition",
     "agent",
@@ -24,13 +26,14 @@
   "interface": {
     "displayName": "Work Planner",
     "shortDescription": "Clarify, plan, and split Codex work before execution",
-    "longDescription": "Work Planner combines needs clarification, Codex Plan mode alignment, and Work Splitter decomposition. It turns fuzzy or large Codex tasks into confirmed needs, solution blueprints, bounded lanes, XA/XB delivery gates, Agent groups, subtask contracts, thread strategy, and 555 escalation packets before implementation begins.",
+    "longDescription": "Work Planner can be launched with / followed by a task. It combines needs clarification, Codex Plan mode alignment, and Work Splitter decomposition. It turns fuzzy or large Codex tasks into confirmed needs, solution blueprints, bounded lanes, XA/XB delivery gates, Agent groups, subtask contracts, thread strategy, and 555 escalation packets before implementation begins.",
     "developerName": "buyu",
     "category": "Developer Tools",
     "capabilities": [
       "Read"
     ],
     "defaultPrompt": [
+      "/ followed by a task launches Work Planner for planning, requirements clarification, work splitting, and route decisions",
       "Clarify this fuzzy need, align it with Codex Plan mode, then split it into lanes, gates, owners, evidence, and next handoffs",
       "Decide whether this task should stay in this thread, use worker threads, or escalate to 555"
     ],

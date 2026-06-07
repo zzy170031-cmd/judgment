@@ -1,6 +1,6 @@
 ---
 name: "work-planner"
-description: Complete Codex work planning skill that combines needs clarification, Codex Plan mode alignment, work-splitter decomposition, XA/XB gates, thread strategy, and 555 escalation decisions. Use when the user says 计划模式, 需求分析, 需求解析, 需求澄清, 工作拆分, 拆任务, 开发计划, 开发线路, 如何推进, 先规划, 先拆一下, or asks to turn a fuzzy product/game/AI idea into an execution-ready Codex plan.
+description: Complete Codex work planning skill that combines needs clarification, Codex Plan mode alignment, work-splitter decomposition, XA/XB gates, thread strategy, and 555 escalation decisions. Use when the user starts a message with / for planning, or says 计划模式, 需求分析, 需求解析, 需求澄清, 工作拆分, 拆任务, 开发计划, 开发线路, 如何推进, 先规划, 先拆一下, or asks to turn a fuzzy product/game/AI idea into an execution-ready Codex plan.
 ---
 
 # work-planner
@@ -31,6 +31,7 @@ It does not replace:
 
 Strong trigger:
 
+- User starts a message with `/` and the message is not a clearly built-in Codex slash command. Treat the text after `/` as a `work-planner` request.
 - User says 计划模式, 需求分析, 需求解析, 需求澄清, 工作拆分, 拆任务, 分工, 编组, 开发计划, 开发线路, 如何推进, 先规划, 先拆一下.
 - User has a fuzzy product/game/AI/workflow idea and wants a reliable path before implementation.
 - User asks to align a workflow with Codex Plan mode.
@@ -259,4 +260,3 @@ When ready for execution:
 - Do not let `needs-solution-designer` keep asking forever when the remaining uncertainty is narrow and a bounded plan is safe.
 - Do not let `work-splitter` create ownerless lanes without verification.
 - Do not publish, deploy, submit, delete, reset, send, or touch production/user data from planning.
-

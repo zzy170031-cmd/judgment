@@ -1,7 +1,7 @@
 interface:
   display_name: "666 Workflow Router"
-  short_description: "Routes Codex work by work-planner needs clarification, work-splitter decomposition, XA/XB gates, AI/Agent safety, context pressure, 555 escalation, and packaging fit."
-  default_prompt: "Use $666 to decide whether this task needs work-planner planning, needs-solution-designer clarification, work-splitter decomposition, XA/XB gates, AI/Agent guardrails, 555 assurance, or packaging before execution."
+  short_description: "Routes Codex work by / slash launcher handling, work-planner needs clarification, work-splitter decomposition, XA/XB gates, AI/Agent safety, context pressure, 555 escalation, and packaging fit."
+  default_prompt: "Use $666, or / followed by a task, to decide whether this task needs work-planner planning, needs-solution-designer clarification, work-splitter decomposition, XA/XB gates, AI/Agent guardrails, 555 assurance, or packaging before execution."
 
 policy:
   allow_implicit_invocation: true
