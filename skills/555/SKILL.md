@@ -1,6 +1,6 @@
 ---
 name: "555"
-description: Unified Codex project five-agent operating mode for live Git anchoring, lane routing, adversarial review, backend delegation, evidence verification, progress-watch escalation, context-pressure protection, and copy-ready controller/worker reporting. Use when the user says 五代理, 五代理闭环, 对抗审查, 红队, Core Challenger, 后端代码委派, 总控分线程, milestone/release confidence, or asks to combine project workflow skills into one execution loop.
+description: Unified Codex project five-agent operating mode for live Git anchoring, XA/XB development-gate assurance, AI/Agent safety review, lane routing, adversarial review, backend delegation, evidence verification, progress-watch escalation, context-pressure protection, and copy-ready controller/worker reporting. Use when the user says 五代理, 五代理闭环, 对抗审查, 红队, Core Challenger, 后端代码委派, 总控分线程, milestone/release confidence, XA/XB release gate, AI开发安全, Agent安全审查, or asks to combine project workflow skills into one execution loop.
 ---
 
 # 555
@@ -10,6 +10,13 @@ description: Unified Codex project five-agent operating mode for live Git anchor
 Run Codex project work as one closed governance loop: anchor live state, assign the right seat, execute or review within scope, verify from actual evidence, and report in a paste-ready format.
 
 This skill supersedes scattered five-agent instructions for the current task. Use the older narrow skills only as supporting references when needed.
+
+Use the local XA/XB standard as the default development gate reference when product, game, AI, Agent, release, QA, or operations work is involved:
+
+- Local standard: `/Users/buyu/.codex/rules/xa-xb-standard.md`
+- `XA`: non-game product development and launch.
+- `XB`: game development and launch.
+- Gates: `G0 Intake`, `G1 Ready for Build`, `G2 Technical Design`, `G3 Implementation Ready for Test`, `G4 Quality`, `G5 Release`, `G6 Operate`.
 
 ## The Five Seats
 
@@ -82,6 +89,54 @@ Use narrower project-specific skills when they match the task:
 - UI, packaging, QA, documentation, or repository-specific skills when they are narrower than this generic five-agent loop.
 
 Return to `555` when the task needs multi-agent review, backend delegation, red-team critique, or controller/worker dispatch.
+
+If the user is primarily asking how to clarify a fuzzy need, align with Codex Plan mode, split work, assign lanes, decide thread strategy, or separate implementation/QA/audit rounds, use `work-planner` first. Use `needs-solution-designer` for unclear requirements and `work-splitter` for already-clear decomposition. Start `555` only after the planning result identifies a milestone, release gate, architecture/backend/shared-surface risk, AI/Agent safety risk, or adversarial assurance need.
+
+## XA / XB Gate Assurance
+
+Use this section for milestone, release-readiness, architecture, backend/shared-contract, or AI/Agent safety-sensitive work.
+
+Before executing or reviewing, `A0` must identify:
+
+```text
+flow: XA / XB
+gate: G0 / G1 / G2 / G3 / G4 / G5 / G6
+AI/Agent requirements: none / behavior contract / tool boundary / guardrails-evals / human approval / monitoring / incident
+release impact: none / local artifact / internal test / production / store submission / external user impact
+```
+
+Seat responsibilities under XA/XB:
+
+- `A0 总控架构席`: map the task to XA/XB, state the active gate, enforce scope, define acceptance evidence, and decide go/conditional go/no-go.
+- `A1 实现委派席`: implement only inside the active gate boundary; do not broaden scope, publish, deploy, submit, or change production/user data without explicit authorization.
+- `A2 红队审查席`: challenge assumptions, missing acceptance criteria, security/privacy/AI/tool risks, release-readiness claims, and rollback gaps.
+- `A3 二轮裁定席`: adjudicate disputes and look for missed cross-gate risks, especially AI/Agent failure modes and operational blind spots.
+- `A4 证据验证席`: verify actual files, tests, builds, previews, logs, artifacts, release status, monitor state, and source references.
+
+Gate-specific closure:
+
+- `G0/G1`: close only when route, non-goals, acceptance criteria, and completion oracle are explicit.
+- `G2`: close only when architecture/contracts/security/privacy/observability/rollback and AI guardrails/evals are covered where relevant.
+- `G3`: close only when a running implementation or artifact plus verification steps exists.
+- `G4`: close only with test/security/privacy/accessibility/AI evidence and a `go`, `conditional go`, or `no-go`.
+- `G5`: close only with exact release artifact, release notes, monitoring, rollback/hotfix, support path, and explicit authorization for external effects.
+- `G6`: close only when incidents/feedback are triaged with owner, severity, evidence, and next gate.
+
+Do not include market research, competitor research, advertising, or commercial sizing in XA/XB reviews unless explicitly requested.
+
+## AI / Agent Safety Review
+
+Trigger this section whenever AI, LLMs, autonomous Agents, tool calling, generated code, or automation could affect files, users, external systems, production, payments, permissions, privacy, or legal state.
+
+Review checklist:
+
+- Behavior contract: purpose, allowed inputs, expected outputs, forbidden actions, escalation conditions, and handoff format.
+- Tool boundary: allowlist, least privilege, read/write separation, production/external-send controls, destructive-action defaults.
+- Guardrails/evals: prompt injection, malicious instructions, sensitive data, out-of-scope tasks, unsafe tool calls, hallucinated claims, known failure regressions.
+- Human approval: external publication/upload, production deploy, app-store submission, sending messages, payment/refund/billing, permission changes, user-data operations, legal actions, deletion/reset/mass modification.
+- Observability: logs, model/tool decisions, failure modes, refusals, user overrides, incident response, without exposing secrets or raw private data.
+
+If any required AI/Agent control is missing at a release or external-effect gate, classify as `必须改` or `用户拍板`, not as ordinary polish.
 
 ## Direct Work Versus Delegation
 
@@ -223,6 +278,8 @@ A0 may close the loop only after:
 - Live branch/HEAD/dirty state is known.
 - Context pressure was checked before any large loop or handoff-sensitive action.
 - The active route and allowed scope are stated.
+- XA/XB flow and active gate are stated when product/game/AI/release work is involved.
+- AI/Agent behavior, tool, guardrail, human-approval, and monitoring requirements are checked when relevant.
 - Delegated jobs have returned actual results, not pending notifications.
 - Review claims were checked against files/tests/artifacts.
 - Remaining user decisions are explicit and minimal.

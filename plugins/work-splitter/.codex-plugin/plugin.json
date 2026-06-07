@@ -1,0 +1,40 @@
+{
+  "name": "work-splitter",
+  "version": "0.1.0",
+  "description": "Complete Codex work planning plugin that combines needs clarification, Codex Plan mode alignment, work decomposition, XA/XB gates, Agent groups, subtask contracts, thread strategy, and 555 escalation decisions.",
+  "author": {
+    "name": "buyu"
+  },
+  "homepage": "https://github.com/zzy170031-cmd/judgment/tree/main/plugins/work-splitter",
+  "repository": "https://github.com/zzy170031-cmd/judgment",
+  "license": "Proprietary",
+  "keywords": [
+    "codex",
+    "workflow",
+    "planning",
+    "requirements",
+    "decomposition",
+    "agent",
+    "xa",
+    "xb",
+    "555",
+    "666"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Work Planner",
+    "shortDescription": "Clarify, plan, and split Codex work before execution",
+    "longDescription": "Work Planner combines needs clarification, Codex Plan mode alignment, and Work Splitter decomposition. It turns fuzzy or large Codex tasks into confirmed needs, solution blueprints, bounded lanes, XA/XB delivery gates, Agent groups, subtask contracts, thread strategy, and 555 escalation packets before implementation begins.",
+    "developerName": "buyu",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read"
+    ],
+    "defaultPrompt": [
+      "Clarify this fuzzy need, align it with Codex Plan mode, then split it into lanes, gates, owners, evidence, and next handoffs",
+      "Decide whether this task should stay in this thread, use worker threads, or escalate to 555"
+    ],
+    "brandColor": "#2563EB",
+    "screenshots": []
+  }
+}

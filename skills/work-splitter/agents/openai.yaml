@@ -1,0 +1,7 @@
+interface:
+  display_name: "Work Splitter"
+  short_description: "Splits large Codex work into XA/XB gates, lanes, Agent groups, thread strategy, subtask contracts, and 555 escalation decisions."
+  default_prompt: "Use $work-splitter to decompose this task into bounded lanes, owners, gates, evidence, forbidden actions, and next handoffs before execution."
+
+policy:
+  allow_implicit_invocation: true

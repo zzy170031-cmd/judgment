@@ -1,0 +1,7 @@
+interface:
+  display_name: "Work Planner"
+  short_description: "Aligns fuzzy needs with Codex Plan mode, then routes to needs clarification, work splitting, XA/XB gates, threads, or 555."
+  default_prompt: "Use $work-planner to clarify the need, align with Codex Plan mode, split the work, and decide the next execution or 555 route."
+
+policy:
+  allow_implicit_invocation: true

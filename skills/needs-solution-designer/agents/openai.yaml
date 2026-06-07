@@ -1,0 +1,7 @@
+interface:
+  display_name: "Needs Solution Designer"
+  short_description: "Clarify fuzzy needs, check reuse, and shape a Codex-ready solution blueprint."
+  default_prompt: "Use $needs-solution-designer to turn a fuzzy need into a clear, reuse-aware Codex solution plan before formal writing."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,15 +1,20 @@
 # Judgment Skills Pack
 
-This repository contains general Codex project workflow governance skills. It keeps routing, five-agent review, evidence checks, and dirty-worktree safety under version control for use across projects.
+This repository contains general Codex project workflow governance skills and local plugin sources. It keeps routing, work decomposition, five-agent review, XA/XB development gates, AI/Agent safety rules, evidence checks, and dirty-worktree safety under version control for use across projects.
 
 ## 中文说明
 
-这个仓库现在是一个通用 Codex 项目双技能包：
+这个仓库现在是一个通用 Codex 项目工作流治理包：
 
 - `666`：上游工作流路由器。负责判断当前 Codex 项目任务应该直接回答、只读锚定、调用专用技能、启用审计者、启用核心质疑者、升级到 `555`、生成跨线程调度指令，还是评估重复工作是否值得封装。
+- `work-planner`：完整的计划入口。负责把前期需求解析、Codex Plan mode 对齐、拆工、XA/XB Gate、分线程策略和 555 升级判断串成一条稳定链路。
+- `needs-solution-designer`：需求分析/需求解析智能体。负责把模糊想法、客户需求或流程痛点澄清成已确认事实、工作假设、复用判断和方案蓝图。
+- `work-splitter`：工作拆分智能体。负责把已澄清的任务拆成执行线路、Agent 小组、子任务契约、分线程策略和 555 升级判断。
 - `555`：下游五代理闭环。负责重大任务、对抗审查、后端委派、证据验证、progress-watch 升级、上下文压力保护和 release confidence 审查。
+- `rules/xa-xb-standard.md`：XA/XB AI-assisted development 本地标准，定义非游戏产品和游戏产品从开发、测试、发布到运营反馈的统一 Gate。
+- `plugins/work-splitter`：`work-splitter` 的本地插件源码，包含 `.codex-plugin/plugin.json`。
 
-两者互补，但运行时保持独立。`666` 不复制 `555` 的全文，也不默认启动 `555`；它只在证据和任务风险达到升级条件时调用 `555`。
+这些资产互补，但运行时保持独立。`666` 不复制 `555` 的全文，也不默认启动 `555`；它会在需要完整规划时路由到 `work-planner`，由 `work-planner` 判断是否需要 `needs-solution-designer` 或 `work-splitter`，并在证据和任务风险达到升级条件时调用 `555`。
 
 ### 适合使用的场景
 
@@ -21,6 +26,24 @@ This repository contains general Codex project workflow governance skills. It ke
 - progress-watch 或审查发现 stale evidence、dirty drift、owner blocker、真实 Git 状态冲突。
 - 线程上下文压力升高，用户提到上下文高、背景信息高、压缩、接力、切线程、7.5/10、70% 或 75%。
 - 用户询问重复流程是否值得封装为 skill、automation、subagent，或是否应该扩展现有资产。
+
+使用 `work-planner`：
+
+- 用户明确提到计划模式、需求分析、需求解析、需求澄清、工作拆分、拆任务、开发计划、开发线路、如何推进。
+- 一个任务同时包含“需求还没完全清楚”和“需要拆成执行线路”。
+- 需要把用户想法对齐到 Codex Plan mode，再决定是否进入实现、分线程或 555。
+
+使用 `needs-solution-designer`：
+
+- 用户有模糊想法、客户需求、流程痛点，但还不能稳定复述目标、范围、优先级和成功标准。
+- 需要判断复用现有 skill、轻改现有 skill、新建 skill/agent，还是保持简单流程。
+
+使用 `work-splitter`：
+
+- 用户明确提到工作拆分、拆任务、拆工、分工、编组、任务切分、子任务、分线程、开发线路、如何拆。
+- 一个任务同时涉及产品、技术、QA、安全、发布、运营、AI/Agent 或多个线程。
+- 需要判断哪些工作留在当前线程，哪些应该分线程，哪些应该进入 555。
+- 需要把一个大技能、大流程或大目标拆成更窄的可执行资产。
 
 使用 `555`：
 
@@ -75,6 +98,9 @@ This repository contains general Codex project workflow governance skills. It ke
 
 ```text
 skills/666
+skills/work-planner
+skills/needs-solution-designer
+skills/work-splitter
 skills/555
 ```
 
@@ -89,29 +115,38 @@ agents/openai.yaml
 
 ### 本机当前安装
 
-本机全局安装路径：
+本机 macOS 全局安装路径：
 
 ```text
-C:\Users\Administrator\.codex\skills\666\SKILL.md
-C:\Users\Administrator\.codex\skills\555\SKILL.md
+/Users/buyu/.codex/skills/666/SKILL.md
+/Users/buyu/.codex/skills/work-planner/SKILL.md
+/Users/buyu/.codex/skills/needs-solution-designer/SKILL.md
+/Users/buyu/.codex/skills/work-splitter/SKILL.md
+/Users/buyu/.codex/skills/555/SKILL.md
+/Users/buyu/.codex/rules/xa-xb-standard.md
 ```
 
 Git 源仓库：
 
 ```text
-E:\codex\codex-skill-666
+/Users/buyu/Documents/Codex/judgment
 ```
 
 更新后通常需要重启 Codex 或新开线程，才能让技能列表重新加载。
 
 ## English
 
-This repository is now a general Codex project two-skill pack:
+This repository is now a general Codex project workflow governance pack:
 
 - `666`: upstream workflow router. It decides whether a Codex project task should be answered directly, anchored read-only, routed to a narrow skill, sent to an auditor, challenged by Core Challenger behavior, escalated to `555`, dispatched across threads, or evaluated as a packaging candidate.
+- `work-planner`: complete planning entrypoint. It aligns needs clarification, Codex Plan mode, decomposition, XA/XB gates, thread strategy, and 555 escalation decisions.
+- `needs-solution-designer`: needs clarification and solution-shaping agent. It turns fuzzy ideas into confirmed facts, assumptions, reuse decisions, and solution blueprints.
+- `work-splitter`: dedicated decomposition agent. It turns clear large work into XA/XB gates, lanes, Agent groups, subtask contracts, thread strategy, and 555 escalation decisions.
 - `555`: downstream five-agent execution loop. It handles major tasks, adversarial review, backend delegation, evidence verification, progress-watch escalation, context-pressure protection, and release-confidence review.
+- `rules/xa-xb-standard.md`: local XA/XB AI-assisted development standard.
+- `plugins/work-splitter`: local plugin source for `work-splitter`, including `.codex-plugin/plugin.json`.
 
-They are designed to work together while staying independent at runtime. `666` does not inline `555` and does not run it by default. It escalates only when the task evidence and risk justify the heavier loop.
+They are designed to work together while staying independent at runtime. `666` routes, `work-planner` plans the full path, `needs-solution-designer` clarifies fuzzy needs, `work-splitter` decomposes clear work, XA/XB defines the development gates, and `555` provides evidence assurance when risk justifies the heavier loop.
 
 ### When to use it
 
@@ -123,6 +158,21 @@ Use `666` when:
 - A progress watch or review exposes stale evidence, dirty drift, owner blockers, or contradictions in live Git state.
 - The thread has high context pressure, prior compaction, or a handoff/new-thread request.
 - The user asks whether repeated work should become a skill, automation, subagent, extension, or skip.
+
+Use `work-planner` when:
+
+- The user asks for Plan mode alignment, needs analysis, work splitting, development lines, or how to proceed.
+- The task is fuzzy enough to need clarification and broad enough to need decomposition.
+
+Use `needs-solution-designer` when:
+
+- The real need, success criteria, scope, or reuse/adapt/build decision is unclear.
+
+Use `work-splitter` when:
+
+- The user asks how to split, assign, sequence, or thread work.
+- A task spans multiple lanes such as product/spec, architecture, implementation, QA, release, ops, docs, or AI/Agent safety.
+- A large skill/rule/process needs to be modularized before implementation.
 
 Use `555` when:
 
@@ -169,21 +219,42 @@ Choose the smallest form: `Skill`, `Automation`, `Subagent`, `Extend existing`, 
 
 ```text
 README.md
+AGENTS.md                       # Local global-rule snapshot
 SKILL.md                      # Compatibility entrypoint, same role as skills/666
 agents/openai.yaml            # Compatibility UI metadata for root 666 entrypoint
+rules/
+  xa-xb-standard.md           # XA/XB AI-assisted development standard
 skills/
   666/
     SKILL.md                  # Codex project workflow router
     agents/openai.yaml
+  work-planner/
+    SKILL.md                  # Complete planning entrypoint
+    agents/openai.yaml
+  needs-solution-designer/
+    SKILL.md                  # Needs clarification and solution blueprint
+    agents/openai.yaml
+    references/
+  work-splitter/
+    SKILL.md                  # Work decomposition agent
+    agents/openai.yaml
   555/
     SKILL.md                  # Codex project five-agent evidence loop
     agents/openai.yaml
+plugins/
+  work-splitter/
+    .codex-plugin/plugin.json # Local plugin manifest
+    README.md
+    skills/work-splitter/
 ```
 
 ## Install Paths
 
 ```text
 skills/666
+skills/work-planner
+skills/needs-solution-designer
+skills/work-splitter
 skills/555
 ```
 
