@@ -1,6 +1,6 @@
 ---
 name: "slash-work-planner"
-description: Slash launcher for Work Planner. Use when the user starts a message with / and it is not clearly a built-in Codex slash command. Treat /, /plan, /work, /work-planner, /规划, /计划, /需求, /拆工, /666, and natural-language /... messages as a request to route into work-planner.
+description: Slash launcher for Work Planner. Use when the user starts a message with / and it is not clearly a built-in Codex slash command. Treat /, /p, /plan, /n, /need, /d, /split, /r, /work, /work-planner, /规划, /计划, /需求, /拆工, /审查, /上线, /666, and natural-language /... messages as a request to route into the local quick launcher and work-planner flow.
 ---
 
 # slash-work-planner
@@ -16,7 +16,7 @@ It is a thin alias. Its job is to normalize slash-prefixed user input and then u
 Strong trigger:
 
 - User message starts with `/` and is not clearly a built-in Codex slash command already handled by the platform.
-- User says `/`, `/plan`, `/work`, `/work-planner`, `/规划`, `/计划`, `/需求`, `/拆工`, `/666`, or `/555`.
+- User says `/`, `/p`, `/plan`, `/n`, `/need`, `/d`, `/split`, `/r`, `/work`, `/work-planner`, `/规划`, `/计划`, `/需求`, `/拆工`, `/拆分`, `/审查`, `/上线`, `/666`, or `/555`.
 - User writes natural language after `/`, such as `/帮我拆一下这个项目` or `/我想做一个产品先规划`.
 
 Do not hijack:
@@ -35,9 +35,18 @@ When triggered:
 要规划或拆分什么任务？可以直接写成：/我要做一个产品，先帮我规划开发线路。
 ```
 
-3. If the normalized text is `666`, route to `666`.
-4. If the normalized text is `555`, route to `555` only when the user is explicitly asking for assurance, adversarial review, audit, or release confidence. Otherwise route to `work-planner` first.
-5. For all other normalized text, use `work-planner` as the planning entrypoint.
+3. Apply shortcut routing:
+
+```text
+p / plan / 规划 / 计划 -> work-planner
+n / need / 需求 -> needs-solution-designer, or work-planner if execution splitting is also needed
+d / split / 拆工 / 拆分 -> work-splitter when clear, otherwise work-planner
+r / review / 审查 / 上线 -> 666 first, then 555 only if evidence or release risk justifies it
+666 -> 666
+555 -> 555 only when explicitly asking for assurance, adversarial review, audit, or release confidence
+```
+
+4. For all other normalized text, use `work-planner` as the planning entrypoint.
 
 ## Input Boundary
 
@@ -66,11 +75,23 @@ Do not implement code, run shell commands, edit files, push to Git, or perform e
 /我要做一个产品，先帮我规划
 -> use work-planner
 
+/p 我要做一个产品，先帮我规划
+-> use work-planner
+
+/n 看下这个想法真实需求是什么
+-> use needs-solution-designer
+
 /拆一下这个开发任务
 -> use work-planner, then work-splitter if the need is clear
 
+/d 这个需求已经明确，拆成执行小组
+-> use work-splitter
+
 /需求 这个想法是否值得做成 skill
 -> use work-planner, then needs-solution-designer
+
+/r 上线前看下是否稳
+-> use 666, then 555 if release-readiness evidence is needed
 
 /666
 -> use 666 router

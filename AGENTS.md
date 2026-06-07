@@ -82,6 +82,7 @@ Detailed local standard: `~/.codex/rules/xa-xb-standard.md`.
 Flow routing:
 
 - Slash launcher: when the user starts a message with `/` and it is not a clearly built-in Codex slash command, treat `/` as the local Work Planner launcher. Strip the first `/`, preserve the rest as the planning request, and route through `slash-work-planner` -> `work-planner`. If the remaining text is empty, ask what task should be planned or split.
+- Quick launcher: apply `~/.codex/rules/quick-launcher-rule.md` when the user says short phrases such as `/p`, `/n`, `/d`, `/r`, 规划一下, 需求看下, 拆一下, 审一下, 上线前看下, or 不知道该用哪个. Choose the smallest useful route automatically and briefly state `自动路由：<skill>` before continuing.
 - Use `XA` for non-game products: App, Web, SaaS, internal systems, tools, macOS apps, AI-enabled products, and productized workflows.
 - Use `XB` for games: prototypes, indie games, mobile games, online games, content production, release, and LiveOps.
 - Do not include market research, competitor research, advertising, or commercial sizing in XA/XB unless the user explicitly asks.

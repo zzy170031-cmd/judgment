@@ -26,7 +26,8 @@ Use `666` as the upstream Codex project workflow router. It decides what should 
 
 Strong trigger:
 
-- User message starts with `/` and is not a clearly built-in Codex slash command. Use `slash-work-planner` to normalize the request, then route to `work-planner`, `666`, or `555` as appropriate.
+- User message starts with `/` and is not a clearly built-in Codex slash command. Use `slash-work-planner` and `rules/quick-launcher-rule.md` to normalize the request, then route to `work-planner`, `needs-solution-designer`, `work-splitter`, `666`, or `555` as appropriate.
+- User uses quick launcher wording such as `/p`, `/n`, `/d`, `/r`, 规划一下, 需求看下, 拆一下, 审一下, 上线前看下, 不知道该用哪个, or 帮我判断怎么用.
 - User explicitly says `666`.
 - User explicitly says `work-planner`, `needs-solution-designer`, `work-splitter`, 计划模式, 需求分析, 需求解析, 需求澄清, 工作拆分, 拆任务, 拆工, 分工, 编组, 任务切分, 子任务, 分线程, 开发线路, 如何拆, or 先做什么后做什么.
 - User explicitly says `XA`, `XB`, 产品侧开发上线, 游戏侧开发上线, AI开发流程, Agent编组, or asks to set up a standard development line.
@@ -69,6 +70,28 @@ Before selecting a path, establish the smallest needed facts:
 10. Whether AI/Agent requirements apply: behavior contract, tool boundary, guardrails/evals, human approval points, monitoring, or incident handling.
 
 Trust actual file, Git, process, and artifact state over memory, screenshots, reports, or handoff packets.
+
+## Quick Launcher Auto-Use
+
+Apply `rules/quick-launcher-rule.md` when the user uses a compact launcher phrase or asks which workflow to use.
+
+Default mapping:
+
+- `/p`, `/plan`, 规划一下, 计划一下, 怎么推进, 开发线路 -> `work-planner`.
+- `/n`, `/need`, 需求看下, 需求分析, 真实需求, 这个想法 -> `needs-solution-designer`, or `work-planner` if decomposition is also needed.
+- `/d`, `/split`, 拆一下, 拆任务, 分工, 编组, 分线程 -> `work-splitter` when clear, otherwise `work-planner`.
+- `/r`, 审一下, 检查一下, 是否完成, 上线前看下 -> `666` first; escalate to `555` only for milestone, release, AI/Agent safety, or evidence-closure risk.
+- 不知道该用哪个, 帮我判断怎么用 -> `666`.
+
+When using this rule, briefly report:
+
+```text
+自动路由：<skill>
+原因：<one short reason>
+下一步：<question / plan / split / check>
+```
+
+Do not treat a quick launcher as execution approval.
 
 ## XA / XB Development Standard Overlay
 

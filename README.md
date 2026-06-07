@@ -17,6 +17,7 @@ This repository is not open source. It is a proprietary personal/internal Codex 
 - `work-splitter`：工作拆分智能体。负责把已澄清的任务拆成执行线路、Agent 小组、子任务契约、分线程策略和 555 升级判断。
 - `555`：下游五代理闭环。负责重大任务、对抗审查、后端委派、证据验证、progress-watch 升级、上下文压力保护和 release confidence 审查。
 - `rules/xa-xb-standard.md`：XA/XB AI-assisted development 本地标准，定义非游戏产品和游戏产品从开发、测试、发布到运营反馈的统一 Gate。
+- `rules/quick-launcher-rule.md`：轻量启动和自动判断规则，让 `/p`、`/n`、`/d`、`/r`、规划一下、拆一下、审一下等短语自动路由到合适 skill。
 - `rules/skill-quality-standard.md`：本地 skill 质量标准，约束新建/拆分/审计/改进 skill 时的分类、渐进披露、脚本化和验证要求。
 - `plugins/work-splitter`：`work-splitter` 的本地插件源码，包含 `.codex-plugin/plugin.json`。
 
@@ -46,9 +47,19 @@ This repository is not open source. It is a proprietary personal/internal Codex 
 
 使用 `slash-work-planner`：
 
-- 用户输入 `/`、`/plan`、`/work`、`/work-planner`、`/规划`、`/计划`、`/需求`、`/拆工`、`/666` 或自然语言 `/...`。
+- 用户输入 `/`、`/p`、`/plan`、`/n`、`/need`、`/d`、`/split`、`/r`、`/work`、`/work-planner`、`/规划`、`/计划`、`/需求`、`/拆工`、`/666` 或自然语言 `/...`。
 - `/` 后没有内容时，只追问要规划或拆分什么任务。
 - `/666` 转到 `666`，`/555` 只在明确要求审计、对抗审查、上线信心或证据闭环时转到 `555`。
+
+快速入口：
+
+```text
+/p 或 规划一下 -> work-planner
+/n 或 需求看下 -> needs-solution-designer
+/d 或 拆一下 -> work-splitter / work-planner
+/r 或 审一下 -> 666，必要时 555
+不知道该用哪个 -> 666
+```
 
 使用 `needs-solution-designer`：
 
@@ -180,6 +191,7 @@ This repository is now a general Codex project workflow governance pack:
 - `work-splitter`: dedicated decomposition agent. It turns clear large work into XA/XB gates, lanes, Agent groups, subtask contracts, thread strategy, and 555 escalation decisions.
 - `555`: downstream five-agent execution loop. It handles major tasks, adversarial review, backend delegation, evidence verification, progress-watch escalation, context-pressure protection, and release-confidence review.
 - `rules/xa-xb-standard.md`: local XA/XB AI-assisted development standard.
+- `rules/quick-launcher-rule.md`: local quick launcher and auto-use routing rule for `/p`, `/n`, `/d`, `/r`, planning, needs, split, and review phrases.
 - `rules/skill-quality-standard.md`: local quality standard for creating, splitting, auditing, or improving skills.
 - `plugins/work-splitter`: local plugin source for `work-splitter`, including `.codex-plugin/plugin.json`.
 
@@ -263,6 +275,7 @@ SKILL.md                      # Compatibility entrypoint, same role as skills/66
 agents/openai.yaml            # Compatibility UI metadata for root 666 entrypoint
 rules/
   xa-xb-standard.md           # XA/XB AI-assisted development standard
+  quick-launcher-rule.md      # Simple launcher and auto-use routing rule
   skill-quality-standard.md   # Local skill design and maintenance standard
 skills/
   666/
