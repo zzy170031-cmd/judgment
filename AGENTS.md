@@ -77,7 +77,7 @@ Safety and source discipline:
 
 Use this rule whenever the user asks to build, modify, verify, release, package, or operate a product, app, game, AI feature, Agent workflow, or reusable development process.
 
-Detailed local standard: `/Users/buyu/.codex/rules/xa-xb-standard.md`.
+Detailed local standard: `~/.codex/rules/xa-xb-standard.md`.
 
 Flow routing:
 

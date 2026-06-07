@@ -65,7 +65,7 @@ Before selecting a path, establish the smallest needed facts:
 6. Whether context pressure should block new large work.
 7. Whether the task is asking for packaging candidate evaluation rather than immediate implementation.
 8. Whether the Codex Maxxing overlay changes the route: visible artifact, right-side Browser preview, durable memory/rule update, completion oracle, heartbeat, or packaging candidate.
-9. Whether the task should be routed through the local XA/XB standard in `/Users/buyu/.codex/rules/xa-xb-standard.md`.
+9. Whether the task should be routed through the local XA/XB standard in `~/.codex/rules/xa-xb-standard.md`.
 10. Whether AI/Agent requirements apply: behavior contract, tool boundary, guardrails/evals, human approval points, monitoring, or incident handling.
 
 Trust actual file, Git, process, and artifact state over memory, screenshots, reports, or handoff packets.
@@ -74,7 +74,7 @@ Trust actual file, Git, process, and artifact state over memory, screenshots, re
 
 Apply this overlay whenever a task is about product/game development, AI-assisted implementation, Agent workflows, release, QA, or operations.
 
-Local standard file: `/Users/buyu/.codex/rules/xa-xb-standard.md`.
+Local standard file: `~/.codex/rules/xa-xb-standard.md`.
 
 Flow choice:
 
@@ -102,7 +102,7 @@ Route effects:
 
 ## Codex Maxxing Overlay
 
-Apply this overlay before choosing the routing level. It operationalizes the local rule in `/Users/buyu/.codex/AGENTS.md` and the source notes from `https://mp.weixin.qq.com/s/9CdZIogJQW_XXDvhHTw9HQ` and `https://jxnl.co/writing/2026/05/10/codex-maxxing/`.
+Apply this overlay before choosing the routing level. It operationalizes the local rule in `~/.codex/AGENTS.md` and the source notes from `https://mp.weixin.qq.com/s/9CdZIogJQW_XXDvhHTw9HQ` and `https://jxnl.co/writing/2026/05/10/codex-maxxing/`.
 
 Default posture:
 

@@ -18,7 +18,7 @@ It works with:
 - `666`: upstream router for skill choice, Codex-maxxing fit, context pressure, packaging, and whether this skill is needed.
 - `needs-solution-designer`: upstream needs-clarification skill for fuzzy ideas, rough customer requests, unclear success criteria, reuse decisions, and solution-blueprint stabilization.
 - `555`: five-agent assurance loop for milestone, release, backend/shared-contract, architecture, AI/Agent safety, and adversarial review.
-- `XA/XB`: product/game development standards in `/Users/buyu/.codex/rules/xa-xb-standard.md`.
+- `XA/XB`: product/game development standards in `~/.codex/rules/xa-xb-standard.md`.
 
 `work-splitter` sits between routing and execution:
 

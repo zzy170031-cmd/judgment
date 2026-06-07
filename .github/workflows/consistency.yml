@@ -1,0 +1,13 @@
+name: Consistency
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate skill and plugin consistency
+        run: bash scripts/check-consistency.sh

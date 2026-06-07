@@ -4,4 +4,4 @@ interface:
   default_prompt: "Use $555 to run this XA/XB milestone, release-readiness claim, or AI/Agent safety review through the five-agent evidence loop with context-pressure protection."
 
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

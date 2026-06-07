@@ -13,7 +13,7 @@ This skill supersedes scattered five-agent instructions for the current task. Us
 
 Use the local XA/XB standard as the default development gate reference when product, game, AI, Agent, release, QA, or operations work is involved:
 
-- Local standard: `/Users/buyu/.codex/rules/xa-xb-standard.md`
+- Local standard: `~/.codex/rules/xa-xb-standard.md`
 - `XA`: non-game product development and launch.
 - `XB`: game development and launch.
 - Gates: `G0 Intake`, `G1 Ready for Build`, `G2 Technical Design`, `G3 Implementation Ready for Test`, `G4 Quality`, `G5 Release`, `G6 Operate`.

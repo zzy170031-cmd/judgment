@@ -25,7 +25,7 @@ It does not replace:
 
 - `666`: the upstream router that decides whether this planning skill is needed.
 - `555`: the evidence and adversarial assurance loop for high-risk milestones.
-- `XA/XB`: the development standards in `/Users/buyu/.codex/rules/xa-xb-standard.md`.
+- `XA/XB`: the development standards in `~/.codex/rules/xa-xb-standard.md`.
 
 ## Trigger Policy
 

@@ -17,6 +17,8 @@ This repository contains general Codex project workflow governance skills and lo
 
 这些资产互补，但运行时保持独立。`666` 不复制 `555` 的全文，也不默认启动 `555`；它会在需要完整规划时路由到 `work-planner`，由 `work-planner` 判断是否需要 `needs-solution-designer` 或 `work-splitter`，并在证据和任务风险达到升级条件时调用 `555`。
 
+命名说明：插件目录和 manifest `name` 目前仍保留 `work-splitter`，用于兼容早期本地安装路径；插件展示名和主入口已经是 `Work Planner` / `work-planner`。如果未来不再需要兼容旧路径，可以整体迁移为 `plugins/work-planner`。
+
 ### 适合使用的场景
 
 使用 `666`：
@@ -59,6 +61,8 @@ This repository contains general Codex project workflow governance skills and lo
 - 重大验收、release confidence、done claim、架构方向判断需要完整证据闭环。
 - 任务跨 runtime、contracts、storage、schemas、validators、artifacts 或多仓库。
 - 需要读写分离的后端委派、二轮裁定、证据验证和最终收口。
+
+`555` 属于高风险/高成本闭环，默认应由用户明确点名或由 `666` / `work-planner` 在证据风险达到条件后升级，不作为普通任务的宽泛隐式入口。
 
 ### 它如何提效
 
@@ -127,21 +131,31 @@ agents/openai.yaml
 本机 macOS 全局安装路径：
 
 ```text
-/Users/buyu/.codex/skills/666/SKILL.md
-/Users/buyu/.codex/skills/work-planner/SKILL.md
-/Users/buyu/.codex/skills/needs-solution-designer/SKILL.md
-/Users/buyu/.codex/skills/work-splitter/SKILL.md
-/Users/buyu/.codex/skills/555/SKILL.md
-/Users/buyu/.codex/rules/xa-xb-standard.md
+~/.codex/skills/666/SKILL.md
+~/.codex/skills/work-planner/SKILL.md
+~/.codex/skills/needs-solution-designer/SKILL.md
+~/.codex/skills/work-splitter/SKILL.md
+~/.codex/skills/555/SKILL.md
+~/.codex/rules/xa-xb-standard.md
 ```
 
 Git 源仓库：
 
 ```text
-/Users/buyu/Documents/Codex/judgment
+<repo-root>
 ```
 
 更新后通常需要重启 Codex 或新开线程，才能让技能列表重新加载。
+
+### 一致性检查
+
+仓库包含一个轻量检查脚本，用于防止根兼容入口、插件内嵌 skill 与根目录 skill 发生内容漂移，并阻止公开仓库重新出现维护者本机绝对路径：
+
+```bash
+bash scripts/check-consistency.sh
+```
+
+GitHub Actions 会在 push 和 pull request 时运行同一检查。
 
 ## English
 
@@ -156,6 +170,8 @@ This repository is now a general Codex project workflow governance pack:
 - `plugins/work-splitter`: local plugin source for `work-splitter`, including `.codex-plugin/plugin.json`.
 
 They are designed to work together while staying independent at runtime. `666` routes, `work-planner` plans the full path, `needs-solution-designer` clarifies fuzzy needs, `work-splitter` decomposes clear work, XA/XB defines the development gates, and `555` provides evidence assurance when risk justifies the heavier loop.
+
+Naming note: the plugin directory and manifest `name` still use `work-splitter` for compatibility with the earlier local install path. The plugin display name and primary entrypoint are `Work Planner` / `work-planner`. A future breaking cleanup can migrate the plugin directory to `plugins/work-planner`.
 
 ### When to use it
 
@@ -237,6 +253,9 @@ skills/
   666/
     SKILL.md                  # Codex project workflow router
     agents/openai.yaml
+  slash-work-planner/
+    SKILL.md                  # Slash launcher for Work Planner
+    agents/openai.yaml
   work-planner/
     SKILL.md                  # Complete planning entrypoint
     agents/openai.yaml
@@ -254,6 +273,9 @@ plugins/
   work-splitter/
     .codex-plugin/plugin.json # Local plugin manifest
     README.md
+    skills/slash-work-planner/
+    skills/work-planner/
+    skills/needs-solution-designer/
     skills/work-splitter/
 ```
 
@@ -261,6 +283,7 @@ plugins/
 
 ```text
 skills/666
+skills/slash-work-planner
 skills/work-planner
 skills/needs-solution-designer
 skills/work-splitter
@@ -270,3 +293,11 @@ skills/555
 ## Current Scope
 
 The runtime skill logic stays in each `SKILL.md`. The README and `agents/openai.yaml` files are for GitHub presentation and UI metadata.
+
+## Quality Checks
+
+```bash
+bash scripts/check-consistency.sh
+```
+
+This check validates `plugin.json`, confirms root compatibility files match `skills/666`, confirms plugin-packaged skills match root skills, and blocks maintainer-local absolute paths from public repository files.
