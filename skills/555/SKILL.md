@@ -16,6 +16,8 @@ Use the local XA/XB standard as the default development gate reference when prod
 - Local standard: `~/.codex/rules/xa-xb-standard.md`
 - Durable evidence standard: `rules/durable-evidence-ledger-standard.md` when present in the current repo, or the equivalent local rule path when installed.
 - Tool portfolio standard: `rules/tool-portfolio-standard.md` when choosing, installing, enabling, or reviewing plugins, skills, MCP servers, connectors, scripts, or automations.
+- Security review standard: `rules/security-review-standard.md` for auth, permissions, payments, user data, secrets, external-send, production, AI/Agent tools, and destructive actions.
+- Browser flow testing standard: `rules/browser-flow-testing-standard.md` for web UI, local previews, visual artifacts, responsive layout, and interaction flows.
 - `XA`: non-game product development and launch.
 - `XB`: game development and launch.
 - Gates: `G0 Intake`, `G1 Ready for Build`, `G2 Technical Design`, `G3 Implementation Ready for Test`, `G4 Quality`, `G5 Release`, `G6 Operate`.
@@ -145,6 +147,44 @@ Independent review requirement:
 - A non-clean review returns the work to the smallest relevant earlier gate. Do not close by relabeling the issue as polish.
 
 If review evidence is missing, classify the result as blocked or conditional, not complete.
+
+## Security Threat Model Review
+
+Trigger this section whenever auth, permissions, payments, user data, secrets, external sends, production systems, AI/Agent tool use, or destructive actions are involved.
+
+Review checklist:
+
+- Assets and user rights at risk.
+- Trust boundaries and untrusted inputs.
+- Actors and abuse cases, including prompt injection or confused-user paths.
+- Data flow, storage, logs, secrets, private data, and external transmission.
+- Permission model and least-privilege controls.
+- Human approval requirements for external or irreversible actions.
+- Tests, logs, code evidence, or reviewer evidence that prove the risk was checked.
+
+Gate effects:
+
+- Missing controls for auth, payment, permission, user data, external-send, production, or destructive action are `must fix`, `block`, or `user-decision`, not polish.
+- Do not paste secrets, tokens, cookies, raw private data, or sensitive logs into reports.
+- Release/milestone/backend/shared-surface/AI safety decisions require independent review evidence.
+
+## Browser Flow Review
+
+Trigger this section whenever a web UI, local app, HTML artifact, visual state, responsive layout, design-to-code result, or interaction flow is changed or used as acceptance evidence.
+
+Review checklist:
+
+- Browser target and how it was launched or accessed.
+- Viewport/device when layout risk exists.
+- Primary flow steps, expected result, actual result, and visible evidence.
+- Screenshot, DOM snapshot, console/log signal, or manual Browser observation.
+- Design-source comparison when Figma/screenshot/design implementation is involved.
+
+Gate effects:
+
+- Do not close browser-visible behavior from code inspection alone when a Browser target is available.
+- Blank, broken, overlapped, inaccessible, stale, or unreachable UI is `conditional` or `block`.
+- Auth/payment/external-send/upload/file/production browser flows must also pass the security threat model gate.
 
 ## Tool Portfolio And External Integration Review
 
@@ -328,5 +368,7 @@ A0 may close the loop only after:
 - Review claims were checked against files/tests/artifacts.
 - Ledger-backed tasks have final status, evidence, temporary artifact disposition, risks, and next gate recorded.
 - Independent review evidence exists for `G4/G5`, milestone, release, architecture, AI/Agent safety, backend/shared-surface, or done claims.
+- Security-sensitive tasks have threat-model status and residual risks recorded.
+- Browser-visible tasks have Browser flow evidence or an explicit conditional/blocker reason.
 - Remaining user decisions are explicit and minimal.
 - The final report states changed files, verification results, risks, and the next gate.

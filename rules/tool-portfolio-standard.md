@@ -43,6 +43,8 @@ Prefer:
 - scripts for fragile deterministic sync, validation, packaging, or smoke checks;
 - Browser/artifact review for user-facing web/UI results;
 - security/threat-model review for auth, permission, payment, user-data, external-send, or production paths.
+- `rules/security-review-standard.md` when the tool can access accounts, secrets, user data, production systems, external sends, permissions, payments, AI/Agent tools, or destructive actions.
+- `rules/browser-flow-testing-standard.md` when the tool output is a web UI, local preview, design-to-code implementation, visual artifact, or browser-visible workflow.
 
 ## Source And Permission Rules
 
@@ -69,6 +71,7 @@ When a tool-selection article recommends a workflow, convert it into local gates
 - plan before broad edits;
 - test-first or regression-test expectation for behavior changes;
 - browser-flow testing for web UI flows;
+- threat-model review for auth, permission, payment, user data, external-send, production, AI/Agent tool, or destructive-action flows;
 - CI-log based diagnosis for CI failures;
 - design-source fidelity gate for Figma/design-to-frontend work;
 - independent review before milestone, release, production, or done claims.
@@ -84,6 +87,8 @@ Tool portfolio decision:
 - source trust:
 - permissions and side effects:
 - freshness evidence:
+- security gate:
+- browser-flow gate:
 - verification:
 - forbidden actions:
 - next gate:

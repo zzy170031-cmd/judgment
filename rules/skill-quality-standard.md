@@ -163,6 +163,11 @@ Keep this distinction:
 
 Before accepting a new tool asset, record source trust, permission surface, side effects, and a verification step that can fail.
 
+Add gate links when relevant:
+
+- `rules/security-review-standard.md` for auth, permissions, payments, user data, secrets, external-send, production, AI/Agent tools, or destructive actions.
+- `rules/browser-flow-testing-standard.md` for web UI, local previews, visual artifacts, Figma/design-to-code work, responsive layout, or interaction flows.
+
 ## External Workflow Adaptation
 
 When adapting ideas from a larger workflow system, preserve Judgment's lightweight shape.

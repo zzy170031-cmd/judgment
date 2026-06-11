@@ -195,6 +195,8 @@ This repository is now a general Codex project workflow governance pack:
 - `rules/xa-xb-standard.md`: local XA/XB AI-assisted development standard.
 - `rules/durable-evidence-ledger-standard.md`: lightweight evidence ledger rule for long-running work, worker handoffs, autonomous loops, milestone/release decisions, QA gates, and temporary artifact tracking.
 - `rules/tool-portfolio-standard.md`: lightweight portfolio rule for deciding plugin vs skill vs MCP/connector vs script vs automation vs no-install, including source trust, permission surface, and freshness checks.
+- `rules/security-review-standard.md`: lightweight threat-model rule for auth, permissions, payments, user data, secrets, external sends, production, AI/Agent tools, and destructive actions.
+- `rules/browser-flow-testing-standard.md`: Browser-visible verification rule for web UI, local previews, visual artifacts, Figma/design-to-code work, responsive layout, and interaction flows.
 - `rules/quick-launcher-rule.md`: local quick launcher and auto-use routing rule for `/p`, `/n`, `/d`, `/r`, planning, needs, split, and review phrases.
 - `rules/skill-quality-standard.md`: local quality standard for creating, splitting, auditing, or improving skills.
 - `plugins/work-splitter`: local plugin source for `work-splitter`, including `.codex-plugin/plugin.json`.
@@ -247,6 +249,8 @@ Use `555` when:
 - Uses durable evidence ledgers when a task needs continuity beyond the current response.
 - Requires independent review evidence for milestone, release, done, backend/shared-surface, and AI/Agent safety claims.
 - Routes tool-choice requests through a portfolio gate so popular plugin/skill lists become discovery signals, not blanket install instructions.
+- Adds a threat-model gate for auth, permissions, payments, user data, external sends, production, AI/Agent tools, and destructive actions.
+- Adds a Browser flow gate for web UI, local app previews, visual artifacts, design-to-code work, and interaction correctness.
 - Adds a dirty-worktree ownership checkpoint before cleanup, commit, reset, packaging, or sync actions.
 
 ### Evolution Boundary
@@ -292,7 +296,9 @@ AGENTS.md                       # Local global-rule snapshot
 SKILL.md                      # Compatibility entrypoint, same role as skills/666
 agents/openai.yaml            # Compatibility UI metadata for root 666 entrypoint
 rules/
+  browser-flow-testing-standard.md # Browser-visible UI and interaction verification rule
   durable-evidence-ledger-standard.md # Lightweight ledger and evidence-closure rule
+  security-review-standard.md # Lightweight threat-model rule
   tool-portfolio-standard.md   # Plugin/skill/MCP/script/automation selection rule
   xa-xb-standard.md           # XA/XB AI-assisted development standard
   quick-launcher-rule.md      # Simple launcher and auto-use routing rule

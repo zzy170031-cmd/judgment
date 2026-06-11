@@ -19,6 +19,8 @@ Use `666` as the upstream Codex project workflow router. It decides what should 
 - whether a durable evidence ledger is required for long tasks, autonomous loops, milestone/release decisions, worker handoffs, or temporary artifact tracking;
 - whether independent review evidence is required before accepting a done, milestone, release, or `go / conditional go / no-go` claim;
 - whether `rules/tool-portfolio-standard.md` applies for plugin, skill, MCP, connector, script, automation, or no-install decisions;
+- whether `rules/security-review-standard.md` applies for auth, permissions, payment, user data, external-send, production, AI/Agent tools, or destructive actions;
+- whether `rules/browser-flow-testing-standard.md` applies for web UI, local app, visual artifact, interaction, design-to-code, or browser-visible behavior;
 - whether context pressure requires a handoff before more work;
 - whether repeated work deserves packaging as a skill, automation, subagent, extension, or skip;
 - how to avoid overusing full five-agent flow on small tasks.
@@ -36,6 +38,8 @@ Strong trigger:
 - User explicitly says `XA`, `XB`, 产品侧开发上线, 游戏侧开发上线, AI开发流程, Agent编组, or asks to set up a standard development line.
 - User asks for skill fusion, workflow efficiency, packaging workflows, route selection, or how to proceed.
 - User asks which plugin, skill, MCP server, connector, script, automation, or marketplace source should be used, installed, enabled, skipped, or packaged.
+- User asks about security review, threat model, auth, permission, payment, user data, secrets, external send, production access, or destructive actions.
+- User asks about web UI flow, browser testing, local preview, screenshot verification, design-to-code fidelity, or whether an interactive artifact works.
 - User mentions Codex maxxing, 榨干 Codex, the related public article, right-side browser review, visible artifacts, durable local rules, heartbeats, or turning operating patterns into future defaults.
 - User asks for long-running autonomous work, repeated benchmark loops, durable goals, evidence ledger, independent review, QA gate, or strict delivery loop.
 - User asks whether to use `555`, Core Challenger, Audit Specialist, automation, handoff, or a custom worker.
@@ -76,6 +80,8 @@ Before selecting a path, establish the smallest needed facts:
 11. Whether `rules/durable-evidence-ledger-standard.md` applies.
 12. Whether completion requires independent review rather than implementer self-attestation.
 13. Whether `rules/tool-portfolio-standard.md` applies.
+14. Whether `rules/security-review-standard.md` applies.
+15. Whether `rules/browser-flow-testing-standard.md` applies.
 
 Trust actual file, Git, process, and artifact state over memory, screenshots, reports, or handoff packets.
 
@@ -342,6 +348,28 @@ For web/UI, CI, security, and design workflows, prefer proven narrow gates:
 - threat model for auth, permission, payment, user data, external-send, or production paths;
 - design-source fidelity gate for Figma/design-to-frontend work.
 
+## Security Review Gate
+
+Use `rules/security-review-standard.md` when the task touches auth, permissions, payments, user data, secrets, external sends, production systems, AI/Agent tool use, or destructive actions.
+
+Route effects:
+
+- For small low-risk changes, require a focused local threat-model checklist.
+- For milestone, release, backend/shared-surface, production, or AI/Agent safety decisions, route to `555`.
+- If missing human approval blocks an external or irreversible action, classify it as `user-decision`, not done.
+- Do not treat missing auth, permission, payment, privacy, external-send, production, or destructive-action controls as polish.
+
+## Browser Flow Testing Gate
+
+Use `rules/browser-flow-testing-standard.md` when the task changes or verifies a web UI, local app, HTML artifact, interaction, layout, responsive behavior, screenshot, Figma/design-to-code result, or browser-visible workflow.
+
+Route effects:
+
+- If a browser target is available, require Browser-visible evidence before claiming UI behavior works.
+- For visual/user-facing changes, include at least the primary flow and relevant viewport when layout risk exists.
+- If the target cannot run or Browser cannot access it, classify the gate as `conditional` or `block` and state the missing target, command, or permission.
+- Combine with `Security Review Gate` for auth, payment, external-send, upload, file, or production browser flows.
+
 ## Skill Selection Map
 
 - Git anchor skill: standby, sync, review, readiness, or handoff needs live Git truth.
@@ -356,6 +384,8 @@ For web/UI, CI, security, and design workflows, prefer proven narrow gates:
 - Work-splitter skill: decomposition, lane design, Agent grouping, subtask contracts, thread strategy, and 555-prep packets.
 - Durable evidence ledger standard: long-running work, autonomous loops, worker handoffs, milestone/release decisions, QA gates, and temporary artifact tracking.
 - Tool portfolio standard: plugin vs skill vs MCP/connector vs script vs automation vs no-install decisions, including source trust and permission checks.
+- Security review standard: threat modeling for auth, permissions, payments, user data, external-send, production, AI/Agent tools, and destructive actions.
+- Browser flow testing standard: Browser-visible evidence for web UI, local previews, design-to-code, artifacts, responsive layout, and interaction flows.
 - Contract/spec gate skill: docs-only contract, schema, field boundary, or downstream checklist work.
 - Runtime/implementation repair skill: bounded implementation fixes and targeted verification.
 - Project-specific skills: prefer the current repo's established skill or rule file when it is narrower than this generic router.
@@ -414,6 +444,8 @@ For routing decisions, answer compactly:
 - Durable ledger：<none / response-level / repo artifact / required before execution>
 - Independent review：<none / 555 / QA gate / named verifier>
 - Tool portfolio：<none / use-existing / extend-existing / install / package / skip>
+- Security review：<none / focused / 555 / user-decision / block>
+- Browser flow：<none / required / verified / conditional / block>
 - 推荐层级：L0 / L1 / L2 / L3 / L4 / L5
 - 启用技能 / 角色：
 - 不启用的内容：
@@ -438,3 +470,5 @@ For controller-ready cross-thread text, use the available thread-dispatch or han
 - Do not accept milestone, release, done, or `go / conditional go / no-go` claims from implementer self-attestation alone when independent evidence is required.
 - Do not install, enable, authenticate, or recommend broad tool stacks solely because a public list recommends them.
 - Do not copy public article claims about release dates, counts, availability, or commands into Judgment as facts without current source verification.
+- Do not claim web UI or browser-visible behavior works from code inspection alone when a Browser target is available.
+- Do not down-rank missing security controls for auth, permissions, payments, user data, external-send, production, AI/Agent tools, or destructive actions as ordinary polish.

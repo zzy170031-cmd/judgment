@@ -22,6 +22,7 @@ This skill combines three layers:
 3. `work-splitter`: split the confirmed work into lanes, Agent groups, gates, thread strategy, and 555 escalation packets.
 4. Durable evidence planning: decide whether `rules/durable-evidence-ledger-standard.md` is needed for long-running work, worker reports, QA gates, or release/milestone closure.
 5. Tool portfolio planning: decide whether the task needs an existing tool, an extended skill, a new skill, a plugin, an MCP/connector, a script, an automation, or no install.
+6. Security and browser-flow planning: decide whether `rules/security-review-standard.md` or `rules/browser-flow-testing-standard.md` must be part of the execution gate.
 
 It does not replace:
 
@@ -30,6 +31,8 @@ It does not replace:
 - `XA/XB`: the development standards in `~/.codex/rules/xa-xb-standard.md`.
 - `rules/durable-evidence-ledger-standard.md`: the lightweight evidence ledger standard for long tasks and acceptance decisions.
 - `rules/tool-portfolio-standard.md`: the local standard for plugin, skill, MCP/connector, script, automation, and no-install decisions.
+- `rules/security-review-standard.md`: the lightweight threat-model standard for sensitive or side-effecting work.
+- `rules/browser-flow-testing-standard.md`: the Browser-visible verification standard for web UI and interactive artifacts.
 - `rules/skill-quality-standard.md`: the local standard for creating, splitting, auditing, or improving skills.
 
 ## Trigger Policy
@@ -129,6 +132,15 @@ Tool portfolio gate
   -> use existing / extend / install / package / skip
 ```
 
+When planning web/UI or sensitive side-effecting work, add this gate:
+
+```text
+Safety and browser gate
+  -> security review: none / focused / 555 / user-decision / block
+  -> browser flow: none / required / verified / conditional / block
+  -> evidence needed before done
+```
+
 ### P0 Intake
 
 Identify:
@@ -139,6 +151,8 @@ Identify:
 - whether AI/Agent behavior is involved;
 - whether the work may outlive the current thread or need durable evidence;
 - whether the request is really a tool-selection or tool-packaging decision;
+- whether auth, permissions, payments, user data, external-send, production, or destructive actions require a security gate;
+- whether web UI, local preview, artifact, screenshot, Figma/design-to-code, or interaction work requires a Browser flow gate;
 - whether the user wants planning only or execution after planning.
 
 ### P1 Need Clarity Check
@@ -207,6 +221,8 @@ End with:
 - ledger requirement and location, or why no ledger is needed;
 - independent review requirement, or why self-review is enough;
 - tool portfolio decision, or why no new tool is needed;
+- security review requirement, or why it is not applicable;
+- browser flow requirement, or why it is not applicable;
 - what is not yet authorized;
 - next receiver.
 
@@ -262,6 +278,8 @@ Default:
 - Durable ledger：none / response-level / repo artifact / required before execution
 - Independent review：none / named verifier / QA gate / 555
 - Tool portfolio：none / use-existing / extend-existing / install / package / skip
+- Security review：none / focused / 555 / user-decision / block
+- Browser flow：none / required / verified / conditional / block
 - 不做事项：
 - 完成证据：
 

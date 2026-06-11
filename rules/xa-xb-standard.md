@@ -9,6 +9,8 @@ Scope:
 - This standard covers development, verification, release, operations, and AI/Agent governance. It does not cover market research, competitor research, advertising, or commercial sizing unless the user explicitly asks.
 - Use `rules/durable-evidence-ledger-standard.md` for long-running work, autonomous loops, worker handoffs, milestone/release decisions, QA gates, and temporary artifact tracking.
 - Use `rules/tool-portfolio-standard.md` when product/game work depends on plugins, skills, MCP servers, connectors, scripts, automations, current documentation, browser-flow testing, CI repair, threat modeling, or design-to-code tooling.
+- Use `rules/security-review-standard.md` for auth, permissions, payments, user data, secrets, external-send, production, AI/Agent tools, or destructive actions.
+- Use `rules/browser-flow-testing-standard.md` for web UI, local app previews, visual artifacts, responsive layout, Figma/design-to-code work, and browser-visible interaction flows.
 
 Source alignment:
 
@@ -116,6 +118,8 @@ Required:
 - Build, deploy, rollback approach.
 - AI controls if relevant: prompts/system boundaries, tool allowlist, eval plan, guardrails, human approval points.
 - Current-docs/source-freshness check for framework, API, SDK, plugin, marketplace, or deployment behavior that may have changed.
+- Security-review plan for auth, payments, permissions, user data, external-send, production, AI/Agent tools, or destructive actions.
+- Browser-flow test plan for web UI, local previews, design-to-code, visual artifacts, or interaction flows.
 
 Forbidden:
 

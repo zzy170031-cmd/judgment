@@ -20,6 +20,8 @@ It works with:
 - `555`: five-agent assurance loop for milestone, release, backend/shared-contract, architecture, AI/Agent safety, and adversarial review.
 - `XA/XB`: product/game development standards in `~/.codex/rules/xa-xb-standard.md`.
 - `rules/durable-evidence-ledger-standard.md`: lightweight ledger rule for long work, worker evidence, QA gates, and temporary artifact disposition.
+- `rules/security-review-standard.md`: threat-model rule for sensitive data, permissions, external-send, production, AI/Agent tools, and destructive actions.
+- `rules/browser-flow-testing-standard.md`: Browser-visible verification rule for web UI, local previews, artifacts, and interaction flows.
 
 `work-splitter` sits between routing and execution:
 
@@ -68,6 +70,8 @@ Before splitting, identify the smallest sufficient context:
 7. Context strategy: same thread, handoff, worker thread, or `555`.
 8. Ledger strategy: none, response-level ledger, repo artifact, or required before execution.
 9. Independent review strategy: none, named verifier, QA lane, or `555`.
+10. Security review strategy: none, focused, Security/Compliance Lane, `555`, user-decision, or block.
+11. Browser flow strategy: none, required, QA Lane, verified, conditional, or block.
 
 If the user's need is still fuzzy, customer-facing, or not stable enough to restate in plain language, route to `needs-solution-designer` before decomposing. Do not split work from an unstable need unless the split is explicitly for discovery.
 
@@ -196,6 +200,8 @@ expected_output:
 verification:
 ledger_update:
 independent_review:
+security_review:
+browser_flow:
 handoff_to:
 done_when:
 ```
@@ -216,6 +222,8 @@ Default output:
 - 是否需要分线程：
 - Ledger 策略：none / response-level / repo artifact / required before execution
 - Independent review：none / named verifier / QA gate / 555
+- Security review：none / focused / Security Lane / 555 / user-decision / block
+- Browser flow：none / required / QA Lane / verified / conditional / block
 - 不做事项：
 - 完成证据：
 
@@ -255,6 +263,8 @@ When copy-ready worker packets are needed:
 验证命令：
 Ledger 更新要求：
 独立审查要求：
+安全审查要求：
+浏览器流程验证：
 回报格式：
 ```
 
@@ -268,4 +278,6 @@ Ledger 更新要求：
 - Do not assign a subtask without a verifier.
 - Do not assign a lane that needs durable evidence without saying who records it and where it is recorded.
 - Do not let the implementer be the only acceptance reviewer for milestone, release, AI/Agent safety, backend/shared-surface, or done claims.
+- Do not split away auth, permission, payment, user-data, external-send, production, AI/Agent tool, or destructive-action work without a security review receiver.
+- Do not split away web UI, local preview, design-to-code, screenshot/artifact, or interaction work without a Browser flow verifier when a browser target can exist.
 - Do not allow a worker to publish, deploy, submit, send, delete, reset, or alter user/production data without explicit authorization.
