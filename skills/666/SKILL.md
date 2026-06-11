@@ -18,6 +18,7 @@ Use `666` as the upstream Codex project workflow router. It decides what should 
 - how the Codex Maxxing local operating rule applies: durable thread, explicit memory, visible artifact, right-side review, completion oracle, heartbeat, and packaging fit;
 - whether a durable evidence ledger is required for long tasks, autonomous loops, milestone/release decisions, worker handoffs, or temporary artifact tracking;
 - whether independent review evidence is required before accepting a done, milestone, release, or `go / conditional go / no-go` claim;
+- whether `rules/tool-portfolio-standard.md` applies for plugin, skill, MCP, connector, script, automation, or no-install decisions;
 - whether context pressure requires a handoff before more work;
 - whether repeated work deserves packaging as a skill, automation, subagent, extension, or skip;
 - how to avoid overusing full five-agent flow on small tasks.
@@ -34,6 +35,7 @@ Strong trigger:
 - User explicitly says `work-planner`, `needs-solution-designer`, `work-splitter`, 计划模式, 需求分析, 需求解析, 需求澄清, 工作拆分, 拆任务, 拆工, 分工, 编组, 任务切分, 子任务, 分线程, 开发线路, 如何拆, or 先做什么后做什么.
 - User explicitly says `XA`, `XB`, 产品侧开发上线, 游戏侧开发上线, AI开发流程, Agent编组, or asks to set up a standard development line.
 - User asks for skill fusion, workflow efficiency, packaging workflows, route selection, or how to proceed.
+- User asks which plugin, skill, MCP server, connector, script, automation, or marketplace source should be used, installed, enabled, skipped, or packaged.
 - User mentions Codex maxxing, 榨干 Codex, the related public article, right-side browser review, visible artifacts, durable local rules, heartbeats, or turning operating patterns into future defaults.
 - User asks for long-running autonomous work, repeated benchmark loops, durable goals, evidence ledger, independent review, QA gate, or strict delivery loop.
 - User asks whether to use `555`, Core Challenger, Audit Specialist, automation, handoff, or a custom worker.
@@ -73,6 +75,7 @@ Before selecting a path, establish the smallest needed facts:
 10. Whether AI/Agent requirements apply: behavior contract, tool boundary, guardrails/evals, human approval points, monitoring, or incident handling.
 11. Whether `rules/durable-evidence-ledger-standard.md` applies.
 12. Whether completion requires independent review rather than implementer self-attestation.
+13. Whether `rules/tool-portfolio-standard.md` applies.
 
 Trust actual file, Git, process, and artifact state over memory, screenshots, reports, or handoff packets.
 
@@ -305,6 +308,40 @@ Packaging candidates:
 
 Then create or extend only the high-confidence missing items. Keep them narrow, practical, source-aware, and easy to validate. Do not create speculative, overlapping, or overly broad assets.
 
+## Tool Portfolio Gate
+
+Use `rules/tool-portfolio-standard.md` when the task involves choosing, installing, enabling, skipping, or packaging plugins, skills, MCP servers, connectors, scripts, or automations.
+
+Default posture:
+
+- Do not install or recommend every popular tool.
+- Choose the smallest trustworthy tool surface that closes the current gate.
+- Treat external recommendation articles as discovery signals; verify current availability, commands, scopes, and product facts before turning them into Judgment rules.
+
+Decision order:
+
+1. Can an existing installed skill, plugin, connector, script, or repo command handle this?
+2. If not, is this a repeatable instruction workflow? Prefer `Skill`.
+3. Does it need MCP servers, app integrations, lifecycle hooks, marketplace distribution, or multiple bundled skills? Consider `Plugin`.
+4. Does it primarily need structured access to an external service? Prefer an existing connector/MCP over hand-rolled integration.
+5. Is it deterministic local work? Prefer `Script`.
+6. Is it recurring? Prefer `Automation`.
+7. Is it one-off or already covered? Choose `No install` or `Skip`.
+
+Add source and permission checks before action:
+
+- source trust: official / curated / known-community / private / unknown;
+- requested scopes, hooks, external sends, file writes, browser actions, production or account side effects;
+- current docs/version/ref when framework, API, SDK, plugin, or marketplace behavior may have changed;
+- explicit user approval before install, enable, auth, publish, deploy, send, or scope grant.
+
+For web/UI, CI, security, and design workflows, prefer proven narrow gates:
+
+- Browser flow test for web UI;
+- CI-log diagnosis for GitHub Actions failures;
+- threat model for auth, permission, payment, user data, external-send, or production paths;
+- design-source fidelity gate for Figma/design-to-frontend work.
+
 ## Skill Selection Map
 
 - Git anchor skill: standby, sync, review, readiness, or handoff needs live Git truth.
@@ -318,6 +355,7 @@ Then create or extend only the high-confidence missing items. Keep them narrow, 
 - Needs-solution-designer skill: fuzzy need clarification, confirmed/assumption separation, reuse judgment, and solution blueprint.
 - Work-splitter skill: decomposition, lane design, Agent grouping, subtask contracts, thread strategy, and 555-prep packets.
 - Durable evidence ledger standard: long-running work, autonomous loops, worker handoffs, milestone/release decisions, QA gates, and temporary artifact tracking.
+- Tool portfolio standard: plugin vs skill vs MCP/connector vs script vs automation vs no-install decisions, including source trust and permission checks.
 - Contract/spec gate skill: docs-only contract, schema, field boundary, or downstream checklist work.
 - Runtime/implementation repair skill: bounded implementation fixes and targeted verification.
 - Project-specific skills: prefer the current repo's established skill or rule file when it is narrower than this generic router.
@@ -375,6 +413,7 @@ For routing decisions, answer compactly:
 - Codex Maxxing 适配：<artifact / Browser / durable memory / oracle / heartbeat / packaging / none>
 - Durable ledger：<none / response-level / repo artifact / required before execution>
 - Independent review：<none / 555 / QA gate / named verifier>
+- Tool portfolio：<none / use-existing / extend-existing / install / package / skip>
 - 推荐层级：L0 / L1 / L2 / L3 / L4 / L5
 - 启用技能 / 角色：
 - 不启用的内容：
@@ -397,3 +436,5 @@ For controller-ready cross-thread text, use the available thread-dispatch or han
 - Do not paste secrets, raw knowledge-base rows, raw model prompts, private source registers, or sensitive overlay JSON.
 - Do not import external workflow runtimes, hooks, tmux/team assumptions, bypass-sandbox modes, or hidden state machines into Judgment unless the user explicitly opens a separate runtime-design gate.
 - Do not accept milestone, release, done, or `go / conditional go / no-go` claims from implementer self-attestation alone when independent evidence is required.
+- Do not install, enable, authenticate, or recommend broad tool stacks solely because a public list recommends them.
+- Do not copy public article claims about release dates, counts, availability, or commands into Judgment as facts without current source verification.

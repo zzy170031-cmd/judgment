@@ -194,6 +194,7 @@ This repository is now a general Codex project workflow governance pack:
 - `555`: downstream five-agent execution loop. It handles major tasks, adversarial review, backend delegation, evidence verification, progress-watch escalation, context-pressure protection, and release-confidence review.
 - `rules/xa-xb-standard.md`: local XA/XB AI-assisted development standard.
 - `rules/durable-evidence-ledger-standard.md`: lightweight evidence ledger rule for long-running work, worker handoffs, autonomous loops, milestone/release decisions, QA gates, and temporary artifact tracking.
+- `rules/tool-portfolio-standard.md`: lightweight portfolio rule for deciding plugin vs skill vs MCP/connector vs script vs automation vs no-install, including source trust, permission surface, and freshness checks.
 - `rules/quick-launcher-rule.md`: local quick launcher and auto-use routing rule for `/p`, `/n`, `/d`, `/r`, planning, needs, split, and review phrases.
 - `rules/skill-quality-standard.md`: local quality standard for creating, splitting, auditing, or improving skills.
 - `plugins/work-splitter`: local plugin source for `work-splitter`, including `.codex-plugin/plugin.json`.
@@ -245,6 +246,7 @@ Use `555` when:
 - Filters packaging candidates by evidence before creating or extending assets.
 - Uses durable evidence ledgers when a task needs continuity beyond the current response.
 - Requires independent review evidence for milestone, release, done, backend/shared-surface, and AI/Agent safety claims.
+- Routes tool-choice requests through a portfolio gate so popular plugin/skill lists become discovery signals, not blanket install instructions.
 - Adds a dirty-worktree ownership checkpoint before cleanup, commit, reset, packaging, or sync actions.
 
 ### Evolution Boundary
@@ -254,6 +256,7 @@ When improving this pack from external workflow systems:
 - Borrow concepts that improve routing, evidence, state clarity, review independence, QA discipline, or handoff reliability.
 - Keep Judgment runnable as plain skills and rules.
 - Prefer a small rule or field addition before adding a new skill.
+- Prefer tool-portfolio decisions over "install everything" behavior; distinguish skill, plugin, MCP/connector, script, automation, and no-install.
 - Do not import runtime assumptions such as tmux sessions, hook daemons, hidden `.omx` state, or bypass-sandbox execution modes.
 - Do not duplicate a full external skill catalog when `666`, `work-planner`, `needs-solution-designer`, `work-splitter`, and `555` already cover the role.
 
@@ -290,6 +293,7 @@ SKILL.md                      # Compatibility entrypoint, same role as skills/66
 agents/openai.yaml            # Compatibility UI metadata for root 666 entrypoint
 rules/
   durable-evidence-ledger-standard.md # Lightweight ledger and evidence-closure rule
+  tool-portfolio-standard.md   # Plugin/skill/MCP/script/automation selection rule
   xa-xb-standard.md           # XA/XB AI-assisted development standard
   quick-launcher-rule.md      # Simple launcher and auto-use routing rule
   skill-quality-standard.md   # Local skill design and maintenance standard

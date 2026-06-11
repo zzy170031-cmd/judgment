@@ -21,6 +21,7 @@ This skill combines three layers:
 2. Codex Plan mode alignment: collect unresolved choices, avoid premature execution, and produce an approval-ready plan.
 3. `work-splitter`: split the confirmed work into lanes, Agent groups, gates, thread strategy, and 555 escalation packets.
 4. Durable evidence planning: decide whether `rules/durable-evidence-ledger-standard.md` is needed for long-running work, worker reports, QA gates, or release/milestone closure.
+5. Tool portfolio planning: decide whether the task needs an existing tool, an extended skill, a new skill, a plugin, an MCP/connector, a script, an automation, or no install.
 
 It does not replace:
 
@@ -28,6 +29,7 @@ It does not replace:
 - `555`: the evidence and adversarial assurance loop for high-risk milestones.
 - `XA/XB`: the development standards in `~/.codex/rules/xa-xb-standard.md`.
 - `rules/durable-evidence-ledger-standard.md`: the lightweight evidence ledger standard for long tasks and acceptance decisions.
+- `rules/tool-portfolio-standard.md`: the local standard for plugin, skill, MCP/connector, script, automation, and no-install decisions.
 - `rules/skill-quality-standard.md`: the local standard for creating, splitting, auditing, or improving skills.
 
 ## Trigger Policy
@@ -108,11 +110,23 @@ When planning a skill or plugin improvement, add this gate:
 ```text
 Skill quality gate
   -> primary category
+  -> tool form: skill / plugin / MCP-connector / script / automation / no-install
   -> trigger clarity
   -> progressive disclosure
   -> scripts/templates/references needed
   -> gotchas and forbidden actions
   -> verification that can fail
+```
+
+When the user asks what to install, use, package, or evolve, add this gate:
+
+```text
+Tool portfolio gate
+  -> existing coverage
+  -> source trust
+  -> permissions and side effects
+  -> freshness evidence
+  -> use existing / extend / install / package / skip
 ```
 
 ### P0 Intake
@@ -124,6 +138,7 @@ Identify:
 - whether the task is XA, XB, or general;
 - whether AI/Agent behavior is involved;
 - whether the work may outlive the current thread or need durable evidence;
+- whether the request is really a tool-selection or tool-packaging decision;
 - whether the user wants planning only or execution after planning.
 
 ### P1 Need Clarity Check
@@ -191,6 +206,7 @@ End with:
 - evidence required for completion;
 - ledger requirement and location, or why no ledger is needed;
 - independent review requirement, or why self-review is enough;
+- tool portfolio decision, or why no new tool is needed;
 - what is not yet authorized;
 - next receiver.
 
@@ -245,6 +261,7 @@ Default:
 - 是否需要分线程：
 - Durable ledger：none / response-level / repo artifact / required before execution
 - Independent review：none / named verifier / QA gate / 555
+- Tool portfolio：none / use-existing / extend-existing / install / package / skip
 - 不做事项：
 - 完成证据：
 

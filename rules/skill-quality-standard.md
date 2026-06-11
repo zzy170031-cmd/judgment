@@ -149,6 +149,20 @@ Do not expand a skill just because a source article contains a good idea. Add
 the smallest local rule, script, reference, or template that changes future
 behavior.
 
+## Plugin Vs Skill Boundary
+
+Use `rules/tool-portfolio-standard.md` when a task may become a plugin, skill, MCP connector, script, or automation.
+
+Keep this distinction:
+
+- Make a `Skill` when the job is mostly repeatable judgment, workflow, routing, review, or instruction.
+- Make a `Plugin` only when the package genuinely needs bundled skills plus MCP servers, apps/connectors, lifecycle hooks, marketplace distribution, or install-time metadata.
+- Make a `Script` when the repeated value is deterministic execution rather than instruction.
+- Make an `Automation` only for recurring monitors, reminders, reports, or follow-ups.
+- Choose `No install` when existing tools or one direct answer are enough.
+
+Before accepting a new tool asset, record source trust, permission surface, side effects, and a verification step that can fail.
+
 ## External Workflow Adaptation
 
 When adapting ideas from a larger workflow system, preserve Judgment's lightweight shape.

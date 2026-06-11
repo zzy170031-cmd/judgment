@@ -15,6 +15,7 @@ Use the local XA/XB standard as the default development gate reference when prod
 
 - Local standard: `~/.codex/rules/xa-xb-standard.md`
 - Durable evidence standard: `rules/durable-evidence-ledger-standard.md` when present in the current repo, or the equivalent local rule path when installed.
+- Tool portfolio standard: `rules/tool-portfolio-standard.md` when choosing, installing, enabling, or reviewing plugins, skills, MCP servers, connectors, scripts, or automations.
 - `XA`: non-game product development and launch.
 - `XB`: game development and launch.
 - Gates: `G0 Intake`, `G1 Ready for Build`, `G2 Technical Design`, `G3 Implementation Ready for Test`, `G4 Quality`, `G5 Release`, `G6 Operate`.
@@ -144,6 +145,26 @@ Independent review requirement:
 - A non-clean review returns the work to the smallest relevant earlier gate. Do not close by relabeling the issue as polish.
 
 If review evidence is missing, classify the result as blocked or conditional, not complete.
+
+## Tool Portfolio And External Integration Review
+
+Trigger this section when the task involves installing, enabling, authenticating, packaging, or relying on a plugin, skill, MCP server, connector, lifecycle hook, external documentation provider, or third-party tool recommendation.
+
+Review checklist:
+
+- Tool form: skill, plugin, MCP/connector, script, automation, or no-install.
+- Source trust: official, curated, known-community, private, or unknown.
+- Manifest and scope: requested permissions, hooks, external services, filesystem writes, browser automation, production/deploy access, account authorization, and external sends.
+- Existing coverage: whether an installed skill, connector, script, or repo command already covers the job.
+- Freshness: whether framework/API/plugin/marketplace facts were checked against current official or upstream sources.
+- Verification: command, dry run, focused test, Browser flow, CI log, threat model, design fidelity check, or review artifact.
+
+Gate effects:
+
+- Do not approve broad tool stacks because a public list recommends them.
+- Do not treat installation commands, availability claims, dates, or counts from public articles as authoritative without current verification.
+- Require explicit user approval before install, enable, auth, publish, deploy, external send, or new scope grant.
+- If hooks, account-connected connectors, production access, external sends, or destructive tools are involved, classify missing review as blocked or user-decision, not minor risk.
 
 Do not include market research, competitor research, advertising, or commercial sizing in XA/XB reviews unless explicitly requested.
 

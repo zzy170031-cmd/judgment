@@ -8,6 +8,7 @@ Scope:
 - `XB`: game development and launch flow, including prototypes, indie games, mobile games, online games, and live-operated games.
 - This standard covers development, verification, release, operations, and AI/Agent governance. It does not cover market research, competitor research, advertising, or commercial sizing unless the user explicitly asks.
 - Use `rules/durable-evidence-ledger-standard.md` for long-running work, autonomous loops, worker handoffs, milestone/release decisions, QA gates, and temporary artifact tracking.
+- Use `rules/tool-portfolio-standard.md` when product/game work depends on plugins, skills, MCP servers, connectors, scripts, automations, current documentation, browser-flow testing, CI repair, threat modeling, or design-to-code tooling.
 
 Source alignment:
 
@@ -114,6 +115,7 @@ Required:
 - Security controls.
 - Build, deploy, rollback approach.
 - AI controls if relevant: prompts/system boundaries, tool allowlist, eval plan, guardrails, human approval points.
+- Current-docs/source-freshness check for framework, API, SDK, plugin, marketplace, or deployment behavior that may have changed.
 
 Forbidden:
 
@@ -148,6 +150,10 @@ Required:
 - Performance and stability check where relevant.
 - Independent review evidence for milestone, release, AI/Agent safety, backend/shared-surface, or done claims.
 - Temporary test harnesses, generated artifacts, and debug outputs are either cleaned up or explicitly kept with a reason.
+- Browser-flow evidence for web/UI changes where interaction correctness matters.
+- CI-log based diagnosis for CI failures instead of guessing from local symptoms alone.
+- Threat-model evidence for auth, permissions, payments, user data, external-send, or production paths.
+- Design-source fidelity evidence when implementation is derived from Figma or another design source.
 
 Output must be one of:
 
