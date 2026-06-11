@@ -20,12 +20,14 @@ This skill combines three layers:
 1. `needs-solution-designer`: clarify fuzzy needs and stabilize the solution blueprint.
 2. Codex Plan mode alignment: collect unresolved choices, avoid premature execution, and produce an approval-ready plan.
 3. `work-splitter`: split the confirmed work into lanes, Agent groups, gates, thread strategy, and 555 escalation packets.
+4. Durable evidence planning: decide whether `rules/durable-evidence-ledger-standard.md` is needed for long-running work, worker reports, QA gates, or release/milestone closure.
 
 It does not replace:
 
 - `666`: the upstream router that decides whether this planning skill is needed.
 - `555`: the evidence and adversarial assurance loop for high-risk milestones.
 - `XA/XB`: the development standards in `~/.codex/rules/xa-xb-standard.md`.
+- `rules/durable-evidence-ledger-standard.md`: the lightweight evidence ledger standard for long tasks and acceptance decisions.
 - `rules/skill-quality-standard.md`: the local standard for creating, splitting, auditing, or improving skills.
 
 ## Trigger Policy
@@ -96,8 +98,9 @@ P0 Intake
   -> P1 Need clarity check
   -> P2 Plan-mode preflight
   -> P3 Work split
-  -> P4 Route to execution / worker / 555
-  -> P5 Evidence and next gate
+  -> P4 Ledger / review preflight
+  -> P5 Route to execution / worker / 555
+  -> P6 Evidence and next gate
 ```
 
 When planning a skill or plugin improvement, add this gate:
@@ -120,6 +123,7 @@ Identify:
 - target artifact or project;
 - whether the task is XA, XB, or general;
 - whether AI/Agent behavior is involved;
+- whether the work may outlive the current thread or need durable evidence;
 - whether the user wants planning only or execution after planning.
 
 ### P1 Need Clarity Check
@@ -152,7 +156,24 @@ Use `work-splitter` when:
 - QA/audit/release/ops should be separate gates;
 - thread strategy or worker packets are needed.
 
-### P4 Route to Execution / Worker / 555
+### P4 Ledger / Review Preflight
+
+Decide whether the plan needs a durable evidence ledger before execution.
+
+Require it when:
+
+- the work is long-running, repeated, or likely to cross context windows;
+- multiple worker lanes will report evidence;
+- release, milestone, done, QA, or `go / conditional go / no-go` claims are expected;
+- temporary harnesses, generated artifacts, or cleanup decisions need tracking.
+
+Also decide whether acceptance needs independent review:
+
+- no independent review for tiny low-risk planning or docs-only tasks;
+- named verifier, QA lane, or `555` for higher-risk work;
+- `555` for release/milestone/backend/shared-surface/AI safety claims.
+
+### P5 Route to Execution / Worker / 555
 
 Route after splitting:
 
@@ -161,13 +182,15 @@ Route after splitting:
 - `555` for milestone, release, backend/shared surface, architecture, AI/Agent safety, adversarial review, or evidence closure;
 - stay planning-only if the user has not opened execution.
 
-### P5 Evidence and Next Gate
+### P6 Evidence and Next Gate
 
 End with:
 
 - current gate;
 - next smallest action;
 - evidence required for completion;
+- ledger requirement and location, or why no ledger is needed;
+- independent review requirement, or why self-review is enough;
 - what is not yet authorized;
 - next receiver.
 
@@ -220,6 +243,8 @@ Default:
 - 是否需要 work-splitter：
 - 是否需要 555：
 - 是否需要分线程：
+- Durable ledger：none / response-level / repo artifact / required before execution
+- Independent review：none / named verifier / QA gate / 555
 - 不做事项：
 - 完成证据：
 
@@ -259,6 +284,7 @@ When ready for execution:
 - 当前线程任务：
 - 可分线程任务：
 - 需要 555 的节点：
+- Ledger / review gate：
 - 允许动作：
 - 禁止动作：
 - 第一条执行命令/编辑/检查：

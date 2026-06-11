@@ -68,6 +68,8 @@ Keep a strict split between:
 
 - user-confirmed facts
 - working assumptions used to keep momentum
+- user decisions still needed
+- explicit non-goals and forbidden actions
 
 Do not silently upgrade assumptions into confirmed facts.
 This is especially important for operational details such as:
@@ -81,6 +83,27 @@ This is especially important for operational details such as:
 - destination or recipient
 
 If the user did not explicitly confirm those, keep them out of `confirmed items`.
+
+Use this evidence split whenever the request may become a skill, agent, automation, long-running workflow, or implementation plan:
+
+```text
+Confirmed facts:
+- statements the user explicitly made or approved
+
+Working assumptions:
+- temporary defaults used to keep planning moving
+
+User decisions needed:
+- choices that materially change scope, cost, risk, or acceptance
+
+Non-goals / forbidden actions:
+- what should not be built, changed, automated, sent, deleted, deployed, or assumed
+
+Evidence required:
+- source files, examples, links, tests, screenshots, or user confirmations needed before execution
+```
+
+If a later plan needs durable tracking, hand off the required facts and assumptions to `work-planner` or `666` so they can decide whether a durable evidence ledger is needed.
 
 Assume the user may start with a very rough, plain-language request rather than a clean brief.
 Part of the job is to translate that rough wording into a probable task shape before asking for precision.

@@ -14,6 +14,7 @@ This skill supersedes scattered five-agent instructions for the current task. Us
 Use the local XA/XB standard as the default development gate reference when product, game, AI, Agent, release, QA, or operations work is involved:
 
 - Local standard: `~/.codex/rules/xa-xb-standard.md`
+- Durable evidence standard: `rules/durable-evidence-ledger-standard.md` when present in the current repo, or the equivalent local rule path when installed.
 - `XA`: non-game product development and launch.
 - `XB`: game development and launch.
 - Gates: `G0 Intake`, `G1 Ready for Build`, `G2 Technical Design`, `G3 Implementation Ready for Test`, `G4 Quality`, `G5 Release`, `G6 Operate`.
@@ -53,6 +54,7 @@ Rules:
 - Trust actual Git/file/process/artifact state over packets, screenshots, prior reports, or local tracking refs.
 - If a live remote commit is absent locally, report stale tracking refs.
 - Do not clean, reset, stash, commit, push, or edit unrelated dirty files unless the user explicitly opens that gate.
+- If a ledger exists, treat it as a clue, not authority. Re-check the underlying files, commands, artifacts, and Git state before closure.
 
 ## Context Pressure Before Loop
 
@@ -121,6 +123,27 @@ Gate-specific closure:
 - `G4`: close only with test/security/privacy/accessibility/AI evidence and a `go`, `conditional go`, or `no-go`.
 - `G5`: close only with exact release artifact, release notes, monitoring, rollback/hotfix, support path, and explicit authorization for external effects.
 - `G6`: close only when incidents/feedback are triaged with owner, severity, evidence, and next gate.
+
+## Durable Evidence And Independent Review
+
+Use a durable evidence ledger when the task is long-running, crosses workers/threads, claims a milestone or release, or needs temporary artifact cleanup tracking.
+
+Minimum ledger-backed closure:
+
+- objective and active gate are recorded;
+- allowed scope and forbidden actions are recorded;
+- command, file, artifact, test, or reviewer evidence is listed with result and limitation;
+- temporary harnesses or generated artifacts are marked `keep` or `cleanup`;
+- risks and next gate are explicit.
+
+Independent review requirement:
+
+- Implementer self-review is acceptable only for small `G0-G3` tasks with low risk.
+- `G4`, `G5`, milestone confidence, release readiness, architecture acceptance, AI/Agent safety, backend/shared-surface changes, and done claims require independent review evidence.
+- Independent review can be `A2/A3/A4`, a QA lane, a named verifier, or a worker report that is separate from the implementer.
+- A non-clean review returns the work to the smallest relevant earlier gate. Do not close by relabeling the issue as polish.
+
+If review evidence is missing, classify the result as blocked or conditional, not complete.
 
 Do not include market research, competitor research, advertising, or commercial sizing in XA/XB reviews unless explicitly requested.
 
@@ -282,5 +305,7 @@ A0 may close the loop only after:
 - AI/Agent behavior, tool, guardrail, human-approval, and monitoring requirements are checked when relevant.
 - Delegated jobs have returned actual results, not pending notifications.
 - Review claims were checked against files/tests/artifacts.
+- Ledger-backed tasks have final status, evidence, temporary artifact disposition, risks, and next gate recorded.
+- Independent review evidence exists for `G4/G5`, milestone, release, architecture, AI/Agent safety, backend/shared-surface, or done claims.
 - Remaining user decisions are explicit and minimal.
 - The final report states changed files, verification results, risks, and the next gate.

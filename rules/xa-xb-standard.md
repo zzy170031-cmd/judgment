@@ -7,6 +7,7 @@ Scope:
 - `XA`: non-game product development and launch flow, including App, Web, SaaS, tool products, internal systems, macOS apps, and AI-enabled products.
 - `XB`: game development and launch flow, including prototypes, indie games, mobile games, online games, and live-operated games.
 - This standard covers development, verification, release, operations, and AI/Agent governance. It does not cover market research, competitor research, advertising, or commercial sizing unless the user explicitly asks.
+- Use `rules/durable-evidence-ledger-standard.md` for long-running work, autonomous loops, worker handoffs, milestone/release decisions, QA gates, and temporary artifact tracking.
 
 Source alignment:
 
@@ -145,6 +146,8 @@ Required:
 - Accessibility check for user-facing UI.
 - AI eval/guardrail test for AI or Agent features.
 - Performance and stability check where relevant.
+- Independent review evidence for milestone, release, AI/Agent safety, backend/shared-surface, or done claims.
+- Temporary test harnesses, generated artifacts, and debug outputs are either cleaned up or explicitly kept with a reason.
 
 Output must be one of:
 
@@ -165,6 +168,7 @@ Required:
 - Monitoring and alerting.
 - Rollback or hotfix plan.
 - Support/FAQ or user-facing incident channel where needed.
+- Durable evidence ledger or equivalent release record with exact artifact, checks, reviewer verdict, risks, temporary artifact disposition, and next gate.
 
 Forbidden:
 
@@ -571,6 +575,8 @@ Never claim the task is complete unless:
 - The active gate has named evidence.
 - Files/artifacts/tests/builds/previews/logs were checked where relevant.
 - Security/privacy/AI/tool boundaries were considered when relevant.
+- Required independent review was completed or the lack of independent review is explicitly classified as a risk/blocker.
+- Ledger-backed tasks record final status, evidence, temporary artifact disposition, risks, and next gate.
 - Release/production/store actions were either not needed or explicitly authorized.
 - Remaining risks and next gate are stated.
 

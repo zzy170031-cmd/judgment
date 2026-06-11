@@ -19,6 +19,7 @@ It works with:
 - `needs-solution-designer`: upstream needs-clarification skill for fuzzy ideas, rough customer requests, unclear success criteria, reuse decisions, and solution-blueprint stabilization.
 - `555`: five-agent assurance loop for milestone, release, backend/shared-contract, architecture, AI/Agent safety, and adversarial review.
 - `XA/XB`: product/game development standards in `~/.codex/rules/xa-xb-standard.md`.
+- `rules/durable-evidence-ledger-standard.md`: lightweight ledger rule for long work, worker evidence, QA gates, and temporary artifact disposition.
 
 `work-splitter` sits between routing and execution:
 
@@ -65,6 +66,8 @@ Before splitting, identify the smallest sufficient context:
 5. Risk type: data, auth, payment, privacy, production, external-send, AI/Agent tools, destructive action, user-owned files.
 6. Existing evidence: files, repo state, tests, builds, screenshots, logs, docs, prior reports.
 7. Context strategy: same thread, handoff, worker thread, or `555`.
+8. Ledger strategy: none, response-level ledger, repo artifact, or required before execution.
+9. Independent review strategy: none, named verifier, QA lane, or `555`.
 
 If the user's need is still fuzzy, customer-facing, or not stable enough to restate in plain language, route to `needs-solution-designer` before decomposing. Do not split work from an unstable need unless the split is explicitly for discovery.
 
@@ -99,8 +102,9 @@ Run this in order:
 8. Decide whether work can stay in the current thread.
 9. Split into lanes only where outputs have different owners or verification paths.
 10. Define each lane's input, allowed actions, forbidden actions, output, verifier, and next receiver.
-11. Decide whether `555` is required before, during, or after execution.
-12. Return a compact plan first; include copy-ready packets only when useful.
+11. Define whether each lane updates a durable ledger or reports evidence to the controller.
+12. Decide whether `555` is required before, during, or after execution.
+13. Return a compact plan first; include copy-ready packets only when useful.
 
 ## Lane Types
 
@@ -190,6 +194,8 @@ allowed_actions:
 forbidden_actions:
 expected_output:
 verification:
+ledger_update:
+independent_review:
 handoff_to:
 done_when:
 ```
@@ -208,6 +214,8 @@ Default output:
 - 拆分等级：D0 / D1 / D2 / D3 / D4 / D5
 - 是否需要 555：
 - 是否需要分线程：
+- Ledger 策略：none / response-level / repo artifact / required before execution
+- Independent review：none / named verifier / QA gate / 555
 - 不做事项：
 - 完成证据：
 
@@ -245,6 +253,8 @@ When copy-ready worker packets are needed:
 输入文件：
 输出要求：
 验证命令：
+Ledger 更新要求：
+独立审查要求：
 回报格式：
 ```
 
@@ -256,4 +266,6 @@ When copy-ready worker packets are needed:
 - Do not open `555` for every small task.
 - Do not produce vague ownerless steps such as "optimize", "improve", or "handle later".
 - Do not assign a subtask without a verifier.
+- Do not assign a lane that needs durable evidence without saying who records it and where it is recorded.
+- Do not let the implementer be the only acceptance reviewer for milestone, release, AI/Agent safety, backend/shared-surface, or done claims.
 - Do not allow a worker to publish, deploy, submit, send, delete, reset, or alter user/production data without explicit authorization.

@@ -102,6 +102,7 @@ For this repository, prioritize:
 - route smoke tests for key trigger phrases;
 - checks that prevent maintainer-local absolute paths from entering public files;
 - checks that high-risk skills stay explicit;
+- lightweight evidence ledgers for long-running, worker-split, QA, release, and milestone workflows;
 - README examples that match actual files.
 
 ## Tool And Safety Boundary
@@ -147,3 +148,26 @@ Skill improvement finding:
 Do not expand a skill just because a source article contains a good idea. Add
 the smallest local rule, script, reference, or template that changes future
 behavior.
+
+## External Workflow Adaptation
+
+When adapting ideas from a larger workflow system, preserve Judgment's lightweight shape.
+
+Borrow:
+
+- durable evidence ledgers;
+- explicit state transitions;
+- fact / assumption / decision separation;
+- independent review before release or milestone acceptance;
+- QA gates that fail closed when evidence is missing.
+
+Do not borrow by default:
+
+- external runtimes;
+- required tmux/team orchestration;
+- hidden hook-driven state machines;
+- bypass-sandbox or yolo execution modes;
+- automatic global setup mutation;
+- full skill catalogs that duplicate existing Judgment roles.
+
+Prefer a small rule, checklist, or field addition over a new skill. Create a new skill only when the workflow has a distinct trigger, output, and verification surface.
