@@ -197,6 +197,7 @@ This repository is now a general Codex project workflow governance pack:
 - `rules/tool-portfolio-standard.md`: lightweight portfolio rule for deciding plugin vs skill vs MCP/connector vs script vs automation vs no-install, including source trust, permission surface, and freshness checks.
 - `rules/security-review-standard.md`: lightweight threat-model rule for auth, permissions, payments, user data, secrets, external sends, production, AI/Agent tools, and destructive actions.
 - `rules/browser-flow-testing-standard.md`: Browser-visible verification rule for web UI, local previews, visual artifacts, Figma/design-to-code work, responsive layout, and interaction flows.
+- `rules/git-worktree-standard.md`: Git worktree isolation rule for parallel worker lanes, hotfixes during dirty work, clean review/test runs, branch ownership conflicts, and worktree cleanup.
 - `rules/quick-launcher-rule.md`: local quick launcher and auto-use routing rule for `/p`, `/n`, `/d`, `/r`, planning, needs, split, and review phrases.
 - `rules/skill-quality-standard.md`: local quality standard for creating, splitting, auditing, or improving skills.
 - `plugins/work-splitter`: local plugin source for `work-splitter`, including `.codex-plugin/plugin.json`.
@@ -251,6 +252,7 @@ Use `555` when:
 - Routes tool-choice requests through a portfolio gate so popular plugin/skill lists become discovery signals, not blanket install instructions.
 - Adds a threat-model gate for auth, permissions, payments, user data, external sends, production, AI/Agent tools, and destructive actions.
 - Adds a Browser flow gate for web UI, local app previews, visual artifacts, design-to-code work, and interaction correctness.
+- Adds a Git worktree gate for parallel worker isolation, dirty-state preservation, branch ownership conflicts, and safe lifecycle cleanup.
 - Adds a dirty-worktree ownership checkpoint before cleanup, commit, reset, packaging, or sync actions.
 
 ### Evolution Boundary

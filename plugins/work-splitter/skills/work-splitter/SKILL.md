@@ -103,7 +103,7 @@ Run this in order:
 5. Pick the active `G0-G6` gate if XA/XB applies.
 6. Identify the minimum completion oracle.
 7. Identify safety boundaries: Git, filesystem, network, production, app-store, external-send, user data, AI tools.
-8. Decide whether work can stay in the current thread.
+8. Decide whether work can stay in the current thread or needs Git worktree isolation.
 9. Split into lanes only where outputs have different owners or verification paths.
 10. Define each lane's input, allowed actions, forbidden actions, output, verifier, and next receiver.
 11. Define whether each lane updates a durable ledger or reports evidence to the controller.
@@ -172,6 +172,7 @@ Use worker thread when:
 - A lane can be isolated with clear inputs, allowed files, forbidden actions, and verification.
 - The current thread should remain controller.
 - Implementation is larger than the main thread should hold.
+- Parallel edits/tests in the same repo would be safer in a separate Git worktree.
 
 Use handoff when:
 
@@ -194,6 +195,7 @@ flow: XA / XB / general
 gate: G0 / G1 / G2 / G3 / G4 / G5 / G6 / none
 purpose:
 inputs:
+worktree:
 allowed_actions:
 forbidden_actions:
 expected_output:
@@ -268,6 +270,8 @@ Ledger 更新要求：
 回报格式：
 ```
 
+For Git worktree-backed worker packets, load `rules/git-worktree-standard.md` and include `assigned_worktree`, `branch`, `base_ref`, `head_at_dispatch`, `merge_target`, `allowed_git_actions`, `forbidden_git_actions`, `cleanup_policy`, `push_policy`, and `force_policy`.
+
 ## Forbidden
 
 - Do not implement while the user is asking only how to split.
@@ -276,8 +280,10 @@ Ledger 更新要求：
 - Do not open `555` for every small task.
 - Do not produce vague ownerless steps such as "optimize", "improve", or "handle later".
 - Do not assign a subtask without a verifier.
+- Do not assign two writing workers to the same Git branch or worktree.
 - Do not assign a lane that needs durable evidence without saying who records it and where it is recorded.
 - Do not let the implementer be the only acceptance reviewer for milestone, release, AI/Agent safety, backend/shared-surface, or done claims.
 - Do not split away auth, permission, payment, user-data, external-send, production, AI/Agent tool, or destructive-action work without a security review receiver.
 - Do not split away web UI, local preview, design-to-code, screenshot/artifact, or interaction work without a Browser flow verifier when a browser target can exist.
 - Do not allow a worker to publish, deploy, submit, send, delete, reset, or alter user/production data without explicit authorization.
+- Do not allow a worker to force-add, prune, remove, reset, rebase, delete, or rename worktree-owned branches without explicit authorization and live worktree status.

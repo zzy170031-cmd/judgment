@@ -208,6 +208,7 @@ Route after splitting:
 
 - current thread for narrow execution;
 - worker thread for bounded lane work;
+- Git worktree isolation when a worker needs parallel edits/tests, a hotfix/review must happen during dirty work, or branch ownership conflicts could occur; load `rules/git-worktree-standard.md`;
 - `555` for milestone, release, backend/shared surface, architecture, AI/Agent safety, adversarial review, or evidence closure;
 - stay planning-only if the user has not opened execution.
 

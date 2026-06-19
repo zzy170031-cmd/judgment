@@ -1,6 +1,6 @@
 ---
 name: "666"
-description: General Codex project workflow router for choosing the smallest useful combination of skills, slash-work-planner / launcher handling, work-planner needs clarification, work-splitter decomposition, XA/XB development gates, AI/Agent safety requirements, roles, threads, Git checks, Codex-maxxing operating rules, right-side browser/artifact review, context-pressure handoff, 555 escalation, and packaging candidates. Use when the user starts a message with / for planning, or says 666, work-planner, needs-solution-designer, work-splitter, 计划模式, 需求分析, 需求解析, 需求澄清, 工作拆分, 拆任务, 拆工, 分工, 编组, 任务切分, XA, XB, 产品侧开发上线, 游戏侧开发上线, AI开发流程, Agent编组, 技能融合, 工作流提效, Codex maxxing, 榨干 Codex, 封装工作流, 总控路由, 如何推进, 是否开555, 是否审计, 是否核心质疑者, 上下文高, 接力, 切线程, 压缩, 是否值得封装, or asks to coordinate multiple Codex project skills, repos, gates, dirty worktrees, browser previews, artifacts, recurring heartbeats, or worker threads.
+description: General Codex project workflow router for choosing the smallest useful combination of skills, slash-work-planner / launcher handling, work-planner needs clarification, work-splitter decomposition, XA/XB development gates, AI/Agent safety requirements, roles, threads, Git checks, Git worktree isolation for parallel workers, Codex-maxxing operating rules, right-side browser/artifact review, context-pressure handoff, 555 escalation, and packaging candidates. Use when the user starts a message with / for planning, or says 666, work-planner, needs-solution-designer, work-splitter, 计划模式, 需求分析, 需求解析, 需求澄清, 工作拆分, 拆任务, 拆工, 分工, 编组, 任务切分, git worktree, worktree, XA, XB, 产品侧开发上线, 游戏侧开发上线, AI开发流程, Agent编组, 技能融合, 工作流提效, Codex maxxing, 榨干 Codex, 封装工作流, 总控路由, 如何推进, 是否开555, 是否审计, 是否核心质疑者, 上下文高, 接力, 切线程, 压缩, 是否值得封装, or asks to coordinate multiple Codex project skills, repos, gates, dirty worktrees, browser previews, artifacts, recurring heartbeats, or worker threads.
 ---
 
 # 666
@@ -22,6 +22,7 @@ Use `666` as the upstream Codex project workflow router. It decides what should 
 - whether `rules/security-review-standard.md` applies for auth, permissions, payment, user data, external-send, production, AI/Agent tools, or destructive actions;
 - whether `rules/browser-flow-testing-standard.md` applies for web UI, local app, visual artifact, interaction, design-to-code, or browser-visible behavior;
 - whether context pressure requires a handoff before more work;
+- whether Git worktree isolation is needed for worker lanes, hotfixes, reviews, or dirty-state preservation;
 - whether repeated work deserves packaging as a skill, automation, subagent, extension, or skip;
 - how to avoid overusing full five-agent flow on small tasks.
 
@@ -251,7 +252,7 @@ At `C2` or `C3`, the handoff must include:
 
 - current goal;
 - workspace path;
-- branch, HEAD, and dirty state when Git matters;
+- branch, HEAD, dirty state, and worktree path/list when Git worktrees matter;
 - completed work;
 - unfinished work;
 - commands/tests and results;
@@ -373,6 +374,7 @@ Route effects:
 ## Skill Selection Map
 
 - Git anchor skill: standby, sync, review, readiness, or handoff needs live Git truth.
+- `rules/git-worktree-standard.md`: Git worktree isolation for parallel worker lanes, hotfixes, clean review/test runs, dirty-state preservation, and branch ownership conflicts.
 - Progress-watch or monitoring skill: recurring progress reports and checkpoint comparisons.
 - Browser skill: local app/HTML preview, visual inspection, side-panel review, DOM/screenshot verification, and interactive artifact checks.
 - Computer Use skill: GUI-only desktop work that cannot be handled through Browser, connectors, CLI, or structured APIs.
@@ -394,9 +396,21 @@ Route effects:
 
 Load only the selected downstream skill bodies. Do not bulk-load every skill just because `666` triggered.
 
+## Git Worktree Gate
+
+Load `rules/git-worktree-standard.md` when the task involves `git worktree`, parallel Codex worker lanes, hotfix/review work during a dirty task, branch checkout conflicts across worktrees, or worker-thread edits that should not share a working directory.
+
+Route effects:
+
+- Anchor live state with `git worktree list --porcelain`, branch, HEAD, and dirty status before creating, assigning, cleaning, pruning, repairing, merging, or pushing worktree work.
+- Prefer one branch and one filesystem path per writing worker. Use detached or read-only worktrees for pure review.
+- Treat "branch already checked out in another worktree" as an ownership conflict, not a nuisance. Do not bypass it with force unless the user explicitly approves after a live-state report.
+- Add worktree path, branch, base ref, merge target, allowed files, forbidden Git actions, verification commands, and cleanup policy to worker packets.
+- Do not prune, remove, reset, rebase, delete, or rename worktree-owned branches without explicit authorization and a target-worktree dirty-state check.
+
 ## Dirty Ownership Gate
 
-Before any commit, cleanup, reset, restore, package, or sync action in a dirty worktree, classify dirty paths:
+Before any commit, cleanup, reset, restore, package, sync, or worktree lifecycle action in a dirty worktree, classify dirty paths:
 
 - current task owned;
 - user-owned or previous-thread-owned;

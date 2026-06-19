@@ -40,6 +40,7 @@ Before planning, reviewing, delegating, or claiming readiness:
 
 ```powershell
 git -C <repo> status -sb
+git -C <repo> worktree list --porcelain
 git -C <repo> log -1 --oneline --decorate
 git -C <repo> rev-parse HEAD
 git -C <repo> branch -vv
@@ -58,6 +59,7 @@ Rules:
 - If a live remote commit is absent locally, report stale tracking refs.
 - Do not clean, reset, stash, commit, push, or edit unrelated dirty files unless the user explicitly opens that gate.
 - If a ledger exists, treat it as a clue, not authority. Re-check the underlying files, commands, artifacts, and Git state before closure.
+- When `git worktree`, parallel worker lanes, hotfixes during dirty work, or branch ownership conflicts matter, load `rules/git-worktree-standard.md`; include current worktree path, worktree list, branch owner, and cleanup policy in controller/worker reports.
 
 ## Context Pressure Before Loop
 
@@ -68,7 +70,7 @@ If the user mentions high context, background load, compression, handoff, new th
 - do not start new five-agent work yet;
 - finish or report the state of any running command;
 - produce a copy-ready handoff/checkpoint first;
-- include goal, workspace, branch, HEAD, dirty state, completed work, unfinished work, commands/tests, decisions, constraints, risks, and next gate;
+- include goal, workspace, branch, HEAD, dirty state, worktree path/list when relevant, completed work, unfinished work, commands/tests, decisions, constraints, risks, and next gate;
 - tell the next thread to trust live Git/file state over the handoff packet.
 
 If context pressure is elevated but not critical, keep the loop narrow and avoid adding side investigations or extra worker threads.
