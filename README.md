@@ -194,7 +194,9 @@ This repository is now a general Codex project workflow governance pack:
 - `555`: downstream five-agent execution loop. It handles major tasks, adversarial review, backend delegation, evidence verification, progress-watch escalation, context-pressure protection, and release-confidence review.
 - `rules/xa-xb-standard.md`: local XA/XB AI-assisted development standard.
 - `rules/durable-evidence-ledger-standard.md`: lightweight evidence ledger rule for long-running work, worker handoffs, autonomous loops, milestone/release decisions, QA gates, and temporary artifact tracking.
+- `rules/codex-surface-governance-standard.md`: Codex-only surface selection rule for absorbing external model, agent, Git/GitHub, and tool patterns into prompt/thread, AGENTS, rules, skills, plugins, connectors/MCP, scripts, automations, browser surfaces, worktrees, or 555.
 - `rules/tool-portfolio-standard.md`: lightweight portfolio rule for deciding plugin vs skill vs MCP/connector vs script vs automation vs no-install, including source trust, permission surface, and freshness checks.
+- `rules/role-lane-responsibility-standard.md`: responsibility mapping rule for product, frontend, backend, fullstack, platform/DevOps, SRE/Ops, QA, security, data, AI/Agent, Git/GitHub, docs/rules, and release lanes.
 - `rules/security-review-standard.md`: lightweight threat-model rule for auth, permissions, payments, user data, secrets, external sends, production, AI/Agent tools, and destructive actions.
 - `rules/browser-flow-testing-standard.md`: Browser-visible verification rule for web UI, local previews, visual artifacts, Figma/design-to-code work, responsive layout, and interaction flows.
 - `rules/git-worktree-standard.md`: Git worktree isolation rule for parallel worker lanes, hotfixes during dirty work, clean review/test runs, branch ownership conflicts, and worktree cleanup.
@@ -263,6 +265,8 @@ When improving this pack from external workflow systems:
 - Keep Judgment runnable as plain skills and rules.
 - Prefer a small rule or field addition before adding a new skill.
 - Prefer tool-portfolio decisions over "install everything" behavior; distinguish skill, plugin, MCP/connector, script, automation, and no-install.
+- Translate outside model/tool/company practices into Codex surfaces first; Judgment stays Codex-only at execution time.
+- Split product and engineering work by responsibility and verification path, not job title alone.
 - Do not import runtime assumptions such as tmux sessions, hook daemons, hidden `.omx` state, or bypass-sandbox execution modes.
 - Do not duplicate a full external skill catalog when `666`, `work-planner`, `needs-solution-designer`, `work-splitter`, and `555` already cover the role.
 
@@ -299,7 +303,9 @@ SKILL.md                      # Compatibility entrypoint, same role as skills/66
 agents/openai.yaml            # Compatibility UI metadata for root 666 entrypoint
 rules/
   browser-flow-testing-standard.md # Browser-visible UI and interaction verification rule
+  codex-surface-governance-standard.md # Codex surface selection and external-pattern intake rule
   durable-evidence-ledger-standard.md # Lightweight ledger and evidence-closure rule
+  role-lane-responsibility-standard.md # Product/engineering lane responsibility rule
   security-review-standard.md # Lightweight threat-model rule
   tool-portfolio-standard.md   # Plugin/skill/MCP/script/automation selection rule
   xa-xb-standard.md           # XA/XB AI-assisted development standard

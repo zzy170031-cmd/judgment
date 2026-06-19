@@ -43,6 +43,7 @@ git -C <repo> status -sb
 git -C <repo> worktree list --porcelain
 git -C <repo> log -1 --oneline --decorate
 git -C <repo> rev-parse HEAD
+git -C <repo> rev-parse --git-dir --git-common-dir
 git -C <repo> branch -vv
 ```
 
@@ -59,7 +60,8 @@ Rules:
 - If a live remote commit is absent locally, report stale tracking refs.
 - Do not clean, reset, stash, commit, push, or edit unrelated dirty files unless the user explicitly opens that gate.
 - If a ledger exists, treat it as a clue, not authority. Re-check the underlying files, commands, artifacts, and Git state before closure.
-- When `git worktree`, parallel worker lanes, hotfixes during dirty work, or branch ownership conflicts matter, load `rules/git-worktree-standard.md`; include current worktree path, worktree list, branch owner, and cleanup policy in controller/worker reports.
+- When `git worktree`, parallel worker lanes, hotfixes during dirty work, clean review/test worktrees, or branch ownership conflicts matter, load `rules/git-worktree-standard.md`; include current worktree path, worktree list, branch owner, base ref, setup state, shared-file policy, integration owner, verification output, commit/push policy, force policy, and cleanup policy in controller/worker reports.
+- Do not accept a worker's worktree report as closed until the target worktree has a fresh `status -sb`, `HEAD`, changed-file list, verification evidence, and an explicit integration or handoff state.
 
 ## Context Pressure Before Loop
 

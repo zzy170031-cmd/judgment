@@ -18,7 +18,9 @@ Use `666` as the upstream Codex project workflow router. It decides what should 
 - how the Codex Maxxing local operating rule applies: durable thread, explicit memory, visible artifact, right-side review, completion oracle, heartbeat, and packaging fit;
 - whether a durable evidence ledger is required for long tasks, autonomous loops, milestone/release decisions, worker handoffs, or temporary artifact tracking;
 - whether independent review evidence is required before accepting a done, milestone, release, or `go / conditional go / no-go` claim;
+- whether `rules/codex-surface-governance-standard.md` applies for translating external agent/model/tool patterns into Codex-only surfaces such as prompts, AGENTS, rules, skills, plugins, connectors, scripts, automations, hooks, worktrees, Browser, Chrome, Computer Use, or 555;
 - whether `rules/tool-portfolio-standard.md` applies for plugin, skill, MCP, connector, script, automation, or no-install decisions;
+- whether `rules/role-lane-responsibility-standard.md` applies for product, engineering, fullstack, frontend, backend, QA, security, SRE/Ops, AI/Agent, Git/GitHub, docs/rules, or release lane responsibility;
 - whether `rules/security-review-standard.md` applies for auth, permissions, payment, user data, external-send, production, AI/Agent tools, or destructive actions;
 - whether `rules/browser-flow-testing-standard.md` applies for web UI, local app, visual artifact, interaction, design-to-code, or browser-visible behavior;
 - whether context pressure requires a handoff before more work;
@@ -80,9 +82,11 @@ Before selecting a path, establish the smallest needed facts:
 10. Whether AI/Agent requirements apply: behavior contract, tool boundary, guardrails/evals, human approval points, monitoring, or incident handling.
 11. Whether `rules/durable-evidence-ledger-standard.md` applies.
 12. Whether completion requires independent review rather than implementer self-attestation.
-13. Whether `rules/tool-portfolio-standard.md` applies.
-14. Whether `rules/security-review-standard.md` applies.
-15. Whether `rules/browser-flow-testing-standard.md` applies.
+13. Whether external model/tool/org patterns must be researched and translated through `rules/codex-surface-governance-standard.md`.
+14. Whether `rules/tool-portfolio-standard.md` applies.
+15. Whether product/engineering role responsibility or lane ownership must be mapped through `rules/role-lane-responsibility-standard.md`.
+16. Whether `rules/security-review-standard.md` applies.
+17. Whether `rules/browser-flow-testing-standard.md` applies.
 
 Trust actual file, Git, process, and artifact state over memory, screenshots, reports, or handoff packets.
 
@@ -181,6 +185,29 @@ Route effects:
 
 Do not import heavy runtime assumptions from external systems: no required tmux, no hook daemon, no hidden state machine, no bypass-sandbox mode, and no automatic global setup mutation.
 
+## Codex Surface Governance Gate
+
+Use `rules/codex-surface-governance-standard.md` when the task asks to absorb, compare, install, package, automate, delegate, or persist ideas from Codex, ChatGPT/OpenAI agents, Claude Code, Gemini CLI, GLM/Z.ai, Git/GitHub, ByteDance/Trae-style agent tools, or other model/developer ecosystems.
+
+Route effects:
+
+- Extract the external pattern first: what problem it solves, what safety boundary it assumes, and what not to import.
+- Translate the pattern into the smallest Codex surface: prompt/thread, `AGENTS.md`, Codex config/hook, `rules/*.md`, skill, plugin, MCP/connector/app, script, automation/heartbeat, Browser, Chrome, Computer Use, Git worktree, or `555`.
+- Prefer extending existing Judgment surfaces over creating a new asset.
+- Keep Judgment Codex-only at execution time. External tools are inspiration unless the user explicitly opens a separate integration/runtime gate.
+- Require current source verification before copying model names, commands, release claims, marketplace availability, pricing, or provider-specific facts.
+
+## Role Lane Responsibility Gate
+
+Use `rules/role-lane-responsibility-standard.md` when a task touches product development roles, programmer roles, frontend, backend, fullstack, platform/DevOps, SRE/Ops, QA, security/compliance, data/analytics, AI/Agent, Git/GitHub integration, docs/rules, or release responsibility.
+
+Route effects:
+
+- Split by responsibility and verification path, not job title alone.
+- Use role patterns from external sources only as stable responsibility signals, not as company org charts or hiring ladders.
+- Keep fullstack work bounded by explicit browser/user evidence, backend/test evidence, security gates, and integration ownership.
+- Add the role/lane verifier before accepting a milestone, release, done claim, or worker output.
+
 ## Strict Delivery Loop Gate
 
 Use this gate only when the user explicitly asks for autonomous, overnight, benchmark-loop, durable-goal, or strict delivery-loop behavior.
@@ -272,7 +299,7 @@ Review available evidence in this order:
 1. Recent Codex sessions, task summaries, and the current thread.
 2. Codex memories and rollout summaries, if available.
 3. Global rules such as `AGENTS.md`, especially the Codex Maxxing local operating rule.
-4. Repo-local rules such as `rules/durable-evidence-ledger-standard.md`, `rules/xa-xb-standard.md`, and `rules/skill-quality-standard.md`.
+4. Repo-local rules such as `rules/codex-surface-governance-standard.md`, `rules/role-lane-responsibility-standard.md`, `rules/durable-evidence-ledger-standard.md`, `rules/xa-xb-standard.md`, and `rules/skill-quality-standard.md`.
 5. Existing skills, custom agents, automations, scripts, and repo-local rules.
 6. External activity records such as Chronicle only as discovery signals; confirm important facts in the relevant source system.
 
@@ -302,6 +329,8 @@ When the recommended form is `Skill` or `Extend existing`, apply the local skill
 - add a verification step that can fail;
 - do not broaden a skill merely because an external article contains a useful idea.
 
+When the source idea comes from another model tool, company practice, GitHub repo, job ladder, or engineering handbook, also apply `rules/codex-surface-governance-standard.md` and `rules/role-lane-responsibility-standard.md` before changing Judgment. Import the stable pattern, not the vendor runtime or org-specific title.
+
 First produce a compact shortlist:
 
 ```text
@@ -323,6 +352,7 @@ Default posture:
 
 - Do not install or recommend every popular tool.
 - Choose the smallest trustworthy tool surface that closes the current gate.
+- If the request is really "where should this behavior live in Codex?", run `rules/codex-surface-governance-standard.md` before tool selection.
 - Treat external recommendation articles as discovery signals; verify current availability, commands, scopes, and product facts before turning them into Judgment rules.
 
 Decision order:
@@ -334,6 +364,8 @@ Decision order:
 5. Is it deterministic local work? Prefer `Script`.
 6. Is it recurring? Prefer `Automation`.
 7. Is it one-off or already covered? Choose `No install` or `Skip`.
+
+When external tools suggest model memories, slash commands, hooks, subagents, sandbox modes, checkpointing, MCP servers, browser agents, or GUI agents, translate them to the corresponding Codex surface before deciding whether any plugin or skill is needed.
 
 Add source and permission checks before action:
 
@@ -374,7 +406,7 @@ Route effects:
 ## Skill Selection Map
 
 - Git anchor skill: standby, sync, review, readiness, or handoff needs live Git truth.
-- `rules/git-worktree-standard.md`: Git worktree isolation for parallel worker lanes, hotfixes, clean review/test runs, dirty-state preservation, and branch ownership conflicts.
+- `rules/git-worktree-standard.md`: Git worktree isolation for parallel worker lanes, hotfixes, clean review/test runs, dirty-state preservation, branch ownership conflicts, shared-file coordination, and safe integration/cleanup.
 - Progress-watch or monitoring skill: recurring progress reports and checkpoint comparisons.
 - Browser skill: local app/HTML preview, visual inspection, side-panel review, DOM/screenshot verification, and interactive artifact checks.
 - Computer Use skill: GUI-only desktop work that cannot be handled through Browser, connectors, CLI, or structured APIs.
@@ -385,7 +417,9 @@ Route effects:
 - Needs-solution-designer skill: fuzzy need clarification, confirmed/assumption separation, reuse judgment, and solution blueprint.
 - Work-splitter skill: decomposition, lane design, Agent grouping, subtask contracts, thread strategy, and 555-prep packets.
 - Durable evidence ledger standard: long-running work, autonomous loops, worker handoffs, milestone/release decisions, QA gates, and temporary artifact tracking.
+- Codex surface governance standard: translating external agent/model/tool patterns into Codex-only surfaces, deciding prompt vs AGENTS vs rule vs skill vs plugin vs connector/MCP vs script vs automation vs Browser/Chrome/Computer Use vs worktree vs 555.
 - Tool portfolio standard: plugin vs skill vs MCP/connector vs script vs automation vs no-install decisions, including source trust and permission checks.
+- Role lane responsibility standard: mapping product, programmer, frontend, backend, fullstack, DevOps, SRE/Ops, QA, security, data, AI/Agent, Git/GitHub, docs/rules, and release responsibilities into lanes, verifiers, and handoffs.
 - Security review standard: threat modeling for auth, permissions, payments, user data, external-send, production, AI/Agent tools, and destructive actions.
 - Browser flow testing standard: Browser-visible evidence for web UI, local previews, design-to-code, artifacts, responsive layout, and interaction flows.
 - Contract/spec gate skill: docs-only contract, schema, field boundary, or downstream checklist work.
@@ -402,11 +436,12 @@ Load `rules/git-worktree-standard.md` when the task involves `git worktree`, par
 
 Route effects:
 
-- Anchor live state with `git worktree list --porcelain`, branch, HEAD, and dirty status before creating, assigning, cleaning, pruning, repairing, merging, or pushing worktree work.
+- Anchor live state with `git worktree list --porcelain`, branch, HEAD, Git dir/common dir, dirty status, and remote freshness before creating, assigning, cleaning, pruning, repairing, merging, or pushing worktree work.
 - Prefer one branch and one filesystem path per writing worker. Use detached or read-only worktrees for pure review.
 - Treat "branch already checked out in another worktree" as an ownership conflict, not a nuisance. Do not bypass it with force unless the user explicitly approves after a live-state report.
-- Add worktree path, branch, base ref, merge target, allowed files, forbidden Git actions, verification commands, and cleanup policy to worker packets.
-- Do not prune, remove, reset, rebase, delete, or rename worktree-owned branches without explicit authorization and a target-worktree dirty-state check.
+- Add worktree path, branch, base ref, merge target, setup commands, shared-file policy, allowed/forbidden Git actions, verification commands, commit/push policy, conflict policy, integration owner, and cleanup policy to worker packets.
+- Treat worktree isolation as insufficient by itself. If parallel lanes touch lockfiles, migrations, generated schemas, route registries, prompts, package manifests, public snapshots, release files, ports, databases, or build output directories, serialize or assign an integration owner.
+- Do not prune, remove, reset, rebase, delete, rename, force-add, force-remove, or push worktree-owned branches without explicit authorization and a target-worktree dirty-state check.
 
 ## Dirty Ownership Gate
 
@@ -457,7 +492,9 @@ For routing decisions, answer compactly:
 - Codex Maxxing 适配：<artifact / Browser / durable memory / oracle / heartbeat / packaging / none>
 - Durable ledger：<none / response-level / repo artifact / required before execution>
 - Independent review：<none / 555 / QA gate / named verifier>
+- Codex surface：<none / prompt-thread / AGENTS / config-hook / rule / skill / plugin / connector-MCP / script / automation / Browser / Chrome / Computer Use / worktree / 555>
 - Tool portfolio：<none / use-existing / extend-existing / install / package / skip>
+- Role lane：<none / product-spec / UX-design / frontend / backend / fullstack / platform-DevOps / SRE-Ops / QA / security / data / AI-Agent / Git-integration / docs-rule / release>
 - Security review：<none / focused / 555 / user-decision / block>
 - Browser flow：<none / required / verified / conditional / block>
 - 推荐层级：L0 / L1 / L2 / L3 / L4 / L5
@@ -484,5 +521,6 @@ For controller-ready cross-thread text, use the available thread-dispatch or han
 - Do not accept milestone, release, done, or `go / conditional go / no-go` claims from implementer self-attestation alone when independent evidence is required.
 - Do not install, enable, authenticate, or recommend broad tool stacks solely because a public list recommends them.
 - Do not copy public article claims about release dates, counts, availability, or commands into Judgment as facts without current source verification.
+- Do not import external model/tool/org runtimes, hidden reasoning stores, job ladders, or company-specific process titles as Judgment behavior without translating them through Codex surfaces and role-lane responsibilities.
 - Do not claim web UI or browser-visible behavior works from code inspection alone when a Browser target is available.
 - Do not down-rank missing security controls for auth, permissions, payments, user data, external-send, production, AI/Agent tools, or destructive actions as ordinary polish.

@@ -21,8 +21,10 @@ This skill combines three layers:
 2. Codex Plan mode alignment: collect unresolved choices, avoid premature execution, and produce an approval-ready plan.
 3. `work-splitter`: split the confirmed work into lanes, Agent groups, gates, thread strategy, and 555 escalation packets.
 4. Durable evidence planning: decide whether `rules/durable-evidence-ledger-standard.md` is needed for long-running work, worker reports, QA gates, or release/milestone closure.
-5. Tool portfolio planning: decide whether the task needs an existing tool, an extended skill, a new skill, a plugin, an MCP/connector, a script, an automation, or no install.
-6. Security and browser-flow planning: decide whether `rules/security-review-standard.md` or `rules/browser-flow-testing-standard.md` must be part of the execution gate.
+5. Codex surface planning: decide where borrowed or durable behavior should live inside Codex: prompt/thread, `AGENTS.md`, rule, skill, plugin, connector/MCP, script, automation, Browser, Chrome, Computer Use, worktree, hook/config, or 555.
+6. Tool portfolio planning: decide whether the task needs an existing tool, an extended skill, a new skill, a plugin, an MCP/connector, a script, an automation, or no install.
+7. Role/lane responsibility planning: decide whether product, UX, frontend, backend, fullstack, platform/DevOps, SRE/Ops, QA, security, data, AI/Agent, Git/GitHub, docs/rules, or release responsibility must be split or verified separately.
+8. Security and browser-flow planning: decide whether `rules/security-review-standard.md` or `rules/browser-flow-testing-standard.md` must be part of the execution gate.
 
 It does not replace:
 
@@ -30,7 +32,9 @@ It does not replace:
 - `555`: the evidence and adversarial assurance loop for high-risk milestones.
 - `XA/XB`: the development standards in `~/.codex/rules/xa-xb-standard.md`.
 - `rules/durable-evidence-ledger-standard.md`: the lightweight evidence ledger standard for long tasks and acceptance decisions.
+- `rules/codex-surface-governance-standard.md`: the local standard for translating external agent/model/tool patterns into Codex-only surfaces.
 - `rules/tool-portfolio-standard.md`: the local standard for plugin, skill, MCP/connector, script, automation, and no-install decisions.
+- `rules/role-lane-responsibility-standard.md`: the local standard for mapping product, programmer, fullstack, frontend, backend, QA, security, SRE/Ops, AI/Agent, Git/GitHub, docs/rules, and release work into lanes and verifiers.
 - `rules/security-review-standard.md`: the lightweight threat-model standard for sensitive or side-effecting work.
 - `rules/browser-flow-testing-standard.md`: the Browser-visible verification standard for web UI and interactive artifacts.
 - `rules/skill-quality-standard.md`: the local standard for creating, splitting, auditing, or improving skills.
@@ -132,6 +136,31 @@ Tool portfolio gate
   -> use existing / extend / install / package / skip
 ```
 
+When the user asks to absorb external model/tool/org practices, or when a planning decision must persist beyond the thread, add this gate:
+
+```text
+Codex surface gate
+  -> external pattern, if any
+  -> problem it solves
+  -> Codex translation
+  -> existing Judgment coverage
+  -> smallest durable surface
+  -> permission and restart/new-thread impact
+  -> what not to import
+```
+
+When the task involves product or engineering role responsibility, add this gate:
+
+```text
+Role lane gate
+  -> primary lane
+  -> supporting lanes
+  -> verifier
+  -> handoff receiver
+  -> split / no-split reason
+  -> fullstack boundary if applicable
+```
+
 When planning web/UI or sensitive side-effecting work, add this gate:
 
 ```text
@@ -150,7 +179,10 @@ Identify:
 - whether the task is XA, XB, or general;
 - whether AI/Agent behavior is involved;
 - whether the work may outlive the current thread or need durable evidence;
+- whether external model/tool/org patterns are being borrowed and need Codex-only translation;
+- which Codex surface should own any durable behavior;
 - whether the request is really a tool-selection or tool-packaging decision;
+- whether role/lane responsibility must be mapped before execution;
 - whether auth, permissions, payments, user data, external-send, production, or destructive actions require a security gate;
 - whether web UI, local preview, artifact, screenshot, Figma/design-to-code, or interaction work requires a Browser flow gate;
 - whether the user wants planning only or execution after planning.
@@ -208,9 +240,11 @@ Route after splitting:
 
 - current thread for narrow execution;
 - worker thread for bounded lane work;
-- Git worktree isolation when a worker needs parallel edits/tests, a hotfix/review must happen during dirty work, or branch ownership conflicts could occur; load `rules/git-worktree-standard.md`;
+- Git worktree isolation when a worker needs parallel edits/tests, a hotfix/review must happen during dirty work, branch ownership conflicts could occur, or a clean review/test run must not inherit current dirty state; load `rules/git-worktree-standard.md`;
 - `555` for milestone, release, backend/shared surface, architecture, AI/Agent safety, adversarial review, or evidence closure;
 - stay planning-only if the user has not opened execution.
+
+When routing to worktree-backed execution, the plan must name the base ref, assigned worktree path, branch owner, setup commands, shared-file policy, integration owner, commit/push policy, force policy, and cleanup policy. If those facts are not available, stop at a planning packet rather than creating or assigning a worktree.
 
 ### P6 Evidence and Next Gate
 
@@ -221,9 +255,12 @@ End with:
 - evidence required for completion;
 - ledger requirement and location, or why no ledger is needed;
 - independent review requirement, or why self-review is enough;
+- Codex surface decision, or why no durable surface change is needed;
 - tool portfolio decision, or why no new tool is needed;
+- role/lane responsibility decision, or why no split is needed;
 - security review requirement, or why it is not applicable;
 - browser flow requirement, or why it is not applicable;
+- worktree/integration requirement, or why it is not applicable;
 - what is not yet authorized;
 - next receiver.
 
@@ -278,7 +315,9 @@ Default:
 - 是否需要分线程：
 - Durable ledger：none / response-level / repo artifact / required before execution
 - Independent review：none / named verifier / QA gate / 555
+- Codex surface：none / prompt-thread / AGENTS / config-hook / rule / skill / plugin / connector-MCP / script / automation / Browser / Chrome / Computer Use / worktree / 555
 - Tool portfolio：none / use-existing / extend-existing / install / package / skip
+- Role lane：none / product-spec / UX-design / frontend / backend / fullstack / platform-DevOps / SRE-Ops / QA / security / data / AI-Agent / Git-integration / docs-rule / release
 - Security review：none / focused / 555 / user-decision / block
 - Browser flow：none / required / verified / conditional / block
 - 不做事项：
@@ -334,4 +373,5 @@ When ready for execution:
 - Do not call `555` for every planning task.
 - Do not let `needs-solution-designer` keep asking forever when the remaining uncertainty is narrow and a bounded plan is safe.
 - Do not let `work-splitter` create ownerless lanes without verification.
+- Do not import external model/tool/org practices into Judgment without Codex surface translation and role/lane responsibility mapping when they affect execution.
 - Do not publish, deploy, submit, delete, reset, send, or touch production/user data from planning.

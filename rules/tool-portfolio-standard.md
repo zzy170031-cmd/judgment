@@ -8,6 +8,8 @@ This rule adapts the tool-selection lesson from the WeChat article "Codex 进阶
 
 Do not optimize for the largest tool stack. Choose the smallest trustworthy tool surface that closes the current gate.
 
+If the real question is where a behavior should live inside Codex, run `rules/codex-surface-governance-standard.md` before this tool-selection rule. A tool is only one possible Codex surface.
+
 Tool forms:
 
 - `Skill`: repeatable instruction workflow, usually centered on `SKILL.md`, with optional references, templates, scripts, or assets.
@@ -23,6 +25,7 @@ Before adding or recommending a tool, answer:
 
 ```text
 job_to_be_done:
+codex_surface:
 existing_coverage:
 candidate_form: skill / plugin / MCP-connector / script / automation / no-install
 source_trust: official / curated / known-community / private / unknown
@@ -37,6 +40,7 @@ decision:
 Prefer:
 
 - existing installed tools before new tools;
+- Codex surface translation before installing a new tool for a borrowed external pattern;
 - a narrow skill before a broad plugin when no external service or hook is needed;
 - an existing connector/plugin before hand-rolling an MCP integration;
 - official or repo-local documentation for API/framework facts;
@@ -68,6 +72,7 @@ Use a current-docs gate when implementation depends on framework, API, SDK, prod
 When a tool-selection article recommends a workflow, convert it into local gates:
 
 - clarification before implementation when the need is fuzzy;
+- Codex surface selection when the workflow could be a prompt, `AGENTS.md`, rule, skill, plugin, connector/MCP, script, automation, Browser/Chrome/Computer Use, worktree, hook/config, or 555 gate;
 - plan before broad edits;
 - test-first or regression-test expectation for behavior changes;
 - browser-flow testing for web UI flows;
@@ -81,6 +86,7 @@ When a tool-selection article recommends a workflow, convert it into local gates
 ```text
 Tool portfolio decision:
 - job:
+- Codex surface:
 - current coverage:
 - chosen form:
 - use existing / extend / install / skip:

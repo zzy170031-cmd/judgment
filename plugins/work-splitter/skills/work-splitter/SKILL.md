@@ -20,6 +20,8 @@ It works with:
 - `555`: five-agent assurance loop for milestone, release, backend/shared-contract, architecture, AI/Agent safety, and adversarial review.
 - `XA/XB`: product/game development standards in `~/.codex/rules/xa-xb-standard.md`.
 - `rules/durable-evidence-ledger-standard.md`: lightweight ledger rule for long work, worker evidence, QA gates, and temporary artifact disposition.
+- `rules/codex-surface-governance-standard.md`: translation rule for external agent/model/tool patterns into Codex-only surfaces before they become work lanes.
+- `rules/role-lane-responsibility-standard.md`: responsibility mapping rule for product, programmer, frontend, backend, fullstack, platform/DevOps, SRE/Ops, QA, security, data, AI/Agent, Git/GitHub, docs/rules, and release lanes.
 - `rules/security-review-standard.md`: threat-model rule for sensitive data, permissions, external-send, production, AI/Agent tools, and destructive actions.
 - `rules/browser-flow-testing-standard.md`: Browser-visible verification rule for web UI, local previews, artifacts, and interaction flows.
 
@@ -70,8 +72,10 @@ Before splitting, identify the smallest sufficient context:
 7. Context strategy: same thread, handoff, worker thread, or `555`.
 8. Ledger strategy: none, response-level ledger, repo artifact, or required before execution.
 9. Independent review strategy: none, named verifier, QA lane, or `555`.
-10. Security review strategy: none, focused, Security/Compliance Lane, `555`, user-decision, or block.
-11. Browser flow strategy: none, required, QA Lane, verified, conditional, or block.
+10. Codex surface strategy: none, existing surface, extend rule/skill, script, automation, connector/MCP, worktree, or 555.
+11. Role/lane responsibility strategy: no split, primary lane, supporting lanes, verifier, and handoff receiver.
+12. Security review strategy: none, focused, Security/Compliance Lane, `555`, user-decision, or block.
+13. Browser flow strategy: none, required, QA Lane, verified, conditional, or block.
 
 If the user's need is still fuzzy, customer-facing, or not stable enough to restate in plain language, route to `needs-solution-designer` before decomposing. Do not split work from an unstable need unless the split is explicitly for discovery.
 
@@ -103,12 +107,15 @@ Run this in order:
 5. Pick the active `G0-G6` gate if XA/XB applies.
 6. Identify the minimum completion oracle.
 7. Identify safety boundaries: Git, filesystem, network, production, app-store, external-send, user data, AI tools.
-8. Decide whether work can stay in the current thread or needs Git worktree isolation.
-9. Split into lanes only where outputs have different owners or verification paths.
-10. Define each lane's input, allowed actions, forbidden actions, output, verifier, and next receiver.
-11. Define whether each lane updates a durable ledger or reports evidence to the controller.
-12. Decide whether `555` is required before, during, or after execution.
-13. Return a compact plan first; include copy-ready packets only when useful.
+8. If external model/tool/org patterns are being absorbed, translate them through `rules/codex-surface-governance-standard.md` before creating lanes.
+9. Map the task through `rules/role-lane-responsibility-standard.md` when product, engineering, fullstack, QA, security, SRE/Ops, AI/Agent, Git/GitHub, docs/rules, or release responsibility matters.
+10. Decide whether work can stay in the current thread or needs Git worktree isolation.
+11. If worktrees are needed, identify branch owner, base ref, assigned path, setup commands, shared files, commit/push policy, force policy, integration owner, and cleanup policy before dispatch.
+12. Split into lanes only where outputs have different owners or verification paths.
+13. Define each lane's input, allowed actions, forbidden actions, output, verifier, and next receiver.
+14. Define whether each lane updates a durable ledger or reports evidence to the controller.
+15. Decide whether `555` is required before, during, or after execution.
+16. Return a compact plan first; include copy-ready packets only when useful.
 
 ## Lane Types
 
@@ -119,12 +126,19 @@ Use these lane names consistently:
 - `Spec Lane`: requirements, acceptance criteria, non-goals, PRD-lite/GDD-lite.
 - `Architecture Lane`: system design, interfaces, state/data model, technical risk.
 - `Implementation Lane`: code or artifact creation within bounded files/modules.
+- `Frontend Lane`: UI state, rendering, accessibility implementation, client tests, Browser-visible flows.
+- `Backend Lane`: APIs, data model, persistence, auth enforcement, server workflows, backend tests.
+- `Fullstack Lane`: narrow vertical slice across UI, API, data, tests, and user value, with explicit integration ownership.
+- `Platform/DevOps Lane`: CI/CD, build/runtime setup, environments, deployments, infrastructure-as-code.
+- `SRE/Ops Lane`: availability, latency, monitoring, rollback, incident response, postmortems, operational feedback.
 - `QA Lane`: functional, regression, compatibility, performance, accessibility.
 - `Security/Compliance Lane`: privacy, auth, permissions, sensitive data, policy, store review.
+- `Data/Analytics Lane`: metrics, instrumentation, event definitions, data quality, experiment/readout evidence.
 - `Release Lane`: release candidate, deploy/store submission, monitoring, rollback.
 - `Ops Lane`: incident, support, data monitor, feedback loop, hotfix triage.
 - `Docs/Rule Lane`: local rules, skills, handoff docs, runbooks, decision records.
 - `AI/Agent Lane`: behavior contract, tool boundary, guardrails/evals, human approval, observability.
+- `Git/Integration Lane`: branch/worktree ownership, conflict policy, merge path, review state, CI status, PR readiness.
 
 ### XA Group Mapping
 
@@ -174,6 +188,8 @@ Use worker thread when:
 - Implementation is larger than the main thread should hold.
 - Parallel edits/tests in the same repo would be safer in a separate Git worktree.
 
+Do not use worker threads as a substitute for integration design. If parallel lanes touch shared files, generated artifacts, lockfiles, migrations, registries, prompt catalogs, package manifests, release notes, ports, databases, browser profiles, or build output directories, serialize those files or assign one integration owner.
+
 Use handoff when:
 
 - Context pressure is high.
@@ -195,11 +211,27 @@ flow: XA / XB / general
 gate: G0 / G1 / G2 / G3 / G4 / G5 / G6 / none
 purpose:
 inputs:
+codex_surface:
+source_pattern:
+role_lane:
+supporting_lanes:
 worktree:
+branch:
+base_ref:
+setup_commands:
 allowed_actions:
 forbidden_actions:
+allowed_git_actions:
+forbidden_git_actions:
 expected_output:
 verification:
+shared_files_policy:
+commit_policy:
+push_policy:
+force_policy:
+conflict_policy:
+integration_owner:
+cleanup_policy:
 ledger_update:
 independent_review:
 security_review:
@@ -224,6 +256,8 @@ Default output:
 - 是否需要分线程：
 - Ledger 策略：none / response-level / repo artifact / required before execution
 - Independent review：none / named verifier / QA gate / 555
+- Codex surface：none / prompt-thread / AGENTS / config-hook / rule / skill / plugin / connector-MCP / script / automation / Browser / Chrome / Computer Use / worktree / 555
+- Role lane：none / product-spec / UX-design / frontend / backend / fullstack / platform-DevOps / SRE-Ops / QA / security / data / AI-Agent / Git-integration / docs-rule / release
 - Security review：none / focused / Security Lane / 555 / user-decision / block
 - Browser flow：none / required / QA Lane / verified / conditional / block
 - 不做事项：
@@ -261,6 +295,8 @@ When copy-ready worker packets are needed:
 允许：
 禁止：
 输入文件：
+Codex surface：
+Role lane：
 输出要求：
 验证命令：
 Ledger 更新要求：
@@ -270,7 +306,7 @@ Ledger 更新要求：
 回报格式：
 ```
 
-For Git worktree-backed worker packets, load `rules/git-worktree-standard.md` and include `assigned_worktree`, `branch`, `base_ref`, `head_at_dispatch`, `merge_target`, `allowed_git_actions`, `forbidden_git_actions`, `cleanup_policy`, `push_policy`, and `force_policy`.
+For Git worktree-backed worker packets, load `rules/git-worktree-standard.md` and include `controller_worktree`, `assigned_worktree`, `branch`, `base_ref`, `head_at_dispatch`, `merge_target`, `setup_commands`, `shared_files_policy`, `allowed_git_actions`, `forbidden_git_actions`, `verification_commands`, `commit_policy`, `cleanup_policy`, `push_policy`, `force_policy`, `conflict_policy`, and `integration_owner`.
 
 ## Forbidden
 
@@ -279,8 +315,10 @@ For Git worktree-backed worker packets, load `rules/git-worktree-standard.md` an
 - Do not include market research, competitor research, advertising, or commercial sizing unless explicitly requested.
 - Do not open `555` for every small task.
 - Do not produce vague ownerless steps such as "optimize", "improve", or "handle later".
+- Do not import external model/tool/org patterns as lanes until they have a Codex surface and responsibility mapping.
 - Do not assign a subtask without a verifier.
 - Do not assign two writing workers to the same Git branch or worktree.
+- Do not split parallel worker lanes without naming shared-file ownership and the integration receiver when shared files or semantic dependencies exist.
 - Do not assign a lane that needs durable evidence without saying who records it and where it is recorded.
 - Do not let the implementer be the only acceptance reviewer for milestone, release, AI/Agent safety, backend/shared-surface, or done claims.
 - Do not split away auth, permission, payment, user-data, external-send, production, AI/Agent tool, or destructive-action work without a security review receiver.
