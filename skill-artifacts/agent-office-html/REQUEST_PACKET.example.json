@@ -1,0 +1,33 @@
+{
+  "id": "codex-001",
+  "createdAt": "2026-06-21T19:44:26+08:00",
+  "project": "OpenClaw Platform",
+  "branch": "main",
+  "gate": "XB-4",
+  "module": "Agent Office",
+  "selectedAgent": {
+    "id": "controller",
+    "name": "Controller",
+    "lane": "controller"
+  },
+  "request": "Continue improving the Agent Office right rail layout and add a 1440px validation screenshot.",
+  "expectedOutputs": [
+    "Update page source files",
+    "Write runtime events",
+    "Add browser screenshot evidence",
+    "Record test commands and results"
+  ],
+  "safetyBoundary": {
+    "htmlCanExecute": false,
+    "codexMustReview": true,
+    "gitWriteRequiresCodex": true,
+    "destructiveActionsRequireHumanApproval": true
+  },
+  "bridge": {
+    "requestEndpoint": "/codex/request",
+    "eventEndpoint": "/codex/event",
+    "stateEndpoint": "/codex/state"
+  },
+  "status": "queued",
+  "statusText": "Queued in local Codex Bridge and waiting for the Codex thread."
+}

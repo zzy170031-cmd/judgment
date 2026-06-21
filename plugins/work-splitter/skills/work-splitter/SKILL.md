@@ -20,6 +20,7 @@ It works with:
 - `555`: five-agent assurance loop for milestone, release, backend/shared-contract, architecture, AI/Agent safety, and adversarial review.
 - `XA/XB`: product/game development standards in `~/.codex/rules/xa-xb-standard.md`.
 - `rules/durable-evidence-ledger-standard.md`: lightweight ledger rule for long work, worker evidence, QA gates, and temporary artifact disposition.
+- `rules/project-agent-topology-standard.md`: project runtime topology rule for generating real/planned agents, interlocked node/test/evidence graphs, conversation surfaces, and HTML cockpit artifacts.
 - `rules/codex-surface-governance-standard.md`: translation rule for external agent/model/tool patterns into Codex-only surfaces before they become work lanes.
 - `rules/role-lane-responsibility-standard.md`: responsibility mapping rule for product, programmer, frontend, backend, fullstack, platform/DevOps, SRE/Ops, QA, security, data, AI/Agent, Git/GitHub, docs/rules, and release lanes.
 - `rules/security-review-standard.md`: threat-model rule for sensitive data, permissions, external-send, production, AI/Agent tools, and destructive actions.
@@ -72,10 +73,11 @@ Before splitting, identify the smallest sufficient context:
 7. Context strategy: same thread, handoff, worker thread, or `555`.
 8. Ledger strategy: none, response-level ledger, repo artifact, or required before execution.
 9. Independent review strategy: none, named verifier, QA lane, or `555`.
-10. Codex surface strategy: none, existing surface, extend rule/skill, script, automation, connector/MCP, worktree, or 555.
-11. Role/lane responsibility strategy: no split, primary lane, supporting lanes, verifier, and handoff receiver.
-12. Security review strategy: none, focused, Security/Compliance Lane, `555`, user-decision, or block.
-13. Browser flow strategy: none, required, QA Lane, verified, conditional, or block.
+10. Project topology strategy: none, graph-required, html-required, agents-planned, agents-running, or blocked.
+11. Codex surface strategy: none, existing surface, extend rule/skill, script, automation, connector/MCP, worktree, or 555.
+12. Role/lane responsibility strategy: no split, primary lane, supporting lanes, verifier, and handoff receiver.
+13. Security review strategy: none, focused, Security/Compliance Lane, `555`, user-decision, or block.
+14. Browser flow strategy: none, required, QA Lane, verified, conditional, or block.
 
 If the user's need is still fuzzy, customer-facing, or not stable enough to restate in plain language, route to `needs-solution-designer` before decomposing. Do not split work from an unstable need unless the split is explicitly for discovery.
 
@@ -109,13 +111,15 @@ Run this in order:
 7. Identify safety boundaries: Git, filesystem, network, production, app-store, external-send, user data, AI tools.
 8. If external model/tool/org patterns are being absorbed, translate them through `rules/codex-surface-governance-standard.md` before creating lanes.
 9. Map the task through `rules/role-lane-responsibility-standard.md` when product, engineering, fullstack, QA, security, SRE/Ops, AI/Agent, Git/GitHub, docs/rules, or release responsibility matters.
-10. Decide whether work can stay in the current thread or needs Git worktree isolation.
-11. If worktrees are needed, identify branch owner, base ref, assigned path, setup commands, shared files, commit/push policy, force policy, integration owner, and cleanup policy before dispatch.
-12. Split into lanes only where outputs have different owners or verification paths.
-13. Define each lane's input, allowed actions, forbidden actions, output, verifier, and next receiver.
-14. Define whether each lane updates a durable ledger or reports evidence to the controller.
-15. Decide whether `555` is required before, during, or after execution.
-16. Return a compact plan first; include copy-ready packets only when useful.
+10. If N agents, runtime cockpit, or interlocked testing is needed, map lanes into `rules/project-agent-topology-standard.md` nodes before dispatch.
+11. Decide whether work can stay in the current thread or needs Git worktree isolation.
+12. If worktrees are needed, identify branch owner, base ref, assigned path, setup commands, shared files, commit/push policy, force policy, integration owner, and cleanup policy before dispatch.
+13. Split into lanes only where outputs have different owners or verification paths.
+14. Define each lane's input, allowed actions, forbidden actions, output, verifier, and next receiver.
+15. Define each lane's test/evidence node and downstream receiver. If no test/evidence node exists, the lane is not dispatch-ready.
+16. Define whether each lane updates a durable ledger or reports evidence to the controller.
+17. Decide whether `555` is required before, during, or after execution.
+18. Return a compact plan first; include copy-ready packets only when useful.
 
 ## Lane Types
 
@@ -211,14 +215,24 @@ flow: XA / XB / general
 gate: G0 / G1 / G2 / G3 / G4 / G5 / G6 / none
 purpose:
 inputs:
+graph_node:
+test_node:
+evidence_nodes:
 codex_surface:
 source_pattern:
 role_lane:
 supporting_lanes:
+agent_id:
+delegation_tool:
+conversation_surface:
+conversation_open_target:
+claim_level:
 worktree:
 branch:
 base_ref:
 setup_commands:
+read_scope:
+write_scope:
 allowed_actions:
 forbidden_actions:
 allowed_git_actions:
@@ -236,6 +250,7 @@ ledger_update:
 independent_review:
 security_review:
 browser_flow:
+downstream_receiver:
 handoff_to:
 done_when:
 ```
@@ -256,6 +271,7 @@ Default output:
 - 是否需要分线程：
 - Ledger 策略：none / response-level / repo artifact / required before execution
 - Independent review：none / named verifier / QA gate / 555
+- Project topology：none / graph-required / html-required / agents-planned / agents-running / blocked
 - Codex surface：none / prompt-thread / AGENTS / config-hook / rule / skill / plugin / connector-MCP / script / automation / Browser / Chrome / Computer Use / worktree / 555
 - Role lane：none / product-spec / UX-design / frontend / backend / fullstack / platform-DevOps / SRE-Ops / QA / security / data / AI-Agent / Git-integration / docs-rule / release
 - Security review：none / focused / Security Lane / 555 / user-decision / block
@@ -295,8 +311,12 @@ When copy-ready worker packets are needed:
 允许：
 禁止：
 输入文件：
+Graph node：
+Test node：
+Evidence nodes：
 Codex surface：
 Role lane：
+Conversation surface：
 输出要求：
 验证命令：
 Ledger 更新要求：
@@ -315,6 +335,7 @@ For Git worktree-backed worker packets, load `rules/git-worktree-standard.md` an
 - Do not include market research, competitor research, advertising, or commercial sizing unless explicitly requested.
 - Do not open `555` for every small task.
 - Do not produce vague ownerless steps such as "optimize", "improve", or "handle later".
+- Do not dispatch a lane without a graph node, test/evidence node, and downstream receiver when project topology is active.
 - Do not import external model/tool/org patterns as lanes until they have a Codex surface and responsibility mapping.
 - Do not assign a subtask without a verifier.
 - Do not assign two writing workers to the same Git branch or worktree.

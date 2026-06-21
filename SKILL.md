@@ -18,6 +18,7 @@ Use `666` as the upstream Codex project workflow router. It decides what should 
 - how the Codex Maxxing local operating rule applies: durable thread, explicit memory, visible artifact, right-side review, completion oracle, heartbeat, and packaging fit;
 - whether a durable evidence ledger is required for long tasks, autonomous loops, milestone/release decisions, worker handoffs, or temporary artifact tracking;
 - whether independent review evidence is required before accepting a done, milestone, release, or `go / conditional go / no-go` claim;
+- whether `rules/project-agent-topology-standard.md` applies for real project runtime agent generation, node/test/evidence dependency maps, subagent conversation surfaces, and HTML project cockpit artifacts;
 - whether `rules/codex-surface-governance-standard.md` applies for translating external agent/model/tool patterns into Codex-only surfaces such as prompts, AGENTS, rules, skills, plugins, connectors, scripts, automations, hooks, worktrees, Browser, Chrome, Computer Use, or 555;
 - whether `rules/tool-portfolio-standard.md` applies for plugin, skill, MCP, connector, script, automation, or no-install decisions;
 - whether `rules/role-lane-responsibility-standard.md` applies for product, engineering, fullstack, frontend, backend, QA, security, SRE/Ops, AI/Agent, Git/GitHub, docs/rules, or release lane responsibility;
@@ -82,11 +83,12 @@ Before selecting a path, establish the smallest needed facts:
 10. Whether AI/Agent requirements apply: behavior contract, tool boundary, guardrails/evals, human approval points, monitoring, or incident handling.
 11. Whether `rules/durable-evidence-ledger-standard.md` applies.
 12. Whether completion requires independent review rather than implementer self-attestation.
-13. Whether external model/tool/org patterns must be researched and translated through `rules/codex-surface-governance-standard.md`.
-14. Whether `rules/tool-portfolio-standard.md` applies.
-15. Whether product/engineering role responsibility or lane ownership must be mapped through `rules/role-lane-responsibility-standard.md`.
-16. Whether `rules/security-review-standard.md` applies.
-17. Whether `rules/browser-flow-testing-standard.md` applies.
+13. Whether project runtime agent topology and HTML cockpit should be produced through `rules/project-agent-topology-standard.md`.
+14. Whether external model/tool/org patterns must be researched and translated through `rules/codex-surface-governance-standard.md`.
+15. Whether `rules/tool-portfolio-standard.md` applies.
+16. Whether product/engineering role responsibility or lane ownership must be mapped through `rules/role-lane-responsibility-standard.md`.
+17. Whether `rules/security-review-standard.md` applies.
+18. Whether `rules/browser-flow-testing-standard.md` applies.
 
 Trust actual file, Git, process, and artifact state over memory, screenshots, reports, or handoff packets.
 
@@ -184,6 +186,19 @@ Route effects:
 - If the request is only a small same-turn answer or one-file docs change, skip the ledger and state the normal completion evidence.
 
 Do not import heavy runtime assumptions from external systems: no required tmux, no hook daemon, no hidden state machine, no bypass-sandbox mode, and no automatic global setup mutation.
+
+## Project Agent Topology Gate
+
+Use `rules/project-agent-topology-standard.md` when a project should run as a coordinated graph of real or planned Codex agents, worker threads, tests, evidence nodes, blockers, handoffs, and an HTML cockpit.
+
+Route effects:
+
+- Generate agents from real project state, active XA/XB gate, role lanes, safety gates, and Git/worktree boundaries, not from a fixed org chart.
+- Every work node must have upstream inputs, downstream consumers, and test/evidence. A node without a test or evidence oracle cannot be marked `done`.
+- If real subagents are launched, record `agent_id`, `delegation_tool`, `delegation_result`, conversation surface, UI location, assigned nodes, write scope, last message, and next input.
+- If real subagents cannot be launched or embedded in the UI, output planned worker packets and mark conversation state as a mirrored summary, not a live chat.
+- Generate or update `project-agent-graph.json` and render it with `scripts/render-project-agent-graph.py` when the user asks for an HTML project map or cockpit.
+- Keep the HTML work-focused: project status, lane/node board, sticky agent conversation rail, tests/evidence, blockers, integration risk, warnings, and raw JSON.
 
 ## Codex Surface Governance Gate
 
@@ -417,6 +432,7 @@ Route effects:
 - Needs-solution-designer skill: fuzzy need clarification, confirmed/assumption separation, reuse judgment, and solution blueprint.
 - Work-splitter skill: decomposition, lane design, Agent grouping, subtask contracts, thread strategy, and 555-prep packets.
 - Durable evidence ledger standard: long-running work, autonomous loops, worker handoffs, milestone/release decisions, QA gates, and temporary artifact tracking.
+- Project agent topology standard: real project runtime agent generation, mutually-tested node graph, subagent conversation surface tracking, and HTML cockpit rendering.
 - Codex surface governance standard: translating external agent/model/tool patterns into Codex-only surfaces, deciding prompt vs AGENTS vs rule vs skill vs plugin vs connector/MCP vs script vs automation vs Browser/Chrome/Computer Use vs worktree vs 555.
 - Tool portfolio standard: plugin vs skill vs MCP/connector vs script vs automation vs no-install decisions, including source trust and permission checks.
 - Role lane responsibility standard: mapping product, programmer, frontend, backend, fullstack, DevOps, SRE/Ops, QA, security, data, AI/Agent, Git/GitHub, docs/rules, and release responsibilities into lanes, verifiers, and handoffs.
@@ -492,6 +508,7 @@ For routing decisions, answer compactly:
 - Codex Maxxing 适配：<artifact / Browser / durable memory / oracle / heartbeat / packaging / none>
 - Durable ledger：<none / response-level / repo artifact / required before execution>
 - Independent review：<none / 555 / QA gate / named verifier>
+- Project topology：<none / graph-required / html-required / agents-planned / agents-running / blocked>
 - Codex surface：<none / prompt-thread / AGENTS / config-hook / rule / skill / plugin / connector-MCP / script / automation / Browser / Chrome / Computer Use / worktree / 555>
 - Tool portfolio：<none / use-existing / extend-existing / install / package / skip>
 - Role lane：<none / product-spec / UX-design / frontend / backend / fullstack / platform-DevOps / SRE-Ops / QA / security / data / AI-Agent / Git-integration / docs-rule / release>
@@ -514,6 +531,8 @@ For controller-ready cross-thread text, use the available thread-dispatch or han
 - Do not start large work when context pressure is high; checkpoint or hand off first.
 - Do not package speculative, overlapping, sensitive, or poorly evidenced workflows.
 - Do not create subagents or automations unless the task genuinely requires them.
+- Do not claim project runtime agents are running or visible unless a real delegation tool returned an agent/thread id and the graph records the conversation surface.
+- Do not mark project graph nodes done when their test/evidence node is missing, failed, or only confidence language.
 - Do not turn audits into cleanup.
 - Do not mutate Git state unless the user explicitly opens that gate.
 - Do not paste secrets, raw knowledge-base rows, raw model prompts, private source registers, or sensitive overlay JSON.

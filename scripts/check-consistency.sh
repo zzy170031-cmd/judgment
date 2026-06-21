@@ -9,7 +9,19 @@ fail() {
   exit 1
 }
 
-python3 -m json.tool plugins/work-splitter/.codex-plugin/plugin.json >/dev/null
+if [[ -n "${PYTHON:-}" ]]; then
+  PYTHON_CMD=("$PYTHON")
+elif command -v python3 >/dev/null 2>&1; then
+  PYTHON_CMD=(python3)
+elif command -v python >/dev/null 2>&1; then
+  PYTHON_CMD=(python)
+elif command -v py >/dev/null 2>&1; then
+  PYTHON_CMD=(py -3)
+else
+  fail "python3, python, or py is required for json validation"
+fi
+
+"${PYTHON_CMD[@]}" -m json.tool plugins/work-splitter/.codex-plugin/plugin.json >/dev/null
 
 cmp -s SKILL.md skills/666/SKILL.md \
   || fail "root SKILL.md must match skills/666/SKILL.md"

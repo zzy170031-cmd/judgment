@@ -194,6 +194,7 @@ This repository is now a general Codex project workflow governance pack:
 - `555`: downstream five-agent execution loop. It handles major tasks, adversarial review, backend delegation, evidence verification, progress-watch escalation, context-pressure protection, and release-confidence review.
 - `rules/xa-xb-standard.md`: local XA/XB AI-assisted development standard.
 - `rules/durable-evidence-ledger-standard.md`: lightweight evidence ledger rule for long-running work, worker handoffs, autonomous loops, milestone/release decisions, QA gates, and temporary artifact tracking.
+- `rules/project-agent-topology-standard.md`: project runtime topology rule for generating real/planned Codex agents, interlocked node/test/evidence graphs, subagent conversation surface tracking, and HTML cockpit artifacts.
 - `rules/codex-surface-governance-standard.md`: Codex-only surface selection rule for absorbing external model, agent, Git/GitHub, and tool patterns into prompt/thread, AGENTS, rules, skills, plugins, connectors/MCP, scripts, automations, browser surfaces, worktrees, or 555.
 - `rules/tool-portfolio-standard.md`: lightweight portfolio rule for deciding plugin vs skill vs MCP/connector vs script vs automation vs no-install, including source trust, permission surface, and freshness checks.
 - `rules/role-lane-responsibility-standard.md`: responsibility mapping rule for product, frontend, backend, fullstack, platform/DevOps, SRE/Ops, QA, security, data, AI/Agent, Git/GitHub, docs/rules, and release lanes.
@@ -202,6 +203,7 @@ This repository is now a general Codex project workflow governance pack:
 - `rules/git-worktree-standard.md`: Git worktree isolation rule for parallel worker lanes, hotfixes during dirty work, clean review/test runs, branch ownership conflicts, and worktree cleanup.
 - `rules/quick-launcher-rule.md`: local quick launcher and auto-use routing rule for `/p`, `/n`, `/d`, `/r`, planning, needs, split, and review phrases.
 - `rules/skill-quality-standard.md`: local quality standard for creating, splitting, auditing, or improving skills.
+- `scripts/render-project-agent-graph.py`: deterministic renderer for project-agent graph JSON into a standalone HTML cockpit with status cards, lane board, warnings, raw JSON, and a right-side agent conversation rail.
 - `plugins/work-splitter`: local plugin source for `work-splitter`, including `.codex-plugin/plugin.json`.
 
 They are designed to work together while staying independent at runtime. `666` routes, `work-planner` plans the full path, `needs-solution-designer` clarifies fuzzy needs, `work-splitter` decomposes clear work, XA/XB defines the development gates, and `555` provides evidence assurance when risk justifies the heavier loop.
@@ -256,6 +258,7 @@ Use `555` when:
 - Adds a Browser flow gate for web UI, local app previews, visual artifacts, design-to-code work, and interaction correctness.
 - Adds a Git worktree gate for parallel worker isolation, dirty-state preservation, branch ownership conflicts, and safe lifecycle cleanup.
 - Adds a dirty-worktree ownership checkpoint before cleanup, commit, reset, packaging, or sync actions.
+- Adds a project agent topology gate for runtime agent generation, every-step test/evidence coupling, live/planned conversation surface tracking, and HTML cockpit visualization.
 
 ### Evolution Boundary
 
@@ -267,6 +270,7 @@ When improving this pack from external workflow systems:
 - Prefer tool-portfolio decisions over "install everything" behavior; distinguish skill, plugin, MCP/connector, script, automation, and no-install.
 - Translate outside model/tool/company practices into Codex surfaces first; Judgment stays Codex-only at execution time.
 - Split product and engineering work by responsibility and verification path, not job title alone.
+- For project runtime cockpits, require every work node to have a test/evidence node and record real subagent conversation surfaces without pretending summaries are live chats.
 - Do not import runtime assumptions such as tmux sessions, hook daemons, hidden `.omx` state, or bypass-sandbox execution modes.
 - Do not duplicate a full external skill catalog when `666`, `work-planner`, `needs-solution-designer`, `work-splitter`, and `555` already cover the role.
 
@@ -305,6 +309,7 @@ rules/
   browser-flow-testing-standard.md # Browser-visible UI and interaction verification rule
   codex-surface-governance-standard.md # Codex surface selection and external-pattern intake rule
   durable-evidence-ledger-standard.md # Lightweight ledger and evidence-closure rule
+  project-agent-topology-standard.md # Project runtime agent topology and HTML cockpit rule
   role-lane-responsibility-standard.md # Product/engineering lane responsibility rule
   security-review-standard.md # Lightweight threat-model rule
   tool-portfolio-standard.md   # Plugin/skill/MCP/script/automation selection rule
@@ -331,6 +336,12 @@ skills/
   555/
     SKILL.md                  # Codex project five-agent evidence loop
     agents/openai.yaml
+scripts/
+  check-consistency.sh
+  render-project-agent-graph.py
+  sync-plugin-skills.sh
+templates/
+  project-agent-graph.example.json
 plugins/
   work-splitter/
     .codex-plugin/plugin.json # Local plugin manifest

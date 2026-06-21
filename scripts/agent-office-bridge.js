@@ -1,0 +1,562 @@
+const fs = require("node:fs");
+const http = require("node:http");
+const path = require("node:path");
+const url = require("node:url");
+const vm = require("node:vm");
+
+const args = process.argv.slice(2);
+
+function argValue(name, fallback) {
+  const index = args.indexOf(name);
+  if (index >= 0 && args[index + 1]) return args[index + 1];
+  return fallback;
+}
+
+const root = path.resolve(argValue("--root", process.cwd()));
+const port = Number(argValue("--port", "8787"));
+const host = argValue("--host", "127.0.0.1");
+const runtimeDir = path.join(root, "agent-office", "runtime");
+const requestsDir = path.join(runtimeDir, "requests");
+const eventsPath = path.join(runtimeDir, "events.jsonl");
+const statePath = path.join(runtimeDir, "runtime-state.json");
+const statusPath = path.join(runtimeDir, "bridge-status.json");
+
+fs.mkdirSync(requestsDir, { recursive: true });
+
+function contentType(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  return {
+    ".html": "text/html; charset=utf-8",
+    ".css": "text/css; charset=utf-8",
+    ".js": "application/javascript; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".svg": "image/svg+xml",
+    ".ico": "image/x-icon",
+    ".txt": "text/plain; charset=utf-8",
+    ".md": "text/markdown; charset=utf-8"
+  }[ext] || "application/octet-stream";
+}
+
+function sendJson(res, status, payload) {
+  const body = Buffer.from(JSON.stringify(payload, null, 2), "utf8");
+  res.writeHead(status, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Content-Length": body.length,
+    "Cache-Control": "no-store",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
+  });
+  res.end(body);
+}
+
+function sendText(res, status, text) {
+  const body = Buffer.from(text, "utf8");
+  res.writeHead(status, {
+    "Content-Type": "text/plain; charset=utf-8",
+    "Content-Length": body.length,
+    "Cache-Control": "no-store"
+  });
+  res.end(body);
+}
+
+function readBody(req, limitBytes = 1024 * 1024) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let total = 0;
+    req.on("data", (chunk) => {
+      total += chunk.length;
+      if (total > limitBytes) {
+        reject(new Error("request body too large"));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    req.on("error", reject);
+  });
+}
+
+function safeId(value) {
+  const base = String(value || "")
+    .replace(/[^a-zA-Z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .slice(0, 80);
+  if (base) return base;
+  const stamp = new Date().toISOString().replace(/[^0-9]/g, "").slice(0, 14);
+  return `codex-${stamp}-${Math.random().toString(16).slice(2, 8)}`;
+}
+
+function appendEvent(event) {
+  fs.appendFileSync(eventsPath, `${JSON.stringify(event)}\n`, "utf8");
+}
+
+function defaultRuntimeState() {
+  return {
+    status: "running",
+    activeRun: null,
+    currentNode: "controller",
+    currentLane: "controller",
+    laneProgress: {},
+    blockers: [],
+    evidence: [],
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function loadRuntimeState() {
+  if (!fs.existsSync(statePath)) return defaultRuntimeState();
+  try {
+    return { ...defaultRuntimeState(), ...JSON.parse(fs.readFileSync(statePath, "utf8")) };
+  } catch {
+    return defaultRuntimeState();
+  }
+}
+
+function saveRuntimeState(state) {
+  const next = { ...state, updatedAt: new Date().toISOString() };
+  fs.writeFileSync(statePath, JSON.stringify(next, null, 2), "utf8");
+  return next;
+}
+
+function canonicalLane(value) {
+  const raw = String(value || "").trim().toLowerCase();
+  const map = {
+    "agent office": "frontend",
+    "agent-office": "frontend",
+    "agent 办公室": "frontend",
+    "agent 鍔炲叕瀹?": "frontend",
+    overview: "controller",
+    "总览": "controller",
+    "鎬昏": "controller",
+    topology: "splitter",
+    "项目拓扑": "splitter",
+    "椤圭洰鎷撴墤": "splitter",
+    split: "splitter",
+    splitter: "splitter",
+    "工作拆分": "splitter",
+    "宸ヤ綔鎷嗗垎": "splitter",
+    planning: "planning",
+    plan: "planning",
+    "规划中心": "planning",
+    "瑙勫垝涓績": "planning",
+    frontend: "frontend",
+    ui: "frontend",
+    ux: "frontend",
+    backend: "backend",
+    api: "backend",
+    db: "backend",
+    qa: "qa",
+    test: "qa",
+    "测试证据": "qa",
+    "娴嬭瘯璇佹嵁": "qa",
+    review: "review",
+    "555": "review",
+    "555 review": "review",
+    "555 审查": "review",
+    "555 瀹℃煡": "review",
+    release: "release",
+    worktree: "backend",
+    git: "backend",
+    controller: "controller"
+  };
+  return map[raw] || raw || "controller";
+}
+
+function writeStatus(status) {
+  fs.writeFileSync(statusPath, JSON.stringify(status, null, 2), "utf8");
+}
+
+function normalizeEvent(payload) {
+  const now = new Date().toISOString();
+  const event = {
+    id: safeId(payload.id || `event-${now}`),
+    time: now,
+    source: String(payload.source || "Codex"),
+    agentId: String(payload.agentId || payload.agent || "controller"),
+    agent: String(payload.agent || payload.agentName || payload.agentId || "Controller"),
+    lane: canonicalLane(payload.lane || payload.module || "controller"),
+    module: String(payload.module || "总览"),
+    node: String(payload.node || payload.agentId || payload.lane || "controller"),
+    status: String(payload.status || "running"),
+    progress: Number.isFinite(Number(payload.progress)) ? Math.max(0, Math.min(100, Number(payload.progress))) : null,
+    text: String(payload.text || payload.message || "Codex 运行事件已更新"),
+    tag: String(payload.tag || "运行事件"),
+    tone: String(payload.tone || "cyan"),
+    evidenceId: payload.evidenceId ? String(payload.evidenceId) : null,
+    requestId: payload.requestId ? String(payload.requestId) : null
+  };
+  return event;
+}
+
+function applyRuntimeEvent(event) {
+  const state = loadRuntimeState();
+  if (event.status === "blocked" || event.status === "failed") {
+    state.status = event.status;
+  } else if (["completed", "executed", "resolved", "pass", "passed"].includes(event.status)) {
+    state.status = "completed";
+  } else {
+    state.status = "running";
+  }
+  state.currentNode = event.node;
+  state.currentLane = event.lane;
+  state.activeRun = {
+    requestId: event.requestId || state.activeRun?.requestId || null,
+    agent: event.agent,
+    agentId: event.agentId,
+    module: event.module,
+    node: event.node,
+    lane: event.lane,
+    status: event.status,
+    progress: event.progress,
+    text: event.text,
+    time: event.time
+  };
+  if (event.progress !== null) {
+    state.laneProgress[event.lane] = {
+      progress: event.progress,
+      status: event.status,
+      tone: event.tone,
+      updatedAt: event.time
+    };
+  }
+  if (event.status === "blocked") {
+    state.blockers = [
+      {
+        id: event.id,
+        lane: event.lane,
+        node: event.node,
+        agent: event.agent,
+        text: event.text,
+        time: event.time
+      },
+      ...(state.blockers || []).filter((item) => item.id !== event.id)
+    ].slice(0, 8);
+  } else if (["completed", "executed", "resolved", "pass", "passed"].includes(event.status)) {
+    state.blockers = (state.blockers || []).filter((item) => (
+      item.lane !== event.lane || (event.node && item.node !== event.node)
+    ));
+  }
+  if (event.evidenceId) {
+    state.evidence = [
+      {
+        id: event.evidenceId,
+        sourceEvent: event.id,
+        agent: event.agent,
+        text: event.text,
+        time: event.time
+      },
+      ...(state.evidence || []).filter((item) => item.id !== event.evidenceId)
+    ].slice(0, 12);
+  }
+  return saveRuntimeState(state);
+}
+
+function recentEvents(limit = 20) {
+  if (!fs.existsSync(eventsPath)) return [];
+  return fs.readFileSync(eventsPath, "utf8")
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .slice(-limit)
+    .map((line) => {
+      try {
+        return JSON.parse(line);
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean)
+    .reverse();
+}
+
+function runCheck(label, file) {
+  const startedAt = Date.now();
+  try {
+    const source = fs.readFileSync(path.join(root, file), "utf8");
+    new vm.Script(source, { filename: file, displayErrors: true });
+    return {
+      label,
+      command: `vm.Script ${file}`,
+      status: "pass",
+      durationMs: Date.now() - startedAt,
+      output: "syntax parsed"
+    };
+  } catch (error) {
+    return {
+      label,
+      command: `vm.Script ${file}`,
+      status: "fail",
+      durationMs: Date.now() - startedAt,
+      output: String(error.message || error).trim()
+    };
+  }
+}
+
+function runStaticChecks() {
+  const indexPath = path.join(root, "agent-office", "index.html");
+  const appPath = path.join(root, "agent-office", "app.js");
+  const mockPath = path.join(root, "agent-office", "mockData.js");
+  const stylesPath = path.join(root, "agent-office", "styles.css");
+  const checks = [
+    runCheck("app.js syntax", path.relative(root, appPath)),
+    runCheck("mockData.js syntax", path.relative(root, mockPath))
+  ];
+  const resources = [indexPath, appPath, mockPath, stylesPath].map((file) => ({
+    label: path.relative(root, file).replace(/\\/g, "/"),
+    status: fs.existsSync(file) ? "pass" : "fail"
+  }));
+  const index = fs.existsSync(indexPath) ? fs.readFileSync(indexPath, "utf8") : "";
+  checks.push({
+    label: "resource version",
+    command: "index.html contains office-v10",
+    status: index.includes("office-v10") ? "pass" : "fail",
+    durationMs: 0,
+    output: index.includes("office-v10") ? "office-v10 present" : "office-v10 missing"
+  });
+  return {
+    kind: "agent-office-validation",
+    status: checks.every((item) => item.status === "pass") && resources.every((item) => item.status === "pass") ? "pass" : "fail",
+    checks,
+    resources
+  };
+}
+
+function shouldExecuteAllowlisted(requestText) {
+  const text = String(requestText || "").toLowerCase();
+  return /验证|校验|检查|测试|验收|语法|资源|状态|check|validate|test|syntax|resource|status|js/.test(text);
+}
+
+function recentRequests() {
+  if (!fs.existsSync(requestsDir)) return [];
+  return fs.readdirSync(requestsDir)
+    .filter((name) => name.endsWith(".json"))
+    .map((name) => {
+      const file = path.join(requestsDir, name);
+      try {
+        return JSON.parse(fs.readFileSync(file, "utf8"));
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean)
+    .sort((a, b) => String(b.receivedAt || "").localeCompare(String(a.receivedAt || "")))
+    .slice(0, 12);
+}
+
+async function handleCodexRequest(req, res) {
+  let payload;
+  try {
+    payload = JSON.parse(await readBody(req));
+  } catch (error) {
+    sendJson(res, 400, { ok: false, status: "bad_request", statusText: error.message });
+    return;
+  }
+
+  const id = safeId(payload.id);
+  const requestText = String(payload.request || "").trim();
+  const record = {
+    ...payload,
+    id,
+    request: requestText,
+    receivedAt: new Date().toISOString(),
+    bridge: {
+      name: "judgment-agent-office-bridge",
+      mode: "local-allowlist",
+      endpoint: "/codex/request"
+    }
+  };
+
+  if (!requestText) {
+    record.status = "rejected";
+    record.statusText = "空需求已拒绝";
+  } else if (shouldExecuteAllowlisted(requestText)) {
+    const execution = runStaticChecks();
+    record.status = execution.status === "pass" ? "executed" : "failed";
+    record.statusText = execution.status === "pass" ? "已执行安全验证" : "安全验证失败";
+    record.execution = execution;
+  } else {
+    record.status = "queued";
+    record.statusText = "已进入本地 Codex 请求队列，等待 Codex 线程读取执行";
+    record.execution = {
+      kind: "manual-codex-queue",
+      status: "pending",
+      note: "Freeform requirements are persisted for Codex-side execution instead of being run directly from HTTP."
+    };
+  }
+
+  const requestPath = path.join(requestsDir, `${id}.json`);
+  fs.writeFileSync(requestPath, JSON.stringify(record, null, 2), "utf8");
+  const requestEvent = normalizeEvent({
+    id,
+    source: "HTML",
+    agentId: record.selectedAgent?.id || "controller",
+    agent: record.selectedAgent?.name || "Controller",
+    lane: "controller",
+    status: record.status,
+    module: record.module,
+    requestId: id,
+    progress: record.status === "executed" ? 100 : 10,
+    text: record.status === "executed" ? record.statusText : `${record.statusText}：${requestText}`,
+    tag: record.status === "executed" ? "验证完成" : "需求进入队列",
+    tone: record.status === "executed" ? "green" : "purple"
+  });
+  appendEvent(requestEvent);
+  applyRuntimeEvent(requestEvent);
+  writeStatus({
+    status: "running",
+    updatedAt: new Date().toISOString(),
+    lastRequest: {
+      id,
+      status: record.status,
+      statusText: record.statusText
+    },
+    recentRequests: recentRequests().map((item) => ({
+      id: item.id,
+      status: item.status,
+      statusText: item.statusText,
+      module: item.module,
+      receivedAt: item.receivedAt
+    }))
+  });
+
+  sendJson(res, 200, {
+    ok: record.status !== "rejected",
+    requestId: id,
+    status: record.status,
+    statusText: record.statusText,
+    execution: record.execution,
+    requestPath: path.relative(root, requestPath).replace(/\\/g, "/")
+  });
+}
+
+async function handleCodexEvent(req, res) {
+  let payload;
+  try {
+    payload = JSON.parse(await readBody(req));
+  } catch (error) {
+    sendJson(res, 400, { ok: false, status: "bad_request", statusText: error.message });
+    return;
+  }
+  const event = normalizeEvent(payload);
+  appendEvent(event);
+  const state = applyRuntimeEvent(event);
+  sendJson(res, 200, {
+    ok: true,
+    status: "accepted",
+    event,
+    state
+  });
+}
+
+function handleStatus(_req, res) {
+  sendJson(res, 200, {
+    ok: true,
+    service: "judgment-agent-office-bridge",
+    status: "running",
+    root,
+    runtimeDir: path.relative(root, runtimeDir).replace(/\\/g, "/"),
+    updatedAt: new Date().toISOString(),
+    recentRequests: recentRequests().map((item) => ({
+      id: item.id,
+      status: item.status,
+      statusText: item.statusText,
+      module: item.module,
+      selectedAgent: item.selectedAgent,
+      receivedAt: item.receivedAt
+    })),
+    recentEvents: recentEvents(8)
+  });
+}
+
+function handleState(_req, res) {
+  sendJson(res, 200, {
+    ok: true,
+    service: "judgment-agent-office-bridge",
+    state: loadRuntimeState(),
+    recentEvents: recentEvents(20),
+    recentRequests: recentRequests().map((item) => ({
+      id: item.id,
+      status: item.status,
+      statusText: item.statusText,
+      module: item.module,
+      selectedAgent: item.selectedAgent,
+      receivedAt: item.receivedAt
+    }))
+  });
+}
+
+function serveStatic(req, res, pathname) {
+  let relative = decodeURIComponent(pathname).replace(/^\/+/, "");
+  if (!relative) relative = "agent-office/index.html";
+  const target = path.resolve(root, relative);
+  if (!target.startsWith(root)) {
+    sendText(res, 403, "Forbidden");
+    return;
+  }
+  let filePath = target;
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+    filePath = path.join(filePath, "index.html");
+  }
+  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+    sendText(res, 404, "Not Found");
+    return;
+  }
+  const body = fs.readFileSync(filePath);
+  res.writeHead(200, {
+    "Content-Type": contentType(filePath),
+    "Content-Length": body.length,
+    "Cache-Control": "no-store"
+  });
+  res.end(body);
+}
+
+const server = http.createServer((req, res) => {
+  const parsed = url.parse(req.url || "/");
+  const pathname = parsed.pathname || "/";
+  if (req.method === "OPTIONS") {
+    sendJson(res, 200, { ok: true });
+    return;
+  }
+  if (req.method === "POST" && pathname === "/codex/request") {
+    handleCodexRequest(req, res).catch((error) => {
+      sendJson(res, 500, { ok: false, status: "error", statusText: error.message });
+    });
+    return;
+  }
+  if (req.method === "POST" && pathname === "/codex/event") {
+    handleCodexEvent(req, res).catch((error) => {
+      sendJson(res, 500, { ok: false, status: "error", statusText: error.message });
+    });
+    return;
+  }
+  if (req.method === "GET" && pathname === "/codex/state") {
+    handleState(req, res);
+    return;
+  }
+  if (req.method === "GET" && pathname === "/codex/status") {
+    handleStatus(req, res);
+    return;
+  }
+  if (req.method === "GET") {
+    serveStatic(req, res, pathname);
+    return;
+  }
+  sendText(res, 405, "Method Not Allowed");
+});
+
+server.listen(port, host, () => {
+  const status = {
+    status: "running",
+    service: "judgment-agent-office-bridge",
+    root,
+    url: `http://${host}:${port}/agent-office/index.html`,
+    endpoint: `http://${host}:${port}/codex/request`,
+    startedAt: new Date().toISOString()
+  };
+  writeStatus(status);
+  console.log(`${status.service} listening on ${status.url}`);
+});

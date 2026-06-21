@@ -21,10 +21,11 @@ This skill combines three layers:
 2. Codex Plan mode alignment: collect unresolved choices, avoid premature execution, and produce an approval-ready plan.
 3. `work-splitter`: split the confirmed work into lanes, Agent groups, gates, thread strategy, and 555 escalation packets.
 4. Durable evidence planning: decide whether `rules/durable-evidence-ledger-standard.md` is needed for long-running work, worker reports, QA gates, or release/milestone closure.
-5. Codex surface planning: decide where borrowed or durable behavior should live inside Codex: prompt/thread, `AGENTS.md`, rule, skill, plugin, connector/MCP, script, automation, Browser, Chrome, Computer Use, worktree, hook/config, or 555.
-6. Tool portfolio planning: decide whether the task needs an existing tool, an extended skill, a new skill, a plugin, an MCP/connector, a script, an automation, or no install.
-7. Role/lane responsibility planning: decide whether product, UX, frontend, backend, fullstack, platform/DevOps, SRE/Ops, QA, security, data, AI/Agent, Git/GitHub, docs/rules, or release responsibility must be split or verified separately.
-8. Security and browser-flow planning: decide whether `rules/security-review-standard.md` or `rules/browser-flow-testing-standard.md` must be part of the execution gate.
+5. Project topology planning: decide whether the project needs real/planned agents, node/test/evidence graph, conversation surfaces, and an HTML cockpit.
+6. Codex surface planning: decide where borrowed or durable behavior should live inside Codex: prompt/thread, `AGENTS.md`, rule, skill, plugin, connector/MCP, script, automation, Browser, Chrome, Computer Use, worktree, hook/config, or 555.
+7. Tool portfolio planning: decide whether the task needs an existing tool, an extended skill, a new skill, a plugin, an MCP/connector, a script, an automation, or no install.
+8. Role/lane responsibility planning: decide whether product, UX, frontend, backend, fullstack, platform/DevOps, SRE/Ops, QA, security, data, AI/Agent, Git/GitHub, docs/rules, or release responsibility must be split or verified separately.
+9. Security and browser-flow planning: decide whether `rules/security-review-standard.md` or `rules/browser-flow-testing-standard.md` must be part of the execution gate.
 
 It does not replace:
 
@@ -32,6 +33,7 @@ It does not replace:
 - `555`: the evidence and adversarial assurance loop for high-risk milestones.
 - `XA/XB`: the development standards in `~/.codex/rules/xa-xb-standard.md`.
 - `rules/durable-evidence-ledger-standard.md`: the lightweight evidence ledger standard for long tasks and acceptance decisions.
+- `rules/project-agent-topology-standard.md`: the local standard for project runtime agent generation, tested node graphs, subagent conversation surface tracking, and HTML cockpit rendering.
 - `rules/codex-surface-governance-standard.md`: the local standard for translating external agent/model/tool patterns into Codex-only surfaces.
 - `rules/tool-portfolio-standard.md`: the local standard for plugin, skill, MCP/connector, script, automation, and no-install decisions.
 - `rules/role-lane-responsibility-standard.md`: the local standard for mapping product, programmer, fullstack, frontend, backend, QA, security, SRE/Ops, AI/Agent, Git/GitHub, docs/rules, and release work into lanes and verifiers.
@@ -136,6 +138,20 @@ Tool portfolio gate
   -> use existing / extend / install / package / skip
 ```
 
+When the user asks for N agents, project runtime, project cockpit, node graph, HTML project map, or every step to be tested and interlocked, add this gate:
+
+```text
+Project topology gate
+  -> current project gate
+  -> generated agents: real / planned / blocked
+  -> node graph source: response / project-agent-graph.json / ledger
+  -> each work node's test/evidence oracle
+  -> subagent conversation surfaces
+  -> write scopes and integration owner
+  -> HTML cockpit artifact
+  -> graph validation command
+```
+
 When the user asks to absorb external model/tool/org practices, or when a planning decision must persist beyond the thread, add this gate:
 
 ```text
@@ -179,6 +195,8 @@ Identify:
 - whether the task is XA, XB, or general;
 - whether AI/Agent behavior is involved;
 - whether the work may outlive the current thread or need durable evidence;
+- whether the project needs a runtime agent topology and HTML cockpit;
+- whether every planned step has a test/evidence node and a downstream receiver;
 - whether external model/tool/org patterns are being borrowed and need Codex-only translation;
 - which Codex surface should own any durable behavior;
 - whether the request is really a tool-selection or tool-packaging decision;
@@ -255,6 +273,7 @@ End with:
 - evidence required for completion;
 - ledger requirement and location, or why no ledger is needed;
 - independent review requirement, or why self-review is enough;
+- project topology decision, including graph JSON/HTML paths or why no topology is needed;
 - Codex surface decision, or why no durable surface change is needed;
 - tool portfolio decision, or why no new tool is needed;
 - role/lane responsibility decision, or why no split is needed;
@@ -315,6 +334,7 @@ Default:
 - 是否需要分线程：
 - Durable ledger：none / response-level / repo artifact / required before execution
 - Independent review：none / named verifier / QA gate / 555
+- Project topology：none / graph-required / html-required / agents-planned / agents-running / blocked
 - Codex surface：none / prompt-thread / AGENTS / config-hook / rule / skill / plugin / connector-MCP / script / automation / Browser / Chrome / Computer Use / worktree / 555
 - Tool portfolio：none / use-existing / extend-existing / install / package / skip
 - Role lane：none / product-spec / UX-design / frontend / backend / fullstack / platform-DevOps / SRE-Ops / QA / security / data / AI-Agent / Git-integration / docs-rule / release
@@ -373,5 +393,6 @@ When ready for execution:
 - Do not call `555` for every planning task.
 - Do not let `needs-solution-designer` keep asking forever when the remaining uncertainty is narrow and a bounded plan is safe.
 - Do not let `work-splitter` create ownerless lanes without verification.
+- Do not plan N agents or an HTML cockpit without a graph source, tests/evidence, conversation-surface truth, and integration owner where needed.
 - Do not import external model/tool/org practices into Judgment without Codex surface translation and role/lane responsibility mapping when they affect execution.
 - Do not publish, deploy, submit, delete, reset, send, or touch production/user data from planning.
