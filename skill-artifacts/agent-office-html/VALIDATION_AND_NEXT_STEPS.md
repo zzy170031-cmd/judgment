@@ -22,6 +22,8 @@ GET /codex/state -> 200
 - 主内容底部保留唯一 `Codex 需求入口`。
 - 右侧 Agent 状态栏不再把需求输入、Agent 对话和 Worktree 堆叠在一起。
 - 页面可以接收 bridge 事件并更新运行条、泳道进度、活动动态、Evidence Wall 和 Agent 状态。
+- 页面契约已经明确 Judgment Controller 是主控调度 Agent；HTML 展示 Controller 的项目全览和决策，不直接执行项目动作。
+- Markdown / HTML / Loop 三层关系已经明确：Markdown 定义规则，Codex 执行 loop，HTML 显示状态和请求队列。
 - 页面仍保持安全边界：不从 HTML 直接执行任意 Codex/Git/文件动作。
 
 ## 人工验收截图
@@ -76,6 +78,8 @@ agent-office/runtime-schema.json
 - 每个卡点写入 `blocked`。
 - 每个卡点关闭时写入 `resolved`。
 - 每个可交付节点写入 Evidence Wall。
+- 每个 loop 事件写入 Controller sees / decision / delegatesTo / waitsFor / stopCondition。
+- 每个可持续推进的 loop 先通过 `rules/loop-engineering-standard.md` 的 readiness gate。
 
 ## 推荐下一步
 

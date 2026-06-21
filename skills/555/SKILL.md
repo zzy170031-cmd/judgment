@@ -15,6 +15,9 @@ Use the local XA/XB standard as the default development gate reference when prod
 
 - Local standard: `~/.codex/rules/xa-xb-standard.md`
 - Durable evidence standard: `rules/durable-evidence-ledger-standard.md` when present in the current repo, or the equivalent local rule path when installed.
+- Authority boundary standard: `rules/authority-boundary-standard.md` when Markdown, HTML, bridge queues, Codex execution, scripts/tests, and review/acceptance authority are mixed.
+- Controller state-machine standard: `rules/controller-state-machine-standard.md` when Judgment is acting as the main Controller for route, evidence, verification, persistence, and stop/next decisions.
+- Loop engineering standard: `rules/loop-engineering-standard.md` when repeated Codex work, Agent Office visibility, automation, heartbeat, worker cycle, or project-development loop readiness matters.
 - Tool portfolio standard: `rules/tool-portfolio-standard.md` when choosing, installing, enabling, or reviewing plugins, skills, MCP servers, connectors, scripts, or automations.
 - Security review standard: `rules/security-review-standard.md` for auth, permissions, payments, user data, secrets, external-send, production, AI/Agent tools, and destructive actions.
 - Browser flow testing standard: `rules/browser-flow-testing-standard.md` for web UI, local previews, visual artifacts, responsive layout, and interaction flows.
@@ -33,6 +36,8 @@ Use exactly five seats for non-trivial project work:
 5. `A4 证据验证席`: general-purpose verifier / Audit Specialist; must inspect real files, logs, tests, or artifacts with read/search before final categorization.
 
 Core Challenger behavior belongs mainly to `A2` and `A3`; Audit Specialist behavior belongs mainly to `A4`. The main thread never treats its own judgment as sufficient for a milestone claim.
+
+When `rules/loop-engineering-standard.md` applies, `A0` is also the `Judgment Controller`: it must state what it sees across the project and skill subflows, what it decides, who receives the next task, what evidence it waits for, and which stop condition prevents uncontrolled looping. When `rules/controller-state-machine-standard.md` applies, `A0` must also name the current state: intake, orient, plan, split, route, execute, verify, review, persist, or next/stop.
 
 ## First Gate: Live State
 
@@ -368,6 +373,7 @@ A0 may close the loop only after:
 - The active route and allowed scope are stated.
 - XA/XB flow and active gate are stated when product/game/AI/release work is involved.
 - AI/Agent behavior, tool, guardrail, human-approval, and monitoring requirements are checked when relevant.
+- Loop Engineering readiness and the Judgment Controller route are recorded when repeated or visible loop behavior is involved.
 - Delegated jobs have returned actual results, not pending notifications.
 - Review claims were checked against files/tests/artifacts.
 - Ledger-backed tasks have final status, evidence, temporary artifact disposition, risks, and next gate recorded.

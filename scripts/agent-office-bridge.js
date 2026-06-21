@@ -128,22 +128,18 @@ function canonicalLane(value) {
   const map = {
     "agent office": "frontend",
     "agent-office": "frontend",
-    "agent 办公室": "frontend",
-    "agent 鍔炲叕瀹?": "frontend",
+    "\u4ee3\u7406\u529e\u516c\u5ba4": "frontend",
+    "\u529e\u516c\u5ba4": "frontend",
     overview: "controller",
-    "总览": "controller",
-    "鎬昏": "controller",
+    "\u603b\u89c8": "controller",
     topology: "splitter",
-    "项目拓扑": "splitter",
-    "椤圭洰鎷撴墤": "splitter",
+    "\u9879\u76ee\u62d3\u6251": "splitter",
     split: "splitter",
     splitter: "splitter",
-    "工作拆分": "splitter",
-    "宸ヤ綔鎷嗗垎": "splitter",
+    "\u5de5\u4f5c\u62c6\u5206": "splitter",
     planning: "planning",
     plan: "planning",
-    "规划中心": "planning",
-    "瑙勫垝涓績": "planning",
+    "\u89c4\u5212\u4e2d\u5fc3": "planning",
     frontend: "frontend",
     ui: "frontend",
     ux: "frontend",
@@ -152,13 +148,11 @@ function canonicalLane(value) {
     db: "backend",
     qa: "qa",
     test: "qa",
-    "测试证据": "qa",
-    "娴嬭瘯璇佹嵁": "qa",
+    "\u6d4b\u8bd5\u8bc1\u636e": "qa",
     review: "review",
     "555": "review",
     "555 review": "review",
-    "555 审查": "review",
-    "555 瀹℃煡": "review",
+    "555 \u5ba1\u67e5": "review",
     release: "release",
     worktree: "backend",
     git: "backend",
@@ -166,7 +160,6 @@ function canonicalLane(value) {
   };
   return map[raw] || raw || "controller";
 }
-
 function writeStatus(status) {
   fs.writeFileSync(statusPath, JSON.stringify(status, null, 2), "utf8");
 }
@@ -180,19 +173,20 @@ function normalizeEvent(payload) {
     agentId: String(payload.agentId || payload.agent || "controller"),
     agent: String(payload.agent || payload.agentName || payload.agentId || "Controller"),
     lane: canonicalLane(payload.lane || payload.module || "controller"),
-    module: String(payload.module || "总览"),
+    module: String(payload.module || "Overview"),
     node: String(payload.node || payload.agentId || payload.lane || "controller"),
     status: String(payload.status || "running"),
     progress: Number.isFinite(Number(payload.progress)) ? Math.max(0, Math.min(100, Number(payload.progress))) : null,
-    text: String(payload.text || payload.message || "Codex 运行事件已更新"),
-    tag: String(payload.tag || "运行事件"),
+    text: String(payload.text || payload.message || "Codex runtime event updated"),
+    tag: String(payload.tag || "runtime-event"),
     tone: String(payload.tone || "cyan"),
     evidenceId: payload.evidenceId ? String(payload.evidenceId) : null,
-    requestId: payload.requestId ? String(payload.requestId) : null
+    requestId: payload.requestId ? String(payload.requestId) : null,
+    controller: payload.controller && typeof payload.controller === "object" ? payload.controller : null,
+    loop: payload.loop && typeof payload.loop === "object" ? payload.loop : null
   };
   return event;
 }
-
 function applyRuntimeEvent(event) {
   const state = loadRuntimeState();
   if (event.status === "blocked" || event.status === "failed") {
@@ -327,7 +321,7 @@ function runStaticChecks() {
 
 function shouldExecuteAllowlisted(requestText) {
   const text = String(requestText || "").toLowerCase();
-  return /验证|校验|检查|测试|验收|语法|资源|状态|check|validate|test|syntax|resource|status|js/.test(text);
+  return /\u9a8c\u8bc1|\u6821\u9a8c|\u68c0\u67e5|\u6d4b\u8bd5|\u9a8c\u6536|check|validate|test|syntax|resource|status|js|browser|evidence/.test(text);
 }
 
 function recentRequests() {
@@ -367,20 +361,29 @@ async function handleCodexRequest(req, res) {
       name: "judgment-agent-office-bridge",
       mode: "local-allowlist",
       endpoint: "/codex/request"
+    },
+    controller: payload.controller || {
+      agentId: "judgment-controller",
+      role: "Judgment Controller",
+      expectedDecision: "intake -> orient -> plan -> route"
+    },
+    loop: payload.loop || {
+      readiness: "manual-first",
+      stopCondition: "Codex-side review required"
     }
   };
 
   if (!requestText) {
     record.status = "rejected";
-    record.statusText = "空需求已拒绝";
+    record.statusText = "Empty request rejected";
   } else if (shouldExecuteAllowlisted(requestText)) {
     const execution = runStaticChecks();
     record.status = execution.status === "pass" ? "executed" : "failed";
-    record.statusText = execution.status === "pass" ? "已执行安全验证" : "安全验证失败";
+    record.statusText = execution.status === "pass" ? "Static validation executed" : "Static validation failed";
     record.execution = execution;
   } else {
     record.status = "queued";
-    record.statusText = "已进入本地 Codex 请求队列，等待 Codex 线程读取执行";
+    record.statusText = "Queued in local Codex request queue for Codex-side review";
     record.execution = {
       kind: "manual-codex-queue",
       status: "pending",
@@ -400,9 +403,11 @@ async function handleCodexRequest(req, res) {
     module: record.module,
     requestId: id,
     progress: record.status === "executed" ? 100 : 10,
-    text: record.status === "executed" ? record.statusText : `${record.statusText}：${requestText}`,
-    tag: record.status === "executed" ? "验证完成" : "需求进入队列",
-    tone: record.status === "executed" ? "green" : "purple"
+    text: record.status === "executed" ? record.statusText : `${record.statusText}: ${requestText}`,
+    tag: record.status === "executed" ? "validation-complete" : "request-queued",
+    tone: record.status === "executed" ? "green" : "purple",
+    controller: record.controller,
+    loop: record.loop
   });
   appendEvent(requestEvent);
   applyRuntimeEvent(requestEvent);
@@ -432,7 +437,6 @@ async function handleCodexRequest(req, res) {
     requestPath: path.relative(root, requestPath).replace(/\\/g, "/")
   });
 }
-
 async function handleCodexEvent(req, res) {
   let payload;
   try {

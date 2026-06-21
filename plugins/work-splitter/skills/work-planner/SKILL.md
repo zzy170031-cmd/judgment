@@ -21,11 +21,14 @@ This skill combines three layers:
 2. Codex Plan mode alignment: collect unresolved choices, avoid premature execution, and produce an approval-ready plan.
 3. `work-splitter`: split the confirmed work into lanes, Agent groups, gates, thread strategy, and 555 escalation packets.
 4. Durable evidence planning: decide whether `rules/durable-evidence-ledger-standard.md` is needed for long-running work, worker reports, QA gates, or release/milestone closure.
-5. Project topology planning: decide whether the project needs real/planned agents, node/test/evidence graph, conversation surfaces, and an HTML cockpit.
-6. Codex surface planning: decide where borrowed or durable behavior should live inside Codex: prompt/thread, `AGENTS.md`, rule, skill, plugin, connector/MCP, script, automation, Browser, Chrome, Computer Use, worktree, hook/config, or 555.
-7. Tool portfolio planning: decide whether the task needs an existing tool, an extended skill, a new skill, a plugin, an MCP/connector, a script, an automation, or no install.
-8. Role/lane responsibility planning: decide whether product, UX, frontend, backend, fullstack, platform/DevOps, SRE/Ops, QA, security, data, AI/Agent, Git/GitHub, docs/rules, or release responsibility must be split or verified separately.
-9. Security and browser-flow planning: decide whether `rules/security-review-standard.md` or `rules/browser-flow-testing-standard.md` must be part of the execution gate.
+5. Authority-boundary planning: decide whether Markdown, HTML, bridge queues, Codex execution, scripts/tests, and review/acceptance are crossing authority levels.
+6. Controller planning: decide the `Judgment Controller` state, route, next receiver, oracle, state update, and stop condition.
+7. Loop engineering planning: decide whether repeated Codex work is `no-loop`, `manual-first`, `skill-ready`, `loop-ready`, or `blocked`, and identify the `Judgment Controller` route.
+8. Project topology planning: decide whether the project needs real/planned agents, node/test/evidence graph, conversation surfaces, and an HTML cockpit.
+9. Codex surface planning: decide where borrowed or durable behavior should live inside Codex: prompt/thread, `AGENTS.md`, rule, skill, plugin, connector/MCP, script, automation, Browser, Chrome, Computer Use, worktree, hook/config, or 555.
+10. Tool portfolio planning: decide whether the task needs an existing tool, an extended skill, a new skill, a plugin, an MCP/connector, a script, an automation, or no install.
+11. Role/lane responsibility planning: decide whether product, UX, frontend, backend, fullstack, platform/DevOps, SRE/Ops, QA, security, data, AI/Agent, Git/GitHub, docs/rules, or release responsibility must be split or verified separately.
+12. Security and browser-flow planning: decide whether `rules/security-review-standard.md` or `rules/browser-flow-testing-standard.md` must be part of the execution gate.
 
 It does not replace:
 
@@ -33,6 +36,9 @@ It does not replace:
 - `555`: the evidence and adversarial assurance loop for high-risk milestones.
 - `XA/XB`: the development standards in `~/.codex/rules/xa-xb-standard.md`.
 - `rules/durable-evidence-ledger-standard.md`: the lightweight evidence ledger standard for long tasks and acceptance decisions.
+- `rules/authority-boundary-standard.md`: the authority boundary standard for separating Markdown guidance, HTML request/visibility, Codex execution, script/test verification, and user/QA/555 acceptance.
+- `rules/controller-state-machine-standard.md`: the Controller state-machine standard for routing project work through intake, orientation, plan, split, route, execute, verify, review, persist, and next/stop.
+- `rules/loop-engineering-standard.md`: the Codex-only loop readiness and Judgment Controller scheduling standard for repeated project-development work.
 - `rules/project-agent-topology-standard.md`: the local standard for project runtime agent generation, tested node graphs, subagent conversation surface tracking, and HTML cockpit rendering.
 - `rules/codex-surface-governance-standard.md`: the local standard for translating external agent/model/tool patterns into Codex-only surfaces.
 - `rules/tool-portfolio-standard.md`: the local standard for plugin, skill, MCP/connector, script, automation, and no-install decisions.
@@ -152,6 +158,22 @@ Project topology gate
   -> graph validation command
 ```
 
+When the user wants Codex work to run as a visible or repeated project-development loop, add this gate:
+
+```text
+Loop engineering gate
+  -> readiness: no-loop / manual-first / skill-ready / loop-ready / blocked
+  -> Judgment Controller sees
+  -> Judgment Controller decides
+  -> next receiver
+  -> hard oracle
+  -> state surface
+  -> budget
+  -> human review receiver
+  -> stop condition
+  -> Agent Office visibility
+```
+
 When the user asks to absorb external model/tool/org practices, or when a planning decision must persist beyond the thread, add this gate:
 
 ```text
@@ -195,6 +217,7 @@ Identify:
 - whether the task is XA, XB, or general;
 - whether AI/Agent behavior is involved;
 - whether the work may outlive the current thread or need durable evidence;
+- whether repeated work needs the Loop Engineering gate and a Judgment Controller route;
 - whether the project needs a runtime agent topology and HTML cockpit;
 - whether every planned step has a test/evidence node and a downstream receiver;
 - whether external model/tool/org patterns are being borrowed and need Codex-only translation;
@@ -333,6 +356,8 @@ Default:
 - 是否需要 555：
 - 是否需要分线程：
 - Durable ledger：none / response-level / repo artifact / required before execution
+- Loop readiness：no-loop / manual-first / skill-ready / loop-ready / blocked
+- Judgment Controller：sees / decides / delegates-to / waits-for / stop-condition
 - Independent review：none / named verifier / QA gate / 555
 - Project topology：none / graph-required / html-required / agents-planned / agents-running / blocked
 - Codex surface：none / prompt-thread / AGENTS / config-hook / rule / skill / plugin / connector-MCP / script / automation / Browser / Chrome / Computer Use / worktree / 555

@@ -34,8 +34,15 @@ http://127.0.0.1:8787/agent-office/index.html
 1. 用户在 Codex 中发起项目需求。
 2. Codex 按 Judgment/666 的 gate、泳道、证据闭环推进任务。
 3. Codex 把真实推进事件写入本地 bridge。
-4. HTML 页面实时显示当前执行节点、泳道进度、卡点、证据、Agent 镜像输出和 Worktree 状态。
-5. 用户也可以在 HTML 页面输入需求，页面生成结构化任务包并进入本地 Codex Bridge 队列。
+4. Judgment Controller 在 Codex 线程里读取项目状态、skill 分流程、泳道、证据、卡点和下一接收方。
+5. HTML 页面实时显示当前执行节点、泳道进度、Controller 调度判断、卡点、证据、Agent 镜像输出和 Worktree 状态。
+6. 用户也可以在 HTML 页面输入需求，页面生成结构化任务包并进入本地 Codex Bridge 队列。
+
+## Markdown / HTML / Loop
+
+- Markdown 是规则层：`SKILL.md`、`rules/*.md`、契约和验收说明定义 Judgment 怎么判断。
+- Loop 是执行层：Codex 线程按 Judgment Controller 的 route、readiness、oracle、budget、review 和 stop condition 推进项目。
+- HTML 是可视层：Agent Office 展示 Controller 调度态、泳道进度、证据闭环和请求队列，不直接执行命令。
 
 ## 安全边界
 

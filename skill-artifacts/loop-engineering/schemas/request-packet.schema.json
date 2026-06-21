@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgment.local/schemas/request-packet.schema.json",
+  "title": "Judgment Codex Request Packet",
+  "type": "object",
+  "required": [
+    "id",
+    "project",
+    "branch",
+    "gate",
+    "module",
+    "selectedAgent",
+    "request",
+    "safetyBoundary"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "createdAt": { "type": "string" },
+    "project": { "type": "string", "minLength": 1 },
+    "branch": { "type": "string", "minLength": 1 },
+    "gate": { "type": "string", "minLength": 1 },
+    "module": { "type": "string", "minLength": 1 },
+    "selectedAgent": {
+      "type": ["object", "string"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "lane": { "type": "string" }
+      }
+    },
+    "request": { "type": "string", "minLength": 1 },
+    "controller": {
+      "type": "object",
+      "properties": {
+        "agentId": { "type": "string" },
+        "role": { "type": "string" },
+        "sees": { "type": "array", "items": { "type": "string" } },
+        "expectedDecision": { "type": "string" }
+      }
+    },
+    "loop": {
+      "type": "object",
+      "properties": {
+        "readiness": {
+          "type": "string",
+          "enum": ["no-loop", "manual-first", "skill-ready", "loop-ready", "blocked"]
+        },
+        "oracle": { "type": "array", "items": { "type": "string" } },
+        "stopCondition": { "type": "string" }
+      }
+    },
+    "expectedOutputs": { "type": "array", "items": { "type": "string" } },
+    "safetyBoundary": {
+      "type": "object",
+      "required": [
+        "htmlCanExecute",
+        "codexMustReview",
+        "gitWriteRequiresCodex",
+        "destructiveActionsRequireHumanApproval"
+      ],
+      "properties": {
+        "htmlCanExecute": { "type": "boolean", "const": false },
+        "codexMustReview": { "type": "boolean", "const": true },
+        "gitWriteRequiresCodex": { "type": "boolean", "const": true },
+        "destructiveActionsRequireHumanApproval": { "type": "boolean", "const": true }
+      }
+    },
+    "bridge": { "type": "object" },
+    "status": { "type": "string" },
+    "statusText": { "type": "string" }
+  }
+}

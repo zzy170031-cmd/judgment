@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgment.local/schemas/evidence-item.schema.json",
+  "title": "Judgment Evidence Item",
+  "type": "object",
+  "required": ["id", "type", "source", "status"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "type": { "type": "string", "minLength": 1 },
+    "source": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["planned", "present", "pass", "fail", "stale", "missing"]
+    },
+    "path": { "type": "string" },
+    "notes": { "type": "string" }
+  }
+}

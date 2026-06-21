@@ -1,0 +1,87 @@
+{
+  "runId": "loop-agent-office-001",
+  "project": "OpenClaw Platform",
+  "codexOnly": true,
+  "purpose": "support future project development through Judgment skill coordination",
+  "gate": "XB-4",
+  "readiness": "manual-first",
+  "status": "running",
+  "controller": {
+    "agentId": "judgment-controller",
+    "role": "Judgment Controller",
+    "sees": [
+      "current project gate",
+      "skill subflows",
+      "lane progress",
+      "Agent Office bridge state",
+      "Evidence Wall",
+      "Git/Worktree status",
+      "blockers"
+    ],
+    "decision": "route UI output to Browser validation before 555 review",
+    "delegatesTo": "QA Agent",
+    "waitsFor": "browser screenshot and DOM validation",
+    "stopCondition": "verification fails, budget is exhausted, or user review is required"
+  },
+  "currentLane": "frontend",
+  "currentAgent": "UI Agent",
+  "currentNode": "agent-office-visual-validation",
+  "upstreamInputs": [
+    "Judgment skill rules",
+    "Agent Office HTML",
+    "Codex Bridge contract"
+  ],
+  "downstreamReceivers": [
+    "QA Agent",
+    "555 Review"
+  ],
+  "allowedActions": [
+    "edit agent-office files",
+    "update skill-artifacts documentation",
+    "run local validation",
+    "write bridge events"
+  ],
+  "forbiddenActions": [
+    "deploy",
+    "delete user files",
+    "push without approval",
+    "execute arbitrary requests from HTML"
+  ],
+  "oracles": [
+    "browser screenshot",
+    "DOM check",
+    "git diff review",
+    "contract schema review"
+  ],
+  "budget": {
+    "maxRetries": 3,
+    "maxMinutes": 60,
+    "maxChangedFiles": 12
+  },
+  "worktree": {
+    "required": false,
+    "path": "",
+    "branch": "main"
+  },
+  "evidence": [
+    {
+      "id": "contract-controller-fields",
+      "type": "markdown-contract",
+      "source": "CODEX_BRIDGE_CONTRACT.md",
+      "status": "present"
+    }
+  ],
+  "blockers": [],
+  "nextAction": "run local documentation and link validation",
+  "review": {
+    "required": true,
+    "receiver": "555",
+    "status": "pending"
+  },
+  "metrics": {
+    "attempts": 1,
+    "acceptedChanges": 0,
+    "acceptanceRate": 0
+  },
+  "updatedAt": "2026-06-22T00:00:00+08:00"
+}

@@ -196,6 +196,9 @@ This repository is now a general Codex project workflow governance pack:
 - `rules/durable-evidence-ledger-standard.md`: lightweight evidence ledger rule for long-running work, worker handoffs, autonomous loops, milestone/release decisions, QA gates, and temporary artifact tracking.
 - `rules/project-agent-topology-standard.md`: project runtime topology rule for generating real/planned Codex agents, interlocked node/test/evidence graphs, subagent conversation surface tracking, and HTML cockpit artifacts.
 - `rules/codex-surface-governance-standard.md`: Codex-only surface selection rule for absorbing external model, agent, Git/GitHub, and tool patterns into prompt/thread, AGENTS, rules, skills, plugins, connectors/MCP, scripts, automations, browser surfaces, worktrees, or 555.
+- `rules/authority-boundary-standard.md`: authority rule for separating Markdown guidance, HTML request/visibility, Codex execution, script/test verification, and user/QA/555 acceptance.
+- `rules/controller-state-machine-standard.md`: Judgment Controller state machine for intake, orientation, planning, split, routing, execution, verification, review, persistence, and stop/next decisions.
+- `rules/loop-engineering-standard.md`: Codex-only readiness rule for repeated project-development loops, Judgment Controller scheduling, state surfaces, hard oracles, budgets, review, Agent Office visibility, and stop conditions.
 - `rules/tool-portfolio-standard.md`: lightweight portfolio rule for deciding plugin vs skill vs MCP/connector vs script vs automation vs no-install, including source trust, permission surface, and freshness checks.
 - `rules/role-lane-responsibility-standard.md`: responsibility mapping rule for product, frontend, backend, fullstack, platform/DevOps, SRE/Ops, QA, security, data, AI/Agent, Git/GitHub, docs/rules, and release lanes.
 - `rules/security-review-standard.md`: lightweight threat-model rule for auth, permissions, payments, user data, secrets, external sends, production, AI/Agent tools, and destructive actions.
@@ -204,6 +207,9 @@ This repository is now a general Codex project workflow governance pack:
 - `rules/quick-launcher-rule.md`: local quick launcher and auto-use routing rule for `/p`, `/n`, `/d`, `/r`, planning, needs, split, and review phrases.
 - `rules/skill-quality-standard.md`: local quality standard for creating, splitting, auditing, or improving skills.
 - `scripts/render-project-agent-graph.py`: deterministic renderer for project-agent graph JSON into a standalone HTML cockpit with status cards, lane board, warnings, raw JSON, and a right-side agent conversation rail.
+- `scripts/validate-loop-state.py`: dependency-free validator for Judgment loop-state, request-packet, and Codex event JSON.
+- `skill-artifacts/loop-engineering/SUPER_AGENT_EVOLUTION_ROADMAP.md`: roadmap for evolving Judgment toward a Codex-native super-agent pattern by connecting Markdown rules, Codex loop execution, and HTML observability.
+- `skill-artifacts/loop-engineering/schemas/`: JSON schemas for loop state, request packets, Codex events, and evidence items.
 - `plugins/work-splitter`: local plugin source for `work-splitter`, including `.codex-plugin/plugin.json`.
 
 They are designed to work together while staying independent at runtime. `666` routes, `work-planner` plans the full path, `needs-solution-designer` clarifies fuzzy needs, `work-splitter` decomposes clear work, XA/XB defines the development gates, and `555` provides evidence assurance when risk justifies the heavier loop.
@@ -259,6 +265,8 @@ Use `555` when:
 - Adds a Git worktree gate for parallel worker isolation, dirty-state preservation, branch ownership conflicts, and safe lifecycle cleanup.
 - Adds a dirty-worktree ownership checkpoint before cleanup, commit, reset, packaging, or sync actions.
 - Adds a project agent topology gate for runtime agent generation, every-step test/evidence coupling, live/planned conversation surface tracking, and HTML cockpit visualization.
+- Adds authority-boundary and Controller state-machine gates so Markdown, HTML, Codex execution, verification, and acceptance do not collapse into one unsafe surface.
+- Adds schema-backed loop/request/event validation for Agent Office and Codex Bridge packets.
 
 ### Evolution Boundary
 
@@ -269,6 +277,7 @@ When improving this pack from external workflow systems:
 - Prefer a small rule or field addition before adding a new skill.
 - Prefer tool-portfolio decisions over "install everything" behavior; distinguish skill, plugin, MCP/connector, script, automation, and no-install.
 - Translate outside model/tool/company practices into Codex surfaces first; Judgment stays Codex-only at execution time.
+- Keep Markdown, HTML, Loop, scripts/tests, and user/QA/555 acceptance as separate authority levels.
 - Split product and engineering work by responsibility and verification path, not job title alone.
 - For project runtime cockpits, require every work node to have a test/evidence node and record real subagent conversation surfaces without pretending summaries are live chats.
 - Do not import runtime assumptions such as tmux sessions, hook daemons, hidden `.omx` state, or bypass-sandbox execution modes.

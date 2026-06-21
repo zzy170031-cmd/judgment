@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgment.local/schemas/codex-event.schema.json",
+  "title": "Judgment Codex Event",
+  "type": "object",
+  "required": [
+    "id",
+    "source",
+    "agentId",
+    "agent",
+    "lane",
+    "module",
+    "node",
+    "status",
+    "text"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "time": { "type": "string" },
+    "source": { "type": "string", "minLength": 1 },
+    "agentId": { "type": "string", "minLength": 1 },
+    "agent": { "type": "string", "minLength": 1 },
+    "lane": { "type": "string", "minLength": 1 },
+    "module": { "type": "string", "minLength": 1 },
+    "node": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["planned", "queued", "running", "blocked", "failed", "completed", "executed", "passed", "resolved", "accepted"]
+    },
+    "progress": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+    "text": { "type": "string", "minLength": 1 },
+    "tag": { "type": "string" },
+    "tone": { "type": "string" },
+    "evidenceId": { "type": ["string", "null"] },
+    "requestId": { "type": ["string", "null"] },
+    "controller": { "type": ["object", "null"] },
+    "loop": { "type": ["object", "null"] }
+  }
+}

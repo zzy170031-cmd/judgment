@@ -20,6 +20,9 @@ It works with:
 - `555`: five-agent assurance loop for milestone, release, backend/shared-contract, architecture, AI/Agent safety, and adversarial review.
 - `XA/XB`: product/game development standards in `~/.codex/rules/xa-xb-standard.md`.
 - `rules/durable-evidence-ledger-standard.md`: lightweight ledger rule for long work, worker evidence, QA gates, and temporary artifact disposition.
+- `rules/authority-boundary-standard.md`: authority boundary rule for separating Markdown guidance, HTML visibility/request intake, Codex execution, verification, and acceptance.
+- `rules/controller-state-machine-standard.md`: Controller state-machine rule for project-level route, verification, persistence, and stop/next decisions.
+- `rules/loop-engineering-standard.md`: Codex-only readiness rule for repeated project-development loops, Controller scheduling, hard oracles, state, budget, and stop conditions.
 - `rules/project-agent-topology-standard.md`: project runtime topology rule for generating real/planned agents, interlocked node/test/evidence graphs, conversation surfaces, and HTML cockpit artifacts.
 - `rules/codex-surface-governance-standard.md`: translation rule for external agent/model/tool patterns into Codex-only surfaces before they become work lanes.
 - `rules/role-lane-responsibility-standard.md`: responsibility mapping rule for product, programmer, frontend, backend, fullstack, platform/DevOps, SRE/Ops, QA, security, data, AI/Agent, Git/GitHub, docs/rules, and release lanes.
@@ -72,12 +75,15 @@ Before splitting, identify the smallest sufficient context:
 6. Existing evidence: files, repo state, tests, builds, screenshots, logs, docs, prior reports.
 7. Context strategy: same thread, handoff, worker thread, or `555`.
 8. Ledger strategy: none, response-level ledger, repo artifact, or required before execution.
-9. Independent review strategy: none, named verifier, QA lane, or `555`.
-10. Project topology strategy: none, graph-required, html-required, agents-planned, agents-running, or blocked.
-11. Codex surface strategy: none, existing surface, extend rule/skill, script, automation, connector/MCP, worktree, or 555.
-12. Role/lane responsibility strategy: no split, primary lane, supporting lanes, verifier, and handoff receiver.
-13. Security review strategy: none, focused, Security/Compliance Lane, `555`, user-decision, or block.
-14. Browser flow strategy: none, required, QA Lane, verified, conditional, or block.
+9. Loop readiness strategy: no-loop, manual-first, skill-ready, loop-ready, or blocked, with Judgment Controller route.
+10. Authority-boundary strategy: source surface, target surface, permission basis, verifier, acceptor, and stop condition.
+11. Controller state strategy: intake, orient, plan, split, route, execute, verify, review, persist, or next/stop.
+12. Independent review strategy: none, named verifier, QA lane, or `555`.
+13. Project topology strategy: none, graph-required, html-required, agents-planned, agents-running, or blocked.
+14. Codex surface strategy: none, existing surface, extend rule/skill, script, automation, connector/MCP, worktree, or 555.
+15. Role/lane responsibility strategy: no split, primary lane, supporting lanes, verifier, and handoff receiver.
+16. Security review strategy: none, focused, Security/Compliance Lane, `555`, user-decision, or block.
+17. Browser flow strategy: none, required, QA Lane, verified, conditional, or block.
 
 If the user's need is still fuzzy, customer-facing, or not stable enough to restate in plain language, route to `needs-solution-designer` before decomposing. Do not split work from an unstable need unless the split is explicitly for discovery.
 
@@ -111,15 +117,18 @@ Run this in order:
 7. Identify safety boundaries: Git, filesystem, network, production, app-store, external-send, user data, AI tools.
 8. If external model/tool/org patterns are being absorbed, translate them through `rules/codex-surface-governance-standard.md` before creating lanes.
 9. Map the task through `rules/role-lane-responsibility-standard.md` when product, engineering, fullstack, QA, security, SRE/Ops, AI/Agent, Git/GitHub, docs/rules, or release responsibility matters.
-10. If N agents, runtime cockpit, or interlocked testing is needed, map lanes into `rules/project-agent-topology-standard.md` nodes before dispatch.
-11. Decide whether work can stay in the current thread or needs Git worktree isolation.
-12. If worktrees are needed, identify branch owner, base ref, assigned path, setup commands, shared files, commit/push policy, force policy, integration owner, and cleanup policy before dispatch.
-13. Split into lanes only where outputs have different owners or verification paths.
-14. Define each lane's input, allowed actions, forbidden actions, output, verifier, and next receiver.
-15. Define each lane's test/evidence node and downstream receiver. If no test/evidence node exists, the lane is not dispatch-ready.
-16. Define whether each lane updates a durable ledger or reports evidence to the controller.
-17. Decide whether `555` is required before, during, or after execution.
-18. Return a compact plan first; include copy-ready packets only when useful.
+10. If Markdown, HTML, bridge queue, Codex, script/test, or review authority is crossing surfaces, apply `rules/authority-boundary-standard.md`.
+11. If Judgment is the project Controller, apply `rules/controller-state-machine-standard.md` and name the current Controller state.
+12. If the work is repeated, visible, automated, or loop-like, apply `rules/loop-engineering-standard.md` and identify the Judgment Controller's sees/decides/delegates/waits/stops fields.
+13. If N agents, runtime cockpit, or interlocked testing is needed, map lanes into `rules/project-agent-topology-standard.md` nodes before dispatch.
+14. Decide whether work can stay in the current thread or needs Git worktree isolation.
+15. If worktrees are needed, identify branch owner, base ref, assigned path, setup commands, shared files, commit/push policy, force policy, integration owner, and cleanup policy before dispatch.
+16. Split into lanes only where outputs have different owners or verification paths.
+15. Define each lane's input, allowed actions, forbidden actions, output, verifier, and next receiver.
+16. Define each lane's test/evidence node and downstream receiver. If no test/evidence node exists, the lane is not dispatch-ready.
+17. Define whether each lane updates a durable ledger or reports evidence to the controller.
+18. Decide whether `555` is required before, during, or after execution.
+19. Return a compact plan first; include copy-ready packets only when useful.
 
 ## Lane Types
 
@@ -270,6 +279,8 @@ Default output:
 - 是否需要 555：
 - 是否需要分线程：
 - Ledger 策略：none / response-level / repo artifact / required before execution
+- Loop readiness：no-loop / manual-first / skill-ready / loop-ready / blocked
+- Judgment Controller：sees / decides / delegates-to / waits-for / stop-condition
 - Independent review：none / named verifier / QA gate / 555
 - Project topology：none / graph-required / html-required / agents-planned / agents-running / blocked
 - Codex surface：none / prompt-thread / AGENTS / config-hook / rule / skill / plugin / connector-MCP / script / automation / Browser / Chrome / Computer Use / worktree / 555

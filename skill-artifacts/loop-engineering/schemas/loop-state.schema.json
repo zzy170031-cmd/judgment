@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgment.local/schemas/loop-state.schema.json",
+  "title": "Judgment Loop State",
+  "type": "object",
+  "required": [
+    "runId",
+    "project",
+    "codexOnly",
+    "purpose",
+    "gate",
+    "readiness",
+    "status",
+    "controller",
+    "currentLane",
+    "currentAgent",
+    "currentNode",
+    "upstreamInputs",
+    "downstreamReceivers",
+    "allowedActions",
+    "forbiddenActions",
+    "oracles",
+    "budget",
+    "worktree",
+    "evidence",
+    "blockers",
+    "nextAction",
+    "review",
+    "metrics",
+    "updatedAt"
+  ],
+  "properties": {
+    "runId": { "type": "string", "minLength": 1 },
+    "project": { "type": "string", "minLength": 1 },
+    "codexOnly": { "type": "boolean", "const": true },
+    "purpose": { "type": "string", "minLength": 1 },
+    "gate": { "type": "string", "minLength": 1 },
+    "readiness": {
+      "type": "string",
+      "enum": ["no-loop", "manual-first", "skill-ready", "loop-ready", "blocked"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["planned", "queued", "running", "blocked", "failed", "completed", "stopped"]
+    },
+    "controller": {
+      "type": "object",
+      "required": ["agentId", "role", "sees", "decision", "delegatesTo", "waitsFor", "stopCondition"],
+      "properties": {
+        "agentId": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "const": "Judgment Controller" },
+        "sees": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "decision": { "type": "string", "minLength": 1 },
+        "delegatesTo": { "type": "string", "minLength": 1 },
+        "waitsFor": { "type": "string", "minLength": 1 },
+        "stopCondition": { "type": "string", "minLength": 1 }
+      }
+    },
+    "currentLane": { "type": "string", "minLength": 1 },
+    "currentAgent": { "type": "string", "minLength": 1 },
+    "currentNode": { "type": "string", "minLength": 1 },
+    "upstreamInputs": { "type": "array", "items": { "type": "string" } },
+    "downstreamReceivers": { "type": "array", "items": { "type": "string" } },
+    "allowedActions": { "type": "array", "items": { "type": "string" } },
+    "forbiddenActions": { "type": "array", "items": { "type": "string" } },
+    "oracles": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "budget": {
+      "type": "object",
+      "required": ["maxRetries", "maxMinutes", "maxChangedFiles"],
+      "properties": {
+        "maxRetries": { "type": "integer", "minimum": 0 },
+        "maxMinutes": { "type": "integer", "minimum": 1 },
+        "maxChangedFiles": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "worktree": {
+      "type": "object",
+      "required": ["required", "path", "branch"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "path": { "type": "string" },
+        "branch": { "type": "string" }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "$ref": "./evidence-item.schema.json" }
+    },
+    "blockers": { "type": "array" },
+    "nextAction": { "type": "string", "minLength": 1 },
+    "review": {
+      "type": "object",
+      "required": ["required", "receiver", "status"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "receiver": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "not-required", "passed", "failed", "blocked"] }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["attempts", "acceptedChanges", "acceptanceRate"],
+      "properties": {
+        "attempts": { "type": "integer", "minimum": 0 },
+        "acceptedChanges": { "type": "integer", "minimum": 0 },
+        "acceptanceRate": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "updatedAt": { "type": "string", "minLength": 1 }
+  }
+}
