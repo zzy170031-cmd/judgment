@@ -134,11 +134,13 @@ window.JUDGMENT_OFFICE_DATA = {
 - 点击右侧 `刷新输出`：提交 `agent.output.refresh` action packet 到本地 Codex Bridge 队列；页面保留当前镜像输出作为即时反馈，真实输出由 Codex 回写 `/codex/event`。
 - 点击右侧 `派发到 Codex`：提交 `agent.dispatch` action packet 到本地 Codex Bridge 队列；页面不直接启动子代理，由 Judgment Controller 在 Codex 线程中读取队列、路由执行并回写事件。
 - 在右侧 `Codex 需求入口` 提交需求：页面生成任务包，追加活动动态和 Agent 对话，尝试 `POST /codex/request`；如果桥接服务不可用，状态显示为页面队列等待接入。
+- 点击右侧 `Codex Bridge / 查看队列`：打开最近 HTML 请求队列，明确显示页面下一步、Codex 下一步、最近请求状态和承接位置。
 - 点击 `复制包`：复制最近一次 Codex 任务包，便于手动交给 Codex 线程执行。
 - 点击拓扑节点：打开节点上下游详情。
 - 点击证据卡片：弹出证据详情。
 - 点击证据筛选：Evidence Wall 按证据类别过滤。
 - 点击左侧 Gate 卡：弹出 Gate 详情。
+- 点击 Gate 弹窗的 `申请进入 XB-5`：只提交 `gate.advance.request` 到 Codex Bridge，不直接修改 Gate；页面弹出“XB-5 申请已进入队列”，提示去右侧 Bridge 队列或下方流程入口继续推进。
 - 点击活动动态：打开事件详情。
 - 点击 Worktree 行/管理按钮：打开只读 Worktree 状态详情。
 - 进度条、状态标签、任务流连线必须有轻微动画，不能影响布局稳定性。

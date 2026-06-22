@@ -960,6 +960,8 @@
   function normalizeModalActions(modal) {
     const baseActions = modal.actions || [];
     const contextActions = modalContextActions(modal);
+    const maxActions = 6;
+    const hasBridgeAction = baseActions.some((action) => action.type === "bridge");
     const nextAction = {
       label: "继续推进到 Codex",
       type: "bridge",
@@ -968,16 +970,16 @@
       bridgeLabel: `继续推进：${modal.title || modal.kicker || activeNav}`
     };
     const copyAction = { label: "复制任务包", type: "copy-packet" };
-    const reservedCount = 2;
-    const contextLimit = Math.max(0, 5 - baseActions.length - reservedCount);
-    const actions = [...baseActions, ...contextActions.slice(0, contextLimit), nextAction, copyAction];
+    const supplementalActions = hasBridgeAction ? [copyAction] : [nextAction, copyAction];
+    const contextLimit = Math.max(0, maxActions - baseActions.length - supplementalActions.length);
+    const actions = [...baseActions, ...contextActions.slice(0, contextLimit), ...supplementalActions];
     const seen = new Set();
     return actions.filter((action) => {
       const key = actionKey(action);
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
-    }).slice(0, 5);
+    }).slice(0, maxActions);
   }
 
   function submitModalNextStep(modal, action) {
@@ -998,7 +1000,14 @@
       requestedFrom: activeNav
     });
     pushActivity("Controller", `从弹窗继续推进：${modal.title || modal.kicker}`, "下一步推进", "cyan");
-    setToast("已提交下一步推进到 Codex Bridge");
+    if (action.actionType === "gate.advance.request") {
+      pushActivity("Controller", "已提交进入 XB-5 的 Gate 推进申请", "Gate 推进", "green");
+      addConversationMessage(selectedAgent, "Gate 推进申请已进入 Codex Bridge 队列。下一步请看右侧 Codex Bridge 或下方流程推进入口，由 Codex Controller 核对 QA、555、证据墙和 Worktree 后回写。", "green");
+      openGateAdvanceQueued();
+      setToast("已进入 Codex Bridge 队列：看右侧 Bridge 或下方流程入口");
+      return;
+    }
+    setToast("已提交下一步推进到 Codex Bridge，可在下方流程入口继续补充");
   }
 
   function handleModalAction(index) {
@@ -1277,7 +1286,7 @@
 
   function renderOffice() {
     return `
-      <section class="office-panel ${isFullscreen ? "fullscreen-office" : ""}">
+      <section class="office-panel office-map-panel ${isFullscreen ? "fullscreen-office" : ""}">
         <div class="panel-title">
           <div>
             <h1>Agent 办公室</h1>
@@ -1952,7 +1961,6 @@
             <strong>${escapeHtml(runtimeBadge)}</strong>
           </div>
           <div class="agent-list">${agentCards}</div>
-          <button class="primary-button" type="button" data-action="agent-all">查看全部 Agent</button>
           <div class="selected-detail focus-card ${toneClass(selectedAgent.tone)}">
             <div>
               <span class="avatar ${toneClass(selectedAgent.tone)} avatar-${selectedAgent.id}" aria-hidden="true"><i></i></span>
@@ -1998,6 +2006,19 @@
         <div class="conversation-list">${rows}</div>
       </section>
     `;
+  }
+
+  function bridgeQueueItems() {
+    const seen = new Set();
+    return [
+      ...codexRequests,
+      ...(bridgeRuntime?.recentRequests || [])
+    ].filter((request) => {
+      const id = request?.id || request?.requestId;
+      if (!id || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    }).slice(0, 8);
   }
 
   function renderCodexBridgeBox() {
@@ -2054,7 +2075,10 @@
             <strong>Codex Bridge</strong>
             <span>${escapeHtml(codexBridgeStatus)}</span>
           </div>
-          <button type="button" data-action="copy-codex-packet">复制包</button>
+          <div class="bridge-head-actions">
+            <button type="button" data-action="focus-bridge-queue">查看队列</button>
+            <button type="button" data-action="copy-codex-packet">复制包</button>
+          </div>
         </div>
         <div class="codex-bridge-feed">${bridgeFeed}</div>
       </section>
@@ -2328,6 +2352,7 @@
       focusCodexAfterRender = false;
       const input = document.querySelector("[data-codex-input]");
       if (input) {
+        input.closest(".codex-command-dock")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
         input.focus();
         input.setSelectionRange(input.value.length, input.value.length);
       }
@@ -2566,7 +2591,8 @@
       rows: [
         { label: "当前 Gate", value: data.project.gate },
         { label: "下一 Gate", value: data.project.nextGate },
-        { label: "状态", value: data.project.status }
+        { label: "状态", value: data.project.status },
+        { label: "Codex 承接", value: "右侧 Codex Bridge 卡片 / 下方流程推进入口 / 复制任务包给当前 Codex 线程" }
       ],
       actions: [
         {
@@ -2581,11 +2607,68 @@
             type: "gate"
           }
         },
+        { label: "查看 Bridge 队列", type: "action", value: "focus-bridge-queue" },
+        { label: "定位流程入口", type: "action", value: "focus-codex-input" },
         { label: "打开 555 审查", type: "nav", value: "555 审查" },
         { label: "查看证据墙", type: "nav", value: "测试证据" }
       ]
     });
     pushActivity("Controller", "查看 Gate 详情", "Gate", "cyan");
+  }
+
+  function openGateAdvanceQueued() {
+    const latest = codexRequests[0];
+    openModal({
+      kicker: "Codex Bridge",
+      title: "XB-5 申请已进入队列",
+      body: "页面已经提交 gate.advance.request。真实推进由 Codex Controller 在本地队列中读取后执行；页面会继续显示队列、执行和证据回写状态。",
+      rows: [
+        { label: "当前请求", value: latest?.id || "gate.advance.request" },
+        { label: "页面承接", value: "右侧 Codex Bridge 卡片查看队列；下方流程推进入口补充说明" },
+        { label: "Codex 承接", value: "在当前 Codex 线程确认 XB-5 前置条件、执行核验并回写 Gate 结果" },
+        { label: "核验范围", value: "QA、555 审查、证据墙、Git / Worktree 状态" }
+      ],
+      list: [
+        "如果桥接服务在线，Controller 会读取这条请求并把执行状态回写到页面。",
+        "如果桥接未连通，点复制任务包，把任务包交给当前 Codex 线程继续执行。",
+        "Gate 不由 HTML 直接变更，必须等 Codex 侧验证通过后回写。"
+      ],
+      actions: [
+        { label: "查看 Bridge 队列", type: "action", value: "focus-bridge-queue", primary: true },
+        { label: "定位流程入口", type: "action", value: "focus-codex-input" },
+        { label: "打开 555 审查", type: "nav", value: "555 审查" },
+        { label: "查看证据墙", type: "nav", value: "测试证据" }
+      ]
+    });
+  }
+
+  function openBridgeQueueDetail() {
+    const queue = bridgeQueueItems();
+    const latest = queue[0];
+    submitBridgeAction("bridge.queue.inspect", "查看 Codex Bridge 队列", {
+      id: "codex-bridge-queue",
+      name: "Codex Bridge 队列",
+      type: "bridge-queue"
+    }, { queue, status: codexBridgeStatus, activeNav });
+    openModal({
+      kicker: "Codex Bridge",
+      title: "Bridge 队列与承接位置",
+      body: "这里显示 HTML 已提交给 Codex Bridge 的请求。真实执行仍在 Codex 线程里完成，页面负责展示队列、执行事件、证据和 Gate 回写。",
+      rows: [
+        { label: "当前状态", value: codexBridgeStatus },
+        { label: "最近请求", value: latest ? `${latest.id} · ${latest.statusText || latest.status || "pending"}` : "暂无请求" },
+        { label: "页面下一步", value: "点定位流程入口补充要求，或复制任务包交给 Codex 继续执行" },
+        { label: "Codex 下一步", value: "读取队列、执行核验、处理卡点并回写 /codex/event" }
+      ],
+      list: queue.length
+        ? queue.map((request) => `${request.id} · ${request.statusText || request.status || "pending"}`)
+        : ["当前没有排队请求，可以先在流程推进入口发起需求。"],
+      actions: [
+        { label: "定位流程入口", type: "action", value: "focus-codex-input", primary: true },
+        { label: "查看 Bridge 契约", type: "action", value: "focus-codex-request" },
+        { label: "复制任务包", type: "copy-packet" }
+      ]
+    });
   }
 
   function openReviewPackage() {
@@ -2991,6 +3074,10 @@
       focusCodexAfterRender = true;
       setToast("已定位到 Codex 需求入口");
     }
+    if (action === "focus-bridge-queue") {
+      openBridgeQueueDetail();
+      setToast("已打开 Codex Bridge 队列");
+    }
     if (action === "focus-codex-request") {
       focusCodexAfterRender = true;
       submitBridgeAction("bridge.contract.inspect", "查看 Bridge 安全契约", {
@@ -3027,8 +3114,9 @@
         note: "HTML 只提交 Gate 推进申请；是否进入 XB-5 必须由 Codex/QA/555 根据证据回写确认。"
       });
       pushActivity("Controller", "已提交进入 XB-5 的 Gate 推进申请", "Gate 推进", "green");
-      addConversationMessage(selectedAgent, "Gate 推进申请已提交到 Codex Bridge，等待 Codex Controller 按 QA、555 和证据状态确认。", "green");
-      setToast("已提交申请进入 XB-5，等待 Codex 回写确认");
+      addConversationMessage(selectedAgent, "Gate 推进申请已进入 Codex Bridge 队列。下一步请看右侧 Codex Bridge 或下方流程推进入口，由 Codex Controller 核对 QA、555、证据墙和 Worktree 后回写。", "green");
+      openGateAdvanceQueued();
+      setToast("已进入 Codex Bridge 队列：看右侧 Bridge 或下方流程入口");
     }
     if (action === "copy-codex-packet") {
       copyText(latestCodexPacketText(), "已复制 Codex 任务包");
