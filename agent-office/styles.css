@@ -825,8 +825,21 @@ button {
   border-bottom-color: rgba(126, 184, 235, 0.07);
 }
 
+.office-map-panel .office-stage {
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #06111f;
+}
+
 .office-map-panel .office-map {
-  align-self: stretch;
+  align-self: center;
+  justify-self: center;
+  width: var(--office-map-width, 100%);
+  height: var(--office-map-height, 100%);
   min-height: 0;
 }
 
@@ -838,8 +851,7 @@ button {
   box-shadow: 0 30px 120px rgba(0, 0, 0, 0.72);
 }
 
-.office-panel.fullscreen-office .office-map {
-  width: 100%;
+.office-panel.fullscreen-office .office-stage {
   min-height: calc(100vh - 78px);
 }
 
@@ -931,6 +943,10 @@ button {
 }
 
 .office-map.reference-office {
+  width: var(--office-map-width, 100%);
+  height: var(--office-map-height, auto);
+  min-height: 0;
+  transform-origin: center;
   background:
     linear-gradient(rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.05)),
     url("./assets/reference-office.png") center / 100% 100% no-repeat,
@@ -3504,28 +3520,50 @@ button {
   }
 
   .center-stack {
-    grid-template-rows: minmax(0, 1fr) 266px;
+    grid-template-rows: 430px 300px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .office-map-panel {
+    min-height: 430px;
   }
 
   .bottom-stack {
-    grid-template-rows: 72px minmax(0, 1fr);
+    grid-template-rows: 104px minmax(0, 1fr);
     gap: 8px;
   }
 
   .codex-command-dock {
-    grid-template-columns: minmax(154px, 0.62fr) minmax(260px, 1.55fr) minmax(160px, 0.66fr);
+    grid-template-columns: minmax(170px, 0.62fr) minmax(300px, 1.42fr) minmax(210px, 0.74fr);
     gap: 8px;
-    padding: 8px 10px;
+    padding: 9px 10px;
+  }
+
+  .codex-command-dock .dock-request-form {
+    grid-template-columns: minmax(0, 1fr) 108px;
+    gap: 8px;
+  }
+
+  .codex-command-dock .dock-request-form textarea {
+    min-height: 58px;
   }
 
   .dock-head span,
   .dock-status em {
-    display: none;
+    display: block;
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  .dock-status strong {
+    white-space: normal;
+    line-height: 1.25;
   }
 
   .office-map,
   .topology-map {
-    min-height: 360px;
+    min-height: 312px;
   }
 
   .module-flow-map {

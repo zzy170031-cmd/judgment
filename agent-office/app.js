@@ -23,10 +23,13 @@
   const issueBacklog = JSON.parse(JSON.stringify(data.issues || []));
   const seenBridgeEventIds = new Set();
   const AUTO_REFRESH_MS = 90000;
+  const OFFICE_REFERENCE_WIDTH = 1048;
+  const OFFICE_REFERENCE_HEIGHT = 544;
   let streamTick = 0;
   let codexRequestSeq = codexRequests.length + 1;
   let nextAutoRefreshAt = Date.now() + AUTO_REFRESH_MS;
   let lastInteractionAt = 0;
+  let officeResizeObserver = null;
 
   const runtimeMessages = [
     { agent: "Controller", text: "同步 Agent 状态快照", tag: "心跳", tone: "cyan" },
@@ -1301,13 +1304,15 @@
             <button type="button" data-zoom="fullscreen">${isFullscreen ? "退出" : "全屏"}</button>
           </div>
         </div>
-        <div class="office-map reference-office" style="transform:scale(${officeZoom / 100});">
-          ${renderOfficeRooms()}
-          ${renderFurniture()}
-          ${renderFlowLines()}
-          ${renderOfficeAgents()}
-          ${renderOfficeRoomHotspots()}
-          <div class="scanline"></div>
+        <div class="office-stage" data-office-stage>
+          <div class="office-map reference-office" data-office-map style="transform:scale(${officeZoom / 100});">
+            ${renderOfficeRooms()}
+            ${renderFurniture()}
+            ${renderFlowLines()}
+            ${renderOfficeAgents()}
+            ${renderOfficeRoomHotspots()}
+            <div class="scanline"></div>
+          </div>
         </div>
       </section>
     `;
@@ -2337,6 +2342,40 @@
     `;
     bindEvents();
     focusSearchIfNeeded();
+    bindOfficeResizeObserver();
+    syncOfficeMapFit();
+  }
+
+  function syncOfficeMapFit() {
+    const stage = document.querySelector("[data-office-stage]");
+    if (!stage) return;
+    const rect = stage.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const aspect = OFFICE_REFERENCE_WIDTH / OFFICE_REFERENCE_HEIGHT;
+    let mapWidth = rect.width;
+    let mapHeight = mapWidth / aspect;
+
+    if (mapHeight > rect.height) {
+      mapHeight = rect.height;
+      mapWidth = mapHeight * aspect;
+    }
+
+    stage.style.setProperty("--office-map-width", `${Math.max(1, Math.floor(mapWidth))}px`);
+    stage.style.setProperty("--office-map-height", `${Math.max(1, Math.floor(mapHeight))}px`);
+  }
+
+  function bindOfficeResizeObserver() {
+    if (officeResizeObserver) {
+      officeResizeObserver.disconnect();
+      officeResizeObserver = null;
+    }
+
+    const stage = document.querySelector("[data-office-stage]");
+    if (!stage || typeof ResizeObserver === "undefined") return;
+
+    officeResizeObserver = new ResizeObserver(syncOfficeMapFit);
+    officeResizeObserver.observe(stage);
   }
 
   function focusSearchIfNeeded() {
@@ -3183,6 +3222,8 @@
       renderApp();
     }
   });
+
+  window.addEventListener("resize", syncOfficeMapFit);
 
   renderApp();
   pollBridgeState();
