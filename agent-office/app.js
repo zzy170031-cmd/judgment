@@ -229,6 +229,7 @@
     const lanes = effectiveLanes();
     const reviewLane = lanes.find((lane) => lane.id === "review");
     const qaLane = lanes.find((lane) => lane.id === "qa");
+    const releaseLane = lanes.find((lane) => lane.id === "release");
     const blockers = bridgeRuntime?.state?.blockers || [];
     const latest = codexRequests[0];
 
@@ -291,6 +292,25 @@
           { label: "查看证据墙", attrs: "data-open-nav=\"测试证据\"", primary: true },
           { label: "刷新输出", attrs: "data-action=\"stream-agent\"" },
           { label: "继续推进", attrs: "data-action=\"focus-codex-input\"" }
+        ]
+      };
+    }
+
+    if (data.project.gate === "XB-4 开发与验证" &&
+      qaLane?.progress >= 100 &&
+      reviewLane?.progress >= 100 &&
+      (releaseLane?.progress || 0) === 0) {
+      return {
+        tone: "green",
+        label: "等待下一 Gate",
+        problem: "XB-4 验证已闭环，可申请进入 XB-5 集成与审查",
+        next: "点击申请进入 XB-5，由 Codex Controller 读取证据、确认 555/QA 状态后回写 Gate 结果。",
+        html: "HTML 显示推进申请入口和当前 Gate 证据状态。",
+        codex: "Codex 执行 Gate 审核、补充验证并回写 /codex/event。",
+        actions: [
+          { label: "申请 XB-5", attrs: "data-action=\"gate-advance\"", primary: true },
+          { label: "查看 Gate", attrs: "data-gate" },
+          { label: "查看证据", attrs: "data-open-nav=\"测试证据\"" }
         ]
       };
     }
@@ -2547,6 +2567,22 @@
         { label: "当前 Gate", value: data.project.gate },
         { label: "下一 Gate", value: data.project.nextGate },
         { label: "状态", value: data.project.status }
+      ],
+      actions: [
+        {
+          label: "申请进入 XB-5",
+          type: "bridge",
+          primary: true,
+          actionType: "gate.advance.request",
+          bridgeLabel: "申请进入 XB-5 集成与审查",
+          target: {
+            id: data.project.nextGate,
+            name: data.project.nextGate,
+            type: "gate"
+          }
+        },
+        { label: "打开 555 审查", type: "nav", value: "555 审查" },
+        { label: "查看证据墙", type: "nav", value: "测试证据" }
       ]
     });
     pushActivity("Controller", "查看 Gate 详情", "Gate", "cyan");
@@ -2977,6 +3013,22 @@
           { label: "当前模块", value: activeNav }
         ]
       });
+    }
+    if (action === "gate-advance") {
+      submitBridgeAction("gate.advance.request", "申请进入 XB-5 集成与审查", {
+        id: data.project.nextGate,
+        name: data.project.nextGate,
+        type: "gate"
+      }, {
+        currentGate: data.project.gate,
+        nextGate: data.project.nextGate,
+        lanes: effectiveLanes(),
+        evidence: data.evidence,
+        note: "HTML 只提交 Gate 推进申请；是否进入 XB-5 必须由 Codex/QA/555 根据证据回写确认。"
+      });
+      pushActivity("Controller", "已提交进入 XB-5 的 Gate 推进申请", "Gate 推进", "green");
+      addConversationMessage(selectedAgent, "Gate 推进申请已提交到 Codex Bridge，等待 Codex Controller 按 QA、555 和证据状态确认。", "green");
+      setToast("已提交申请进入 XB-5，等待 Codex 回写确认");
     }
     if (action === "copy-codex-packet") {
       copyText(latestCodexPacketText(), "已复制 Codex 任务包");
