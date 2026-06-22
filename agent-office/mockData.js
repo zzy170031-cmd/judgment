@@ -342,14 +342,14 @@ window.JUDGMENT_OFFICE_DATA = {
     { name: "feature/db-schema", status: "干净", head: "l0m1n2o", tone: "green" }
   ],
   topologyNodes: [
-    { id: "controller", label: "Controller", x: 50, y: 12, tone: "cyan" },
-    { id: "plan", label: "Planning", x: 22, y: 28, tone: "green" },
-    { id: "split", label: "Splitter", x: 50, y: 32, tone: "green" },
-    { id: "frontend", label: "Frontend", x: 24, y: 54, tone: "purple" },
-    { id: "backend", label: "Backend", x: 68, y: 54, tone: "green" },
+    { id: "controller", label: "Controller", x: 50, y: 15, tone: "cyan" },
+    { id: "plan", label: "Planning", x: 22, y: 33, tone: "green" },
+    { id: "split", label: "Splitter", x: 50, y: 35, tone: "green" },
+    { id: "frontend", label: "Frontend", x: 26, y: 55, tone: "purple" },
+    { id: "backend", label: "Backend", x: 68, y: 55, tone: "green" },
     { id: "qa", label: "QA Evidence", x: 42, y: 72, tone: "yellow" },
-    { id: "review", label: "555 Review", x: 66, y: 76, tone: "red" },
-    { id: "release", label: "Release", x: 84, y: 88, tone: "blue" }
+    { id: "review", label: "555 Review", x: 66, y: 72, tone: "red" },
+    { id: "release", label: "Release", x: 84, y: 72, tone: "blue" }
   ],
   topologyEdges: [
     { from: "controller", to: "plan" },

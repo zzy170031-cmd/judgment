@@ -1,0 +1,25 @@
+{
+  "name": "judgment-src",
+  "version": "1.0.0",
+  "description": "This repository contains general Codex project workflow governance skills and local plugin sources. It keeps routing, work decomposition, five-agent review, XA/XB development gates, AI/Agent safety rules, evidence checks, and dirty-worktree safety under version control for use across projects.",
+  "main": "index.js",
+  "scripts": {
+    "check:agent-office": "node --check agent-office/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzy170031-cmd/judgment.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/zzy170031-cmd/judgment/issues"
+  },
+  "homepage": "https://github.com/zzy170031-cmd/judgment#readme",
+  "devDependencies": {
+    "playwright": "^1.61.0"
+  }
+}

@@ -1595,13 +1595,13 @@
       className: "overview-flow",
       caption: `当前提醒：${step.title}。${step.meta}`,
       nodes: [
-        { id: "controller", label: "Controller", kicker: "运行总线", meta: step.meta, progress: step.progress || 100, tone: step.tone, x: 50, y: 18, agentId: "controller", kind: "hub" },
-        { id: "agents", label: `活跃 Agent ${data.agents.length + officeAgents.length}`, meta: "右侧状态 + 办公室节点", tone: "cyan", x: 19, y: 40, nav: "Agent 办公室" },
-        { id: "progress", label: `平均进度 ${avgProgress}%`, meta: "全部泳道平均", tone: "blue", x: 50, y: 43, nav: "项目统计" },
-        { id: "evidence", label: `证据 ${data.evidence.length}`, meta: "Evidence Wall 已接入", tone: "yellow", x: 81, y: 40, nav: "测试证据" },
-        { id: "gate", label: data.project.gate, meta: `下一步 ${data.project.nextGate}`, tone: "green", x: 33, y: 63, gate: true, kind: "wide" },
-        { id: "worktree", label: "Worktree 安全边界", meta: `${data.worktrees.length} 个分支状态`, tone: blocked ? "orange" : "green", x: 67, y: 63, nav: "Worktree 管理", kind: "wide" },
-        { id: "codex", label: "Codex 需求入口", meta: codexBridgeStatus, tone: "purple", x: 50, y: 79, action: "focus-codex-request", kind: "wide" }
+        { id: "controller", label: "Controller", kicker: "运行总线", meta: step.meta, progress: step.progress || 100, tone: step.tone, x: 24, y: 34, agentId: "controller", kind: "hub" },
+        { id: "agents", label: `活跃 Agent ${data.agents.length + officeAgents.length}`, meta: "右侧状态 + 办公室节点", tone: "cyan", x: 24, y: 62, nav: "Agent 办公室" },
+        { id: "progress", label: `平均进度 ${avgProgress}%`, meta: "全部泳道平均", tone: "blue", x: 43, y: 34, nav: "项目统计" },
+        { id: "evidence", label: `证据 ${data.evidence.length}`, meta: "Evidence Wall 已接入", tone: "yellow", x: 62, y: 34, nav: "测试证据" },
+        { id: "gate", label: data.project.gate, meta: `下一步 ${data.project.nextGate}`, tone: "green", x: 43, y: 62, gate: true, kind: "wide" },
+        { id: "worktree", label: "Worktree 安全边界", meta: `${data.worktrees.length} 个分支状态`, tone: blocked ? "orange" : "green", x: 62, y: 62, nav: "Worktree 管理", kind: "wide" },
+        { id: "codex", label: "Codex 需求入口", meta: codexBridgeStatus, tone: "purple", x: 82, y: 62, action: "focus-codex-request", kind: "wide" }
       ],
       edges: [
         { from: "controller", to: "agents", tone: "cyan" },
@@ -1640,17 +1640,18 @@
       className: "split-flow",
       caption: "工作拆分以可验证链路推进：上游输入、Agent 执行、测试证据、555 审查和 Release 依次咬合。",
       nodes: [
-        agentNode("pm", 9, 36),
-        agentNode("ux", 23, 30),
-        agentNode("ui", 37, 30),
-        agentNode("api", 52, 36),
-        agentNode("test", 66, 52),
-        { id: "review-room", label: "555 审查室", meta: "证据包 2/5", progress: 20, tone: "orange", x: 79, y: 52, reviewPackage: true },
-        agentNode("release-agent", 88, 76)
+        agentNode("pm", 11, 48),
+        agentNode("ux", 26, 34),
+        agentNode("ui", 26, 62),
+        agentNode("api", 44, 48),
+        agentNode("test", 61, 48),
+        { id: "review-room", label: "555 审查室", meta: "证据包 2/5", progress: 20, tone: "orange", x: 75, y: 48, reviewPackage: true },
+        agentNode("release-agent", 88, 48)
       ],
       edges: [
         { from: "pm", to: "ux", tone: "blue" },
-        { from: "ux", to: "ui", tone: "purple" },
+        { from: "pm", to: "ui", tone: "purple" },
+        { from: "ux", to: "api", tone: "purple" },
         { from: "ui", to: "api", tone: "green" },
         { from: "api", to: "test", tone: "yellow" },
         { from: "test", to: "review-room", tone: "orange" },
@@ -1668,12 +1669,12 @@
 
   function renderPlanningModule() {
     const gates = [
-      { id: "xb1", label: "XB-1 需求冻结", tone: "green", progress: 100, x: 16, y: 30 },
-      { id: "xb2", label: "XB-2 拆分编组", tone: "green", progress: 100, x: 34, y: 30 },
-      { id: "xb3", label: "XB-3 原型", tone: "green", progress: 100, x: 52, y: 30 },
-      { id: "xb4", label: data.project.gate, tone: "cyan", progress: 72, x: 70, y: 30, gate: true, kind: "hub" },
-      { id: "xb5", label: data.project.nextGate, tone: "yellow", progress: 20, x: 45, y: 55, gate: true },
-      { id: "xb6", label: "XB-6 发布准备", tone: "gray", progress: 0, x: 64, y: 55 }
+      { id: "xb1", label: "XB-1 需求冻结", tone: "green", progress: 100, x: 13, y: 29 },
+      { id: "xb2", label: "XB-2 拆分编组", tone: "green", progress: 100, x: 30, y: 29 },
+      { id: "xb3", label: "XB-3 原型", tone: "green", progress: 100, x: 47, y: 29 },
+      { id: "xb4", label: data.project.gate, tone: "cyan", progress: 72, x: 65, y: 29, gate: true, kind: "hub" },
+      { id: "xb5", label: data.project.nextGate, tone: "yellow", progress: 20, x: 47, y: 54, gate: true },
+      { id: "xb6", label: "XB-6 发布准备", tone: "gray", progress: 0, x: 65, y: 54 }
     ];
     return renderModuleGraph({
       id: "planning",
@@ -1681,9 +1682,9 @@
       caption: "规划中心把 Gate、Controller、Planner、Splitter 三个责任点连成可回溯推进线。",
       nodes: [
         ...gates,
-        { id: "controller", label: "Controller", meta: "全局路线判断", progress: 100, tone: "cyan", x: 31, y: 78, agentId: "controller" },
-        { id: "planner", label: "Work Planner", meta: "路线已完成", progress: 100, tone: "green", x: 50, y: 78, agentId: "planner" },
-        { id: "splitter", label: "Work Splitter", meta: "编组已完成", progress: 100, tone: "green", x: 69, y: 78, agentId: "splitter" }
+        { id: "controller", label: "Controller", meta: "全局路线判断", progress: 100, tone: "cyan", x: 25, y: 77, agentId: "controller" },
+        { id: "planner", label: "Work Planner", meta: "路线已完成", progress: 100, tone: "green", x: 42, y: 78, agentId: "planner" },
+        { id: "splitter", label: "Work Splitter", meta: "编组已完成", progress: 100, tone: "green", x: 60, y: 78, agentId: "splitter" }
       ],
       edges: [
         { from: "xb1", to: "xb2", tone: "green" },
@@ -1711,22 +1712,26 @@
       meta: `${item.type} / ${item.source}`,
       footer: item.status,
       tone: item.status === "PASS" ? "green" : item.filter === "git" ? "green" : index % 2 ? "blue" : "yellow",
-      x: 44 + (index % 3) * 15,
-      y: 25 + Math.floor(index / 3) * 25,
+      x: 31 + (index % 4) * 15,
+      y: 31 + Math.floor(index / 4) * 34,
+      kind: "evidence",
       evidenceId: item.id
     }));
+    const reviewEvidenceIds = evidenceNodes
+      .filter((_, index) => index % 4 === 3 || index === evidenceNodes.length - 1)
+      .map((node) => node.id);
     return renderModuleGraph({
       id: "evidence",
       className: "evidence-flow",
       caption: "测试证据模块把 QA、浏览器截图、测试报告、Git diff 与 555 审查入口连接在同一证据闭环。",
       nodes: [
-        { id: "qa", label: "QA Team", meta: "测试与质量保障", progress: 45, tone: "yellow", x: 18, y: 43, agentId: "qa-team", kind: "hub" },
+        { id: "qa", label: "QA Team", meta: "测试与质量保障", progress: 45, tone: "yellow", x: 12, y: 49, agentId: "qa-team", kind: "hub" },
         ...evidenceNodes,
-        { id: "review", label: "555 Review", meta: "等待补证据", progress: 20, tone: "orange", x: 83, y: 70, reviewPackage: true }
+        { id: "review", label: "555 Review", meta: "等待补证据", progress: 20, tone: "orange", x: 91, y: 49, reviewPackage: true, kind: "review" }
       ],
       edges: [
         ...evidenceNodes.map((node) => ({ from: "qa", to: node.id, tone: node.tone })),
-        ...evidenceNodes.slice(0, 3).map((node) => ({ from: node.id, to: "review", tone: "orange", risk: node.id === "diff" }))
+        ...reviewEvidenceIds.map((id) => ({ from: id, to: "review", tone: "orange", risk: id === "diff" }))
       ],
       aside: renderModuleAside("验收清单", [
         { label: "布局截图", value: "1440 / 1920", tone: "blue", attrs: "data-module-evidence=\"dashboard\"" },
@@ -1741,11 +1746,11 @@
   function renderReviewModule() {
     const reviewAgents = ["core", "audit", "reviewer-a", "reviewer-b", "reviewer-c"].map((id) => findOfficeAgent(id)).filter(Boolean);
     const positions = [
-      ["core", 50, 22],
-      ["audit", 76, 48],
-      ["reviewer-a", 24, 48],
-      ["reviewer-b", 38, 76],
-      ["reviewer-c", 62, 76]
+      ["core", 15, 46],
+      ["reviewer-a", 52, 22],
+      ["reviewer-b", 52, 46],
+      ["reviewer-c", 52, 70],
+      ["audit", 71, 46]
     ];
     const nodes = positions.map(([id, x, y]) => {
       const agent = reviewAgents.find((item) => item.id === id);
@@ -1765,13 +1770,17 @@
       className: "review-flow",
       caption: "555 审查室围绕证据包运转：Core Challenger 质疑，Audit Specialist 查证据，Reviewer A/B/C 给出审查意见。",
       nodes: [
-        { id: "package", label: "证据包 2/5", meta: "Browser / Test / Git 待闭环", progress: 40, tone: "orange", x: 50, y: 51, reviewPackage: true, kind: "hub" },
+        { id: "package", label: "证据包 2/5", meta: "Browser / Test / Git 待闭环", progress: 40, tone: "orange", x: 33, y: 46, reviewPackage: true, kind: "hub" },
         ...nodes,
-        { id: "release", label: "Release Gate", meta: "审查通过后解锁", progress: 0, tone: "gray", x: 88, y: 83, nav: "Agent 办公室" }
+        { id: "release", label: "Release Gate", meta: "审查通过后解锁", progress: 0, tone: "gray", x: 88, y: 46, nav: "Agent 办公室" }
       ],
       edges: [
-        ...nodes.map((node) => ({ from: node.id, to: "package", tone: node.tone })),
-        { from: "package", to: "release", tone: "red", risk: true }
+        { from: "core", to: "package", tone: "red", risk: true },
+        { from: "package", to: "reviewer-a", tone: "purple" },
+        { from: "package", to: "reviewer-b", tone: "yellow" },
+        { from: "package", to: "reviewer-c", tone: "yellow" },
+        { from: "package", to: "audit", tone: "yellow" },
+        { from: "audit", to: "release", tone: "red", risk: true }
       ],
       aside: renderModuleAside("证据缺口", [
         { label: "已收到", value: "dashboard.png", tone: "green", attrs: "data-module-evidence=\"dashboard\"" },
@@ -1789,8 +1798,8 @@
       meta: `HEAD ${tree.head}`,
       footer: tree.status === "有修改" ? "需隔离" : "干净可验证",
       tone: tree.tone,
-      x: 23 + (index % 2) * 35,
-      y: 28 + Math.floor(index / 2) * 30,
+      x: 36 + (index % 2) * 19,
+      y: 34 + Math.floor(index / 2) * 32,
       worktreeName: tree.name
     }));
     return renderModuleGraph({
@@ -1798,9 +1807,9 @@
       className: "worktree-flow",
       caption: "Worktree 管理保持只读状态展示：写入任务必须一任务一分支，dirty ownership 不明确时停止。",
       nodes: [
-        { id: "controller", label: "Controller", meta: "分支所有权判断", progress: 100, tone: "cyan", x: 50, y: 12, agentId: "controller", kind: "hub" },
+        { id: "controller", label: "Controller", meta: "分支所有权判断", progress: 100, tone: "cyan", x: 15, y: 50, agentId: "controller", kind: "hub" },
         ...nodes,
-        { id: "git", label: "Git 集成", meta: "diff / commit / push 边界", tone: "green", x: 83, y: 76, nav: "Git 集成" }
+        { id: "git", label: "Git 集成", meta: "diff / commit / push 边界", tone: "green", x: 80, y: 50, nav: "Git 集成" }
       ],
       edges: [
         ...nodes.map((node) => ({ from: "controller", to: node.id, tone: node.tone, risk: node.tone === "yellow" })),
@@ -1822,7 +1831,7 @@
       progress: lane.progress,
       tone: lane.tone,
       x: 18 + (index % 4) * 21,
-      y: 28 + Math.floor(index / 4) * 34,
+      y: 46 + Math.floor(index / 4) * 26,
       laneId: lane.id
     }));
     return renderModuleGraph({
@@ -1830,7 +1839,7 @@
       className: "stats-flow",
       caption: "项目统计用泳道节点展示进度，低于 50% 的 QA / 555 / Release 会进入风险观察。",
       nodes: [
-        { id: "hub", label: "运行指标 Hub", meta: `${activityStream.length} 实时事件 / ${data.evidence.length} 证据`, tone: runtimeStep().tone, x: 50, y: 12, nav: "总览", kind: "hub" },
+        { id: "hub", label: "运行指标 Hub", meta: `${activityStream.length} 实时事件 / ${data.evidence.length} 证据`, tone: runtimeStep().tone, x: 50, y: 21, nav: "总览", kind: "hub" },
         ...laneNodes
       ],
       edges: laneNodes.map((node) => ({ from: "hub", to: node.id, tone: node.tone, risk: node.progress < 50 })),
@@ -1849,12 +1858,12 @@
       className: "git-flow",
       caption: "Git 集成模块只做状态和证据编排，不在 HTML 中执行 git add、commit、push 或 reset。",
       nodes: [
-        { id: "worktree", label: "Worktree 状态", meta: `${data.worktrees.length} 个分支`, tone: "green", x: 13, y: 42, nav: "Worktree 管理" },
-        { id: "diff", label: "git-diff.patch", meta: "+128 -23", tone: "green", x: 33, y: 28, evidenceId: "diff" },
-        { id: "test", label: "api-test.json", meta: "PASS", tone: "green", x: 53, y: 28, evidenceId: "api" },
-        { id: "review", label: "555 Review", meta: "证据包 2/5", progress: 20, tone: "orange", x: 72, y: 42, reviewPackage: true },
-        { id: "release", label: "Release Gate", meta: "未开始", progress: 0, tone: "gray", x: 88, y: 68, nav: "Agent 办公室" },
-        { id: "safe", label: "安全边界", meta: "HTML 只读展示", tone: "cyan", x: 42, y: 74, action: "system-health" }
+        { id: "worktree", label: "Worktree 状态", meta: `${data.worktrees.length} 个分支`, tone: "green", x: 15, y: 50, nav: "Worktree 管理" },
+        { id: "diff", label: "git-diff.patch", meta: "+128 -23", tone: "green", x: 33, y: 34, evidenceId: "diff" },
+        { id: "test", label: "api-test.json", meta: "PASS", tone: "green", x: 52, y: 34, evidenceId: "api" },
+        { id: "review", label: "555 Review", meta: "证据包 2/5", progress: 20, tone: "orange", x: 69, y: 50, reviewPackage: true },
+        { id: "release", label: "Release Gate", meta: "未开始", progress: 0, tone: "gray", x: 86, y: 50, nav: "Agent 办公室" },
+        { id: "safe", label: "安全边界", meta: "HTML 只读展示", tone: "cyan", x: 33, y: 66, action: "system-health" }
       ],
       edges: [
         { from: "worktree", to: "diff", tone: "green" },
@@ -1876,12 +1885,12 @@
 
   function renderSettingsModule() {
     const settingsHealthPositions = [
-      { x: 20, y: 28 },
-      { x: 50, y: 40 },
-      { x: 20, y: 54 },
-      { x: 50, y: 66 },
-      { x: 20, y: 78 },
-      { x: 50, y: 78 }
+      { x: 18, y: 31 },
+      { x: 38, y: 31 },
+      { x: 18, y: 55 },
+      { x: 38, y: 55 },
+      { x: 18, y: 78 },
+      { x: 38, y: 78 }
     ];
     const healthNodes = (data.runtime?.health || []).map((item, index) => ({
       id: `health-${index}`,
@@ -1897,10 +1906,10 @@
       className: "settings-flow",
       caption: "系统设置展示当前 runtime 数据源、桥接模式、健康状态和安全控制，不直接执行外部命令。",
       nodes: [
-        { id: "source", label: data.runtime?.source || "mock-runtime", meta: data.runtime?.mode || "mirror", tone: "cyan", x: 50, y: 15, action: "system-health", kind: "hub" },
+        { id: "source", label: data.runtime?.source || "mock-runtime", meta: data.runtime?.mode || "mirror", tone: "cyan", x: 55, y: 20, action: "system-health", kind: "hub" },
         ...healthNodes,
-        { id: "bridge", label: "Codex Bridge", meta: codexBridgeStatus, tone: "purple", x: 80, y: 50, action: "focus-codex-request" },
-        { id: "guard", label: "安全边界", meta: "外部动作需人工批准", tone: "yellow", x: 80, y: 78, action: "system-health" }
+        { id: "bridge", label: "Codex Bridge", meta: codexBridgeStatus, tone: "purple", x: 76, y: 42, action: "focus-codex-request", kind: "wide" },
+        { id: "guard", label: "安全边界", meta: "外部动作需人工批准", tone: "yellow", x: 76, y: 64, action: "system-health", kind: "wide" }
       ],
       edges: [
         ...healthNodes.map((node) => ({ from: "source", to: node.id, tone: node.tone })),
