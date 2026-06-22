@@ -195,6 +195,9 @@ Codex 侧辅助脚本：
 
 - `scripts/list-agent-office-requests.js`：读取 `agent-office/runtime/requests` 中的 HTML 请求队列。
 - `scripts/controller-agent-office-inbox.js`：Judgment Controller 收件箱。读取 `queued/accepted` 请求，写回 Controller 决策、项目会话、下一步、oracle、stop condition 和运行事件；它只做 Codex 侧 intake/route/persist，不由 HTML 直接执行本地命令。
+- `scripts/controller-agent-office-inbox.js --session-action status`：只读查看当前 `projectSession`、Controller、activeRun、blockers 和 Bridge 队列。
+- `scripts/controller-agent-office-inbox.js --session-action close --reason "<原因>"`：由 Codex Controller 关闭当前项目会话，写入 `projectSession.lifecycle=closed`，清空 blockers，并把下一步置为等待新项目或停止。
+- `scripts/controller-agent-office-inbox.js --session-action new --project "<项目名>" --gate "<当前 Gate>" --next-gate "<下一 Gate>"`：创建新的项目会话，生成新的 `projectSession.id`，重置当前运行焦点和阻塞态。
 - `scripts/post-agent-office-event.js`：把 Codex 执行、阻塞、完成或验证结果写回 `/codex/event`，页面在下一次轮询或自动刷新时显示。
 
 Controller / Project Session 状态约定：
@@ -203,6 +206,7 @@ Controller / Project Session 状态约定：
 - `state.controller.nextAction` 必须写清用户下一步应该看哪里、Codex 下一步应该做什么。
 - `state.projectSession.id` 标识当前项目会话；一个项目结束后应进入 `closed`，新项目创建新的 `projectSession.id`。
 - `state.projectSession.lifecycle` 使用 `active`、`review`、`closed` 或 `blocked`；HTML 只显示生命周期，不直接关闭或创建项目。
+- `state.projectSession.queue` 记录 Controller 看到的 Bridge 队列摘要，用于解释页面申请是否已经被 Codex 侧读取。
 
 运行状态约定：
 

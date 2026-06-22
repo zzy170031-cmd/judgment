@@ -4,7 +4,11 @@
   "description": "This repository contains general Codex project workflow governance skills and local plugin sources. It keeps routing, work decomposition, five-agent review, XA/XB development gates, AI/Agent safety rules, evidence checks, and dirty-worktree safety under version control for use across projects.",
   "main": "index.js",
   "scripts": {
-    "check:agent-office": "node --check agent-office/app.js"
+    "check:agent-office": "node --check agent-office/app.js && node --check agent-office/mockData.js && node --check scripts/agent-office-bridge.js && node --check scripts/controller-agent-office-inbox.js",
+    "agent-office:inbox": "node scripts/controller-agent-office-inbox.js --limit 20",
+    "agent-office:session:status": "node scripts/controller-agent-office-inbox.js --session-action status",
+    "agent-office:session:close": "node scripts/controller-agent-office-inbox.js --session-action close",
+    "agent-office:session:new": "node scripts/controller-agent-office-inbox.js --session-action new"
   },
   "repository": {
     "type": "git",

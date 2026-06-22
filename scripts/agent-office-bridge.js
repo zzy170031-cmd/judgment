@@ -330,12 +330,13 @@ function runStaticChecks() {
     status: fs.existsSync(file) ? "pass" : "fail"
   }));
   const index = fs.existsSync(indexPath) ? fs.readFileSync(indexPath, "utf8") : "";
+  const versionMatch = index.match(/office-v\d+/);
   checks.push({
     label: "resource version",
-    command: "index.html contains office-v10",
-    status: index.includes("office-v10") ? "pass" : "fail",
+    command: "index.html contains office-v* cache marker",
+    status: versionMatch ? "pass" : "fail",
     durationMs: 0,
-    output: index.includes("office-v10") ? "office-v10 present" : "office-v10 missing"
+    output: versionMatch ? `${versionMatch[0]} present` : "office-v cache marker missing"
   });
   return {
     kind: "agent-office-validation",

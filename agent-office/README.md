@@ -66,4 +66,14 @@ node scripts\controller-agent-office-inbox.js --limit 20
 
 这个脚本是 Judgment Controller 的收件箱。它读取 `queued/accepted` 请求，按 `intake -> orient -> route -> persist` 写回 Controller 决策、项目会话、下一步、oracle 和 stop condition。它不会由 HTML 触发文件、Git、安装、发布或删除动作。
 
+Codex 侧项目会话入口：
+
+```powershell
+npm run agent-office:session:status
+npm run agent-office:session:close -- --reason "当前项目验收结束"
+npm run agent-office:session:new -- --project "OpenClaw Platform" --gate "XB-1 需求冻结" --next-gate "XB-2 拆分编组"
+```
+
+项目会话是项目制边界：一个项目结束后由 Codex Controller 写入 `projectSession.lifecycle=closed`；进入下一个项目时创建新的 `projectSession.id`，并清空当前阻塞态与运行焦点。HTML 页面只展示和提交申请，不直接关闭或创建项目。
+
 安全边界：HTML 不能直接执行任意文件、Git、网络、安装或发布动作。自由文本需求只进入队列；真实执行仍由 Codex 线程按权限、测试和证据 gate 推进。

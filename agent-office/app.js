@@ -2363,7 +2363,7 @@
         <main class="main">
           ${renderTopBar()}
           <div class="content-grid">
-            <div class="center-stack">
+            <div class="center-stack ${activeNav === "Agent 办公室" ? "office-center-stack" : ""}">
               ${renderMainSurface()}
               ${renderBottom()}
             </div>
@@ -2388,11 +2388,10 @@
 
     const panel = stage.closest(".office-map-panel");
     const aspect = OFFICE_REFERENCE_WIDTH / OFFICE_REFERENCE_HEIGHT;
-    const isCompressedViewport = window.innerHeight <= 940;
     let mapWidth = rect.width;
     let mapHeight = mapWidth / aspect;
 
-    if (!isCompressedViewport && mapHeight > rect.height) {
+    if (mapHeight > rect.height) {
       mapHeight = rect.height;
       mapWidth = mapHeight * aspect;
     }
@@ -2400,11 +2399,7 @@
     stage.style.setProperty("--office-map-width", `${Math.max(1, Math.floor(mapWidth))}px`);
     stage.style.setProperty("--office-map-height", `${Math.max(1, Math.floor(mapHeight))}px`);
     if (panel) {
-      if (isCompressedViewport) {
-        panel.style.setProperty("--office-panel-height", `${Math.max(430, Math.ceil(mapHeight + 44))}px`);
-      } else {
-        panel.style.removeProperty("--office-panel-height");
-      }
+      panel.style.removeProperty("--office-panel-height");
     }
   }
 

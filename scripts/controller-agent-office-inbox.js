@@ -203,6 +203,191 @@ function defaultRuntimeState() {
   };
 }
 
+function compactTimestamp(now = new Date().toISOString()) {
+  return String(now).replace(/[^0-9]/g, "").slice(0, 14);
+}
+
+function queueStatsFor(requestsDir, statuses) {
+  const recent = recentRequests(requestsDir, 500);
+  return {
+    matched: recent.filter((item) => statuses.has(item.status)).length,
+    statuses: [...statuses],
+    recent: recent.slice(0, 12)
+  };
+}
+
+function buildSessionController(action, session, reason) {
+  const isClose = action === "close";
+  const nextAction = isClose
+    ? "当前项目会话已关闭；如果要继续新项目，在 Codex 运行 --session-action new 创建新的 projectSession。"
+    : "新项目会话已创建；HTML 继续提交申请和证据，Codex 运行收件箱脚本读取队列并回写状态。";
+  return {
+    agentId: "judgment-controller",
+    role: "Judgment Controller",
+    state: isClose ? "next-or-stop" : "intake",
+    sees: ["runtime-state", "projectSession", "Codex Bridge queue", "HTML request packet"],
+    decision: isClose
+      ? "项目会话由 Codex Controller 关闭，HTML 只展示 closed 状态，不直接终结项目。"
+      : "项目会话由 Codex Controller 创建，HTML 只显示新会话和后续推进入口。",
+    delegatesTo: isClose ? "Project owner" : "Judgment Controller",
+    waitsFor: isClose ? "新项目目标或用户停止" : "HTML 请求、QA/555/证据/Git 校验结果",
+    oracle: "runtime-state.json + events.jsonl + request queue",
+    stopCondition: isClose ? "用户确认结束或创建新项目" : "目标不清、证据不足、权限缺失或用户停止",
+    nextAction,
+    session: {
+      id: session.id,
+      project: session.project,
+      gate: session.gate,
+      nextGate: session.nextGate,
+      lifecycle: session.lifecycle,
+      reason
+    }
+  };
+}
+
+function buildSessionEvent(action, session, controller, now) {
+  const isClose = action === "close";
+  return {
+    id: safeId(`project-session-${action}-${session.id}-${now}`),
+    time: now,
+    source: "Codex",
+    agentId: "controller",
+    agent: "Judgment Controller",
+    lane: "controller",
+    module: "Project Session",
+    node: `project.session.${action}`,
+    status: isClose ? "completed" : "running",
+    progress: isClose ? 100 : 10,
+    requestId: null,
+    text: isClose
+      ? `Project session closed: ${session.id}`
+      : `Project session started: ${session.id}`,
+    tag: `project-session-${action}`,
+    tone: isClose ? "green" : "cyan",
+    controller,
+    projectSession: session,
+    loop: {
+      readiness: "codex-controller",
+      stateSurface: "agent-office/runtime/runtime-state.json",
+      stopCondition: controller.stopCondition
+    }
+  };
+}
+
+function handleSessionAction({ action, root, runtimeDir, requestsDir, statePath, statusPath, eventsPath, statuses, dryRun }) {
+  const now = new Date().toISOString();
+  const reason = argValue("--reason", "");
+  const current = readJson(statePath, defaultRuntimeState());
+  const queue = queueStatsFor(requestsDir, statuses);
+
+  if (action === "status") {
+    console.log(JSON.stringify({
+      ok: true,
+      action,
+      root,
+      dryRun,
+      projectSession: current.projectSession || null,
+      controller: current.controller || null,
+      activeRun: current.activeRun || null,
+      blockers: current.blockers || [],
+      queue
+    }, null, 2));
+    return;
+  }
+
+  if (!new Set(["close", "new"]).has(action)) {
+    throw new Error(`Unsupported --session-action: ${action}`);
+  }
+
+  const previousSession = current.projectSession || {};
+  const project = argValue("--project", previousSession.project || "OpenClaw Platform");
+  const branch = argValue("--branch", previousSession.branch || "main");
+  const gate = argValue("--gate", action === "new" ? "XB-1 需求冻结" : previousSession.gate || "XB-4 开发与验证");
+  const nextGate = argValue("--next-gate", action === "new" ? "XB-2 拆分编组" : previousSession.nextGate || "XB-5 集成与审查");
+  const sessionId = action === "new"
+    ? argValue("--session-id", `project-${compactTimestamp(now)}`)
+    : previousSession.id || `project-${compactTimestamp(now)}`;
+
+  const session = {
+    ...previousSession,
+    id: sessionId,
+    project,
+    branch,
+    gate,
+    nextGate,
+    lifecycle: action === "close" ? "closed" : "active",
+    status: action === "close" ? "closed" : "running",
+    currentRequestId: null,
+    currentLane: "controller",
+    currentNode: `project.session.${action}`,
+    nextAction: action === "close"
+      ? "当前项目已结束；进入新项目时请运行 --session-action new 创建新的项目会话。"
+      : "新项目已建立；在页面流程推进入口提交第一步，或运行 Controller 收件箱消费现有队列。",
+    queue,
+    reason: reason || (action === "close" ? "project finished" : "project started"),
+    createdAt: action === "new" ? now : previousSession.createdAt || now,
+    closedAt: action === "close" ? now : null,
+    updatedAt: now
+  };
+  const controller = buildSessionController(action, session, reason);
+  const event = buildSessionEvent(action, session, controller, now);
+  const nextState = {
+    ...defaultRuntimeState(),
+    ...(action === "close" ? current : {}),
+    status: action === "close" ? "completed" : "running",
+    activeRun: {
+      requestId: null,
+      agent: event.agent,
+      agentId: event.agentId,
+      module: event.module,
+      node: event.node,
+      lane: event.lane,
+      status: event.status,
+      progress: event.progress,
+      text: event.text,
+      time: event.time,
+      tone: event.tone
+    },
+    currentNode: event.node,
+    currentLane: event.lane,
+    laneProgress: {
+      ...(action === "close" ? current.laneProgress || {} : {}),
+      controller: {
+        progress: event.progress,
+        status: event.status,
+        tone: event.tone,
+        updatedAt: now
+      }
+    },
+    blockers: action === "close" ? [] : [],
+    evidence: action === "close" ? current.evidence || [] : [],
+    controller,
+    projectSession: session,
+    updatedAt: now
+  };
+
+  if (!dryRun) {
+    writeJson(statePath, nextState);
+    appendJsonl(eventsPath, event);
+    updateStatusFile(statusPath, root, runtimeDir, requestsDir, undefined);
+  }
+
+  console.log(JSON.stringify({
+    ok: true,
+    action,
+    root,
+    dryRun,
+    projectSession: session,
+    event: {
+      id: event.id,
+      node: event.node,
+      status: event.status,
+      tag: event.tag
+    },
+    state: dryRun ? nextState : undefined
+  }, null, 2));
+}
+
 function buildEvent(request, route, now) {
   return {
     id: safeId(`controller-inbox-${request.id}`),
@@ -329,6 +514,22 @@ function main() {
   const requestId = argValue("--request-id", "");
   const limit = Math.max(1, Number(argValue("--limit", "20")) || 20);
   const dryRun = args.includes("--dry-run");
+  const sessionAction = argValue("--session-action", "");
+
+  if (sessionAction) {
+    handleSessionAction({
+      action: sessionAction,
+      root,
+      runtimeDir,
+      requestsDir,
+      statePath,
+      statusPath,
+      eventsPath,
+      statuses,
+      dryRun
+    });
+    return;
+  }
 
   const requests = readRequests(requestsDir, statuses, requestId, limit);
   const queueStats = {

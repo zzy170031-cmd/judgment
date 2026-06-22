@@ -3600,6 +3600,10 @@ button {
     padding-right: 4px;
   }
 
+  .center-stack.office-center-stack {
+    grid-template-rows: minmax(0, 1fr) 124px;
+  }
+
   .module-panel {
     min-height: 360px;
   }
@@ -3657,8 +3661,17 @@ button {
     height: var(--office-panel-height, 430px);
   }
 
+  .office-center-stack .office-map-panel {
+    min-height: 0;
+    height: 100%;
+  }
+
   .office-map-panel .office-stage {
     min-height: var(--office-map-height, 386px);
+  }
+
+  .office-center-stack .office-map-panel .office-stage {
+    min-height: 0;
   }
 
   .bottom-stack {
@@ -3667,11 +3680,33 @@ button {
     gap: 8px;
   }
 
+  .office-center-stack .bottom-stack {
+    grid-template-rows: 124px;
+    overflow: hidden;
+  }
+
+  .office-center-stack .bottom-grid {
+    display: none;
+  }
+
   .codex-command-dock {
     grid-template-columns: minmax(210px, 0.72fr) minmax(0, 1fr);
     grid-template-rows: auto minmax(58px, 1fr);
     gap: 8px;
     padding: 9px 10px;
+  }
+
+  .office-center-stack .codex-command-dock {
+    grid-template-rows: 34px minmax(46px, 1fr);
+    gap: 6px;
+    padding: 7px 10px;
+    overflow: hidden;
+  }
+
+  .office-center-stack .codex-command-dock .dock-head,
+  .office-center-stack .codex-command-dock .dock-status {
+    max-height: 34px;
+    overflow: hidden;
   }
 
   .codex-command-dock .dock-head {
@@ -3700,6 +3735,10 @@ button {
 
   .codex-command-dock .dock-request-form textarea {
     min-height: 52px;
+  }
+
+  .office-center-stack .codex-command-dock .dock-request-form textarea {
+    min-height: 42px;
   }
 
   .dock-head span {
