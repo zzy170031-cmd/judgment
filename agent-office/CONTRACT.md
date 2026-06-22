@@ -198,6 +198,7 @@ Codex 侧辅助脚本：
 - `scripts/controller-agent-office-inbox.js --session-action status`：只读查看当前 `projectSession`、Controller、activeRun、blockers 和 Bridge 队列。
 - `scripts/controller-agent-office-inbox.js --session-action close --reason "<原因>"`：由 Codex Controller 关闭当前项目会话，写入 `projectSession.lifecycle=closed`，清空 blockers，并把下一步置为等待新项目或停止。
 - `scripts/controller-agent-office-inbox.js --session-action new --project "<项目名>" --gate "<当前 Gate>" --next-gate "<下一 Gate>"`：创建新的项目会话，生成新的 `projectSession.id`，重置当前运行焦点和阻塞态。
+- `scripts/controller-agent-office-inbox.js --gate-action advance --target-gate "<目标 Gate>" --next-gate "<后续 Gate>"`：由 Codex Controller 在 QA、555、证据墙和 Git/Worktree 核验通过后推进 Gate，清除 `gate.advance.review` blocker，并把原 Gate 请求标记为通过。
 - `scripts/post-agent-office-event.js`：把 Codex 执行、阻塞、完成或验证结果写回 `/codex/event`，页面在下一次轮询或自动刷新时显示。
 
 Controller / Project Session 状态约定：
@@ -207,6 +208,7 @@ Controller / Project Session 状态约定：
 - `state.projectSession.id` 标识当前项目会话；一个项目结束后应进入 `closed`，新项目创建新的 `projectSession.id`。
 - `state.projectSession.lifecycle` 使用 `active`、`review`、`closed` 或 `blocked`；HTML 只显示生命周期，不直接关闭或创建项目。
 - `state.projectSession.queue` 记录 Controller 看到的 Bridge 队列摘要，用于解释页面申请是否已经被 Codex 侧读取。
+- `state.projectSession.gateEvidence` 记录当前 Gate 推进使用的核验证据摘要；缺少证据时不能推进 Gate。
 
 运行状态约定：
 

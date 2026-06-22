@@ -8,7 +8,8 @@
     "agent-office:inbox": "node scripts/controller-agent-office-inbox.js --limit 20",
     "agent-office:session:status": "node scripts/controller-agent-office-inbox.js --session-action status",
     "agent-office:session:close": "node scripts/controller-agent-office-inbox.js --session-action close",
-    "agent-office:session:new": "node scripts/controller-agent-office-inbox.js --session-action new"
+    "agent-office:session:new": "node scripts/controller-agent-office-inbox.js --session-action new",
+    "agent-office:gate:advance": "node scripts/controller-agent-office-inbox.js --gate-action advance"
   },
   "repository": {
     "type": "git",

@@ -274,6 +274,210 @@ function buildSessionEvent(action, session, controller, now) {
   };
 }
 
+function buildGateController(action, session, evidenceSummary) {
+  const isAdvance = action === "advance";
+  return {
+    agentId: "judgment-controller",
+    role: "Judgment Controller",
+    state: isAdvance ? "persist" : "review",
+    sees: ["runtime-state", "projectSession", "Gate request", "QA evidence", "555 review", "Git working tree"],
+    decision: isAdvance
+      ? `Gate 推进已由 Codex Controller 接受：当前进入 ${session.gate}。`
+      : "Gate 推进仍需补齐证据，不由 HTML 直接改变项目阶段。",
+    delegatesTo: isAdvance ? "Integration / QA / Release lanes" : "QA Agent + 555 Review",
+    waitsFor: isAdvance ? "XB-5 集成回归、审查归档和下一 Gate 申请" : "QA、555、证据墙和 Git/Worktree 结果",
+    oracle: evidenceSummary || "QA checks + Browser layout audit + Git/Worktree clean state + 555 verdict",
+    stopCondition: isAdvance ? "XB-5 发现集成阻塞、证据失效或用户停止" : "证据不足、Worktree 不干净、555 未通过或用户停止",
+    nextAction: session.nextAction,
+    session: {
+      id: session.id,
+      project: session.project,
+      gate: session.gate,
+      nextGate: session.nextGate,
+      lifecycle: session.lifecycle,
+      status: session.status
+    }
+  };
+}
+
+function buildGateEvent(action, session, controller, now, requestId) {
+  const isAdvance = action === "advance";
+  return {
+    id: safeId(`gate-${action}-${session.id}-${now}`),
+    time: now,
+    source: "Codex",
+    agentId: "controller",
+    agent: "Judgment Controller",
+    lane: "review",
+    module: "Gate",
+    node: "gate.advance.review",
+    status: isAdvance ? "passed" : "blocked",
+    progress: isAdvance ? 100 : 60,
+    requestId: requestId || null,
+    text: isAdvance
+      ? `${session.project} 已通过 XB-5 前置核验，当前 Gate 推进到 ${session.gate}`
+      : `${session.project} Gate 推进仍被阻塞`,
+    tag: isAdvance ? "gate-advance-accepted" : "gate-review-required",
+    tone: isAdvance ? "green" : "orange",
+    controller,
+    projectSession: session,
+    loop: {
+      readiness: "manual-first",
+      stateSurface: "agent-office/runtime/runtime-state.json",
+      stopCondition: controller.stopCondition
+    }
+  };
+}
+
+function updateRequestRecord(requestsDir, requestId, event, execution) {
+  if (!requestId) return null;
+  const requestPath = path.join(requestsDir, `${safeId(requestId)}.json`);
+  const record = readJson(requestPath, null);
+  if (!record) return null;
+  const nextRecord = {
+    ...record,
+    status: event.status,
+    statusText: event.text,
+    controllerDecision: event.controller,
+    execution: {
+      ...(record.execution || {}),
+      ...execution,
+      handledAt: event.time
+    },
+    lastEventAt: event.time,
+    lastEvent: {
+      id: event.id,
+      status: event.status,
+      agent: event.agent,
+      lane: event.lane,
+      module: event.module,
+      node: event.node,
+      progress: event.progress,
+      tag: event.tag
+    }
+  };
+  writeJson(requestPath, nextRecord);
+  return requestSummary(nextRecord);
+}
+
+function handleGateAction({ action, root, runtimeDir, requestsDir, statePath, statusPath, eventsPath, dryRun }) {
+  const now = new Date().toISOString();
+  if (!new Set(["advance", "block"]).has(action)) {
+    throw new Error(`Unsupported --gate-action: ${action}`);
+  }
+
+  const current = readJson(statePath, defaultRuntimeState());
+  const previousSession = current.projectSession || {};
+  const gateRequestBlocker = (current.blockers || []).find((item) => item.node === "gate.advance.review");
+  const requestId = argValue("--request-id", gateRequestBlocker?.requestId || previousSession.currentRequestId || "");
+  const evidenceSummary = argValue("--evidence", "");
+  const targetGate = argValue("--target-gate", previousSession.nextGate || "XB-5 集成与审查");
+  const followingGate = argValue("--next-gate", targetGate.includes("XB-5") ? "XB-6 发布准备" : previousSession.nextGate || "下一 Gate");
+  const queue = queueStatsFor(requestsDir, new Set(["queued", "accepted"]));
+
+  const session = {
+    ...previousSession,
+    id: previousSession.id || `project-${new Date(now).toISOString().slice(0, 10).replace(/-/g, "")}`,
+    project: argValue("--project", previousSession.project || "OpenClaw Platform"),
+    branch: argValue("--branch", previousSession.branch || "main"),
+    gate: action === "advance" ? targetGate : previousSession.gate || "XB-4 开发与验证",
+    nextGate: action === "advance" ? followingGate : previousSession.nextGate || targetGate,
+    lifecycle: action === "advance" ? "active" : "blocked",
+    status: action === "advance" ? "running" : "review-required",
+    currentRequestId: requestId || null,
+    currentLane: "review",
+    currentNode: "gate.advance.review",
+    nextAction: action === "advance"
+      ? "已进入 XB-5 集成与审查；下一步执行集成回归、证据归档和 XB-6 发布准备检查。"
+      : "继续补齐 QA、555、证据墙和 Git/Worktree 校验，再重新申请 Gate 推进。",
+    queue,
+    gateEvidence: evidenceSummary || "QA checks, Browser audit, Git/Worktree status, 555 verdict",
+    updatedAt: now
+  };
+
+  const controller = buildGateController(action, session, evidenceSummary);
+  const event = buildGateEvent(action, session, controller, now, requestId);
+  const blockers = action === "advance"
+    ? (current.blockers || []).filter((item) => item.node !== "gate.advance.review")
+    : [
+      {
+        id: event.id,
+        requestId,
+        lane: event.lane,
+        node: event.node,
+        agent: event.agent,
+        text: event.text,
+        nextAction: controller.nextAction,
+        time: now
+      },
+      ...(current.blockers || []).filter((item) => item.node !== "gate.advance.review")
+    ].slice(0, 8);
+
+  const nextState = {
+    ...defaultRuntimeState(),
+    ...current,
+    status: action === "advance" && blockers.length === 0 ? "running" : "blocked",
+    activeRun: {
+      requestId: requestId || null,
+      agent: event.agent,
+      agentId: event.agentId,
+      module: event.module,
+      node: event.node,
+      lane: event.lane,
+      status: event.status,
+      progress: event.progress,
+      text: event.text,
+      time: event.time,
+      tone: event.tone
+    },
+    currentNode: event.node,
+    currentLane: event.lane,
+    laneProgress: {
+      ...(current.laneProgress || {}),
+      review: {
+        progress: event.progress,
+        status: event.status,
+        tone: event.tone,
+        updatedAt: now
+      }
+    },
+    blockers,
+    controller,
+    projectSession: session,
+    updatedAt: now
+  };
+
+  let lastRequest = null;
+  if (!dryRun) {
+    writeJson(statePath, nextState);
+    appendJsonl(eventsPath, event);
+    lastRequest = updateRequestRecord(requestsDir, requestId, event, {
+      kind: "controller-gate",
+      status: action === "advance" ? "accepted" : "review-required",
+      oracle: controller.oracle,
+      nextAction: controller.nextAction
+    });
+    updateStatusFile(statusPath, root, runtimeDir, requestsDir, lastRequest || undefined);
+  }
+
+  console.log(JSON.stringify({
+    ok: true,
+    action,
+    root,
+    dryRun,
+    requestId,
+    projectSession: session,
+    event: {
+      id: event.id,
+      node: event.node,
+      status: event.status,
+      tag: event.tag
+    },
+    blockers: nextState.blockers,
+    state: dryRun ? nextState : undefined
+  }, null, 2));
+}
+
 function handleSessionAction({ action, root, runtimeDir, requestsDir, statePath, statusPath, eventsPath, statuses, dryRun }) {
   const now = new Date().toISOString();
   const reason = argValue("--reason", "");
@@ -515,6 +719,7 @@ function main() {
   const limit = Math.max(1, Number(argValue("--limit", "20")) || 20);
   const dryRun = args.includes("--dry-run");
   const sessionAction = argValue("--session-action", "");
+  const gateAction = argValue("--gate-action", "");
 
   if (sessionAction) {
     handleSessionAction({
@@ -526,6 +731,20 @@ function main() {
       statusPath,
       eventsPath,
       statuses,
+      dryRun
+    });
+    return;
+  }
+
+  if (gateAction) {
+    handleGateAction({
+      action: gateAction,
+      root,
+      runtimeDir,
+      requestsDir,
+      statePath,
+      statusPath,
+      eventsPath,
       dryRun
     });
     return;
