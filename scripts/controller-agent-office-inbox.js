@@ -274,6 +274,42 @@ function buildSessionEvent(action, session, controller, now) {
   };
 }
 
+function previousGateLabel(targetGate) {
+  if (String(targetGate || "").includes("XB-6")) return "XB-5 集成与审查";
+  if (String(targetGate || "").includes("XB-5")) return "XB-4 开发与验证";
+  return "上一 Gate";
+}
+
+function gateAdvanceNextAction(session) {
+  if (String(session.gate || "").includes("XB-6")) {
+    return "已进入 XB-6 发布准备；下一步执行发布候选冻结、最终证据归档和项目关闭确认。";
+  }
+  if (String(session.gate || "").includes("XB-5")) {
+    return "已进入 XB-5 集成与审查；下一步执行集成回归、证据归档和 XB-6 发布准备检查。";
+  }
+  return `已进入 ${session.gate || "目标 Gate"}；下一步执行 ${session.nextGate || "下一 Gate"} 前置检查。`;
+}
+
+function gateAdvanceWaitsFor(session) {
+  if (String(session.gate || "").includes("XB-6")) {
+    return "发布候选冻结、最终证据归档和项目关闭申请";
+  }
+  if (String(session.gate || "").includes("XB-5")) {
+    return "XB-5 集成回归、审查归档和下一 Gate 申请";
+  }
+  return `${session.nextGate || "下一 Gate"} 前置条件`;
+}
+
+function gateAdvanceStopCondition(session) {
+  if (String(session.gate || "").includes("XB-6")) {
+    return "发布准备发现阻塞、最终证据缺失或用户停止";
+  }
+  if (String(session.gate || "").includes("XB-5")) {
+    return "XB-5 发现集成阻塞、证据失效或用户停止";
+  }
+  return "目标 Gate 发现阻塞、证据失效或用户停止";
+}
+
 function buildGateController(action, session, evidenceSummary) {
   const isAdvance = action === "advance";
   return {
@@ -285,9 +321,9 @@ function buildGateController(action, session, evidenceSummary) {
       ? `Gate 推进已由 Codex Controller 接受：当前进入 ${session.gate}。`
       : "Gate 推进仍需补齐证据，不由 HTML 直接改变项目阶段。",
     delegatesTo: isAdvance ? "Integration / QA / Release lanes" : "QA Agent + 555 Review",
-    waitsFor: isAdvance ? "XB-5 集成回归、审查归档和下一 Gate 申请" : "QA、555、证据墙和 Git/Worktree 结果",
+    waitsFor: isAdvance ? gateAdvanceWaitsFor(session) : "QA、555、证据墙和 Git/Worktree 结果",
     oracle: evidenceSummary || "QA checks + Browser layout audit + Git/Worktree clean state + 555 verdict",
-    stopCondition: isAdvance ? "XB-5 发现集成阻塞、证据失效或用户停止" : "证据不足、Worktree 不干净、555 未通过或用户停止",
+    stopCondition: isAdvance ? gateAdvanceStopCondition(session) : "证据不足、Worktree 不干净、555 未通过或用户停止",
     nextAction: session.nextAction,
     session: {
       id: session.id,
@@ -315,7 +351,7 @@ function buildGateEvent(action, session, controller, now, requestId) {
     progress: isAdvance ? 100 : 60,
     requestId: requestId || null,
     text: isAdvance
-      ? `${session.project} 已通过 XB-5 前置核验，当前 Gate 推进到 ${session.gate}`
+      ? `${session.project} 已通过 ${previousGateLabel(session.gate)} 核验，当前 Gate 推进到 ${session.gate}`
       : `${session.project} Gate 推进仍被阻塞`,
     tag: isAdvance ? "gate-advance-accepted" : "gate-review-required",
     tone: isAdvance ? "green" : "orange",
@@ -388,7 +424,7 @@ function handleGateAction({ action, root, runtimeDir, requestsDir, statePath, st
     currentLane: "review",
     currentNode: "gate.advance.review",
     nextAction: action === "advance"
-      ? "已进入 XB-5 集成与审查；下一步执行集成回归、证据归档和 XB-6 发布准备检查。"
+      ? gateAdvanceNextAction({ gate: targetGate, nextGate: followingGate })
       : "继续补齐 QA、555、证据墙和 Git/Worktree 校验，再重新申请 Gate 推进。",
     queue,
     gateEvidence: evidenceSummary || "QA checks, Browser audit, Git/Worktree status, 555 verdict",
