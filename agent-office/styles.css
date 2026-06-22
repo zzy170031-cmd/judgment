@@ -3501,7 +3501,7 @@ button {
   }
 
   .module-flow-layout {
-    grid-template-columns: minmax(0, 1fr) 226px;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .module-flow-layout.evidence-flow {
@@ -3513,28 +3513,57 @@ button {
     min-width: 0;
   }
 
+  .module-flow-aside,
   .evidence-flow .module-flow-aside {
     display: none;
   }
 
   .module-flow-node {
-    width: 116px;
+    width: 106px;
+    min-height: 70px;
+    padding: 8px 8px 7px;
   }
 
   .module-flow-node.node-hub {
-    width: 144px;
-  }
-
-  .evidence-flow .module-flow-node.node-evidence {
     width: 132px;
   }
 
+  .module-flow-node.node-wide {
+    width: 142px;
+  }
+
+  .evidence-flow .module-flow-node.node-evidence {
+    width: 104px;
+    min-height: 82px;
+  }
+
   .evidence-flow .module-flow-node.node-review {
-    width: 124px;
+    width: 108px;
   }
 
   .split-flow .module-flow-node {
-    width: 94px;
+    width: 90px;
+  }
+
+  .planning-flow .module-flow-node {
+    width: 104px;
+  }
+
+  .planning-flow .module-flow-node.node-hub {
+    width: 118px;
+  }
+
+  .worktree-flow .module-flow-node,
+  .git-flow .module-flow-node {
+    width: 118px;
+  }
+
+  .settings-flow .module-flow-node {
+    width: 104px;
+  }
+
+  .settings-flow .module-flow-node.node-wide {
+    width: 130px;
   }
 }
 

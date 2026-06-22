@@ -203,6 +203,50 @@
     return data.laneProgress.map(effectiveLane);
   }
 
+  function gateCode(label) {
+    const match = String(label || "").match(/XB-\d+/i);
+    return match ? match[0].toUpperCase() : "";
+  }
+
+  function gateNumber(label) {
+    const code = gateCode(label);
+    const match = code.match(/\d+/);
+    return match ? Number(match[0]) : 0;
+  }
+
+  function projectStatusLabel(status) {
+    const map = {
+      active: "开发中",
+      running: "开发中",
+      "review-required": "待审查",
+      blocked: "已阻塞",
+      closed: "已关闭"
+    };
+    return map[status] || status || data.project.status;
+  }
+
+  function effectiveProject() {
+    const session = bridgeRuntime?.state?.projectSession || {};
+    const gate = session.gate || data.project.gate;
+    const nextGate = session.nextGate || data.project.nextGate;
+    const rawStatus = session.status || data.project.status;
+    return {
+      ...data.project,
+      name: session.project || data.project.name,
+      branch: session.branch || data.project.branch,
+      gate,
+      nextGate,
+      stage: gateCode(gate) || data.project.stage,
+      status: projectStatusLabel(rawStatus),
+      sessionStatus: rawStatus,
+      lifecycle: session.lifecycle || "mirror",
+      sessionId: session.id || null,
+      gateEvidence: session.gateEvidence || "",
+      nextAction: session.nextAction || "",
+      systemStatus: session.lifecycle === "closed" ? "项目已关闭" : data.project.systemStatus
+    };
+  }
+
   function runtimeStep() {
     const state = bridgeRuntime?.state;
     const run = state?.activeRun;
@@ -230,6 +274,7 @@
     const step = runtimeStep();
     const stats = issueStats();
     const lanes = effectiveLanes();
+    const project = effectiveProject();
     const reviewLane = lanes.find((lane) => lane.id === "review");
     const qaLane = lanes.find((lane) => lane.id === "qa");
     const releaseLane = lanes.find((lane) => lane.id === "release");
@@ -299,19 +344,20 @@
       };
     }
 
-    if (data.project.gate === "XB-4 开发与验证" &&
+    if (gateNumber(project.nextGate) > gateNumber(project.gate) &&
       qaLane?.progress >= 100 &&
       reviewLane?.progress >= 100 &&
       (releaseLane?.progress || 0) === 0) {
+      const nextCode = gateCode(project.nextGate) || "下一 Gate";
       return {
         tone: "green",
         label: "等待下一 Gate",
-        problem: "XB-4 验证已闭环，可申请进入 XB-5 集成与审查",
-        next: "点击申请进入 XB-5，由 Codex Controller 读取证据、确认 555/QA 状态后回写 Gate 结果。",
+        problem: `${project.gate} 已闭环，可申请进入 ${project.nextGate}`,
+        next: `点击申请进入 ${nextCode}，由 Codex Controller 读取证据、确认 555/QA 状态后回写 Gate 结果。`,
         html: "HTML 显示推进申请入口和当前 Gate 证据状态。",
         codex: "Codex 执行 Gate 审核、补充验证并回写 /codex/event。",
         actions: [
-          { label: "申请 XB-5", attrs: "data-action=\"gate-advance\"", primary: true },
+          { label: `申请 ${nextCode}`, attrs: "data-action=\"gate-advance\"", primary: true },
           { label: "查看 Gate", attrs: "data-gate" },
           { label: "查看证据", attrs: "data-open-nav=\"测试证据\"" }
         ]
@@ -786,16 +832,17 @@
   }
 
   function buildCodexRequestPacket(text, options = {}) {
+    const project = effectiveProject();
     const stamp = new Date().toISOString().replace(/[^0-9]/g, "").slice(0, 14);
     const id = `codex-${stamp}-${String(codexRequestSeq++).padStart(3, "0")}`;
     return {
       id,
       createdAt: new Date().toISOString(),
       source: "judgment-agent-office-html",
-      project: data.project.name,
+      project: project.name,
       projectSessionId: bridgeRuntime?.state?.projectSession?.id || null,
-      branch: data.project.branch,
-      gate: data.project.gate,
+      branch: project.branch,
+      gate: project.gate,
       module: activeNav,
       actionType: options.actionType || "freeform-request",
       actionLabel: options.actionLabel || "Codex request",
@@ -814,12 +861,13 @@
   }
 
   function latestCodexPacketText() {
+    const project = effectiveProject();
     const packet = codexRequests[0] || {
       id: "codex-draft",
       source: "judgment-agent-office-html",
-      project: data.project.name,
-      branch: data.project.branch,
-      gate: data.project.gate,
+      project: project.name,
+      branch: project.branch,
+      gate: project.gate,
       module: activeNav,
       selectedAgent: selectedAgent.name,
       request: codexDraft || "请在这里填写需求。",
@@ -1053,6 +1101,7 @@
   }
 
   function renderSidebar() {
+    const project = effectiveProject();
     const nav = data.navItems.map((item) => `
       <button class="nav-item ${item === activeNav ? "active" : ""}" type="button" data-nav="${escapeHtml(item)}">
         <span class="nav-mark">${navIcon(item)}</span>
@@ -1072,16 +1121,16 @@
         <nav class="nav-list">${nav}</nav>
         <button class="gate-card" type="button" data-gate>
           <span class="gate-kicker">当前 Gate</span>
-          <strong>${escapeHtml(data.project.gate)}</strong>
+          <strong>${escapeHtml(project.gate)}</strong>
           <em>查看 Gate 详情</em>
           <span class="gate-kicker">下一 Gate</span>
-          <strong>${escapeHtml(data.project.nextGate)}</strong>
+          <strong>${escapeHtml(project.nextGate)}</strong>
         </button>
         <button class="system-card" type="button" data-system>
           <i></i>
           <div>
             <strong>系统状态</strong>
-            <span>${escapeHtml(data.project.systemStatus)}</span>
+            <span>${escapeHtml(project.systemStatus)}</span>
           </div>
         </button>
       </aside>
@@ -1106,6 +1155,7 @@
   }
 
   function renderTopBar() {
+    const project = effectiveProject();
     const lanes = effectiveLanes().map((lane) => `
       <button class="lane-card ${toneClass(lane.tone)}" type="button" data-lane="${lane.id}">
         <div>
@@ -1121,10 +1171,10 @@
       <header class="topbar">
         <div class="project-strip">
           <div class="project-meta">
-            <span>项目 <strong>${escapeHtml(data.project.name)}</strong></span>
-            <span>分支 <strong>${escapeHtml(data.project.branch)}</strong></span>
-            <span>阶段 <strong>${escapeHtml(data.project.stage)}</strong></span>
-            <span class="status-pill">${escapeHtml(data.project.status)}</span>
+            <span>项目 <strong>${escapeHtml(project.name)}</strong></span>
+            <span>分支 <strong>${escapeHtml(project.branch)}</strong></span>
+            <span>阶段 <strong>${escapeHtml(project.stage)}</strong></span>
+            <span class="status-pill">${escapeHtml(project.status)}</span>
             ${renderAutoRefreshPill()}
           </div>
           <div class="top-actions">
@@ -1586,6 +1636,7 @@
 
   function renderOverviewModule() {
     const lanes = effectiveLanes();
+    const project = effectiveProject();
     const avgProgress = Math.round(lanes.reduce((sum, lane) => sum + lane.progress, 0) / lanes.length);
     const blocked = (bridgeRuntime?.state?.blockers?.length || 0) || lanes.filter((lane) => lane.progress < 50).length;
     const step = runtimeStep();
@@ -1595,13 +1646,13 @@
       className: "overview-flow",
       caption: `当前提醒：${step.title}。${step.meta}`,
       nodes: [
-        { id: "controller", label: "Controller", kicker: "运行总线", meta: step.meta, progress: step.progress || 100, tone: step.tone, x: 24, y: 34, agentId: "controller", kind: "hub" },
-        { id: "agents", label: `活跃 Agent ${data.agents.length + officeAgents.length}`, meta: "右侧状态 + 办公室节点", tone: "cyan", x: 24, y: 62, nav: "Agent 办公室" },
-        { id: "progress", label: `平均进度 ${avgProgress}%`, meta: "全部泳道平均", tone: "blue", x: 43, y: 34, nav: "项目统计" },
-        { id: "evidence", label: `证据 ${data.evidence.length}`, meta: "Evidence Wall 已接入", tone: "yellow", x: 62, y: 34, nav: "测试证据" },
-        { id: "gate", label: data.project.gate, meta: `下一步 ${data.project.nextGate}`, tone: "green", x: 43, y: 62, gate: true, kind: "wide" },
-        { id: "worktree", label: "Worktree 安全边界", meta: `${data.worktrees.length} 个分支状态`, tone: blocked ? "orange" : "green", x: 62, y: 62, nav: "Worktree 管理", kind: "wide" },
-        { id: "codex", label: "Codex 需求入口", meta: codexBridgeStatus, tone: "purple", x: 82, y: 62, action: "focus-codex-request", kind: "wide" }
+        { id: "controller", label: "Controller", kicker: "运行总线", meta: step.meta, progress: step.progress || 100, tone: step.tone, x: 42, y: 22, agentId: "controller", kind: "hub" },
+        { id: "agents", label: `活跃 Agent ${data.agents.length + officeAgents.length}`, meta: "右侧状态 + 办公室节点", tone: "cyan", x: 18, y: 45, nav: "Agent 办公室" },
+        { id: "progress", label: `平均进度 ${avgProgress}%`, meta: "全部泳道平均", tone: "blue", x: 43, y: 49, nav: "项目统计" },
+        { id: "evidence", label: `证据 ${data.evidence.length}`, meta: "Evidence Wall 已接入", tone: "yellow", x: 68, y: 42, nav: "测试证据" },
+        { id: "gate", label: project.gate, meta: `下一步 ${project.nextGate}`, tone: project.sessionStatus === "review-required" ? "orange" : "green", x: 28, y: 72, gate: true, kind: "wide" },
+        { id: "worktree", label: "Worktree 安全边界", meta: `${data.worktrees.length} 个分支状态`, tone: blocked ? "orange" : "green", x: 58, y: 72, nav: "Worktree 管理", kind: "wide" },
+        { id: "codex", label: "Codex 需求入口", meta: codexBridgeStatus, tone: "purple", x: 82, y: 72, action: "focus-codex-request", kind: "wide" }
       ],
       edges: [
         { from: "controller", to: "agents", tone: "cyan" },
@@ -1640,13 +1691,13 @@
       className: "split-flow",
       caption: "工作拆分以可验证链路推进：上游输入、Agent 执行、测试证据、555 审查和 Release 依次咬合。",
       nodes: [
-        agentNode("pm", 11, 48),
-        agentNode("ux", 26, 34),
-        agentNode("ui", 26, 62),
-        agentNode("api", 44, 48),
-        agentNode("test", 61, 48),
-        { id: "review-room", label: "555 审查室", meta: "证据包 2/5", progress: 20, tone: "orange", x: 75, y: 48, reviewPackage: true },
-        agentNode("release-agent", 88, 48)
+        agentNode("pm", 10, 49),
+        agentNode("ux", 24, 33),
+        agentNode("ui", 24, 65),
+        agentNode("api", 42, 49),
+        agentNode("test", 58, 49),
+        { id: "review-room", label: "555 审查室", meta: "证据包 2/5", progress: 20, tone: "orange", x: 73, y: 49, reviewPackage: true },
+        agentNode("release-agent", 88, 49)
       ],
       edges: [
         { from: "pm", to: "ux", tone: "blue" },
@@ -1668,23 +1719,55 @@
   }
 
   function renderPlanningModule() {
-    const gates = [
-      { id: "xb1", label: "XB-1 需求冻结", tone: "green", progress: 100, x: 13, y: 29 },
-      { id: "xb2", label: "XB-2 拆分编组", tone: "green", progress: 100, x: 30, y: 29 },
-      { id: "xb3", label: "XB-3 原型", tone: "green", progress: 100, x: 47, y: 29 },
-      { id: "xb4", label: data.project.gate, tone: "cyan", progress: 72, x: 65, y: 29, gate: true, kind: "hub" },
-      { id: "xb5", label: data.project.nextGate, tone: "yellow", progress: 20, x: 47, y: 54, gate: true },
-      { id: "xb6", label: "XB-6 发布准备", tone: "gray", progress: 0, x: 65, y: 54 }
+    const project = effectiveProject();
+    const currentCode = gateCode(project.gate) || "XB-4";
+    const nextCode = gateCode(project.nextGate);
+    const currentNumber = gateNumber(project.gate);
+    const baseGates = [
+      { code: "XB-1", id: "xb1", label: "XB-1 需求冻结", x: 12, y: 25 },
+      { code: "XB-2", id: "xb2", label: "XB-2 拆分编组", x: 29, y: 25 },
+      { code: "XB-3", id: "xb3", label: "XB-3 原型", x: 46, y: 25 },
+      { code: "XB-4", id: "xb4", label: "XB-4 开发与验证", x: 64, y: 25 },
+      { code: "XB-5", id: "xb5", label: "XB-5 集成与审查", x: 46, y: 56 },
+      { code: "XB-6", id: "xb6", label: "XB-6 发布准备", x: 64, y: 56 }
     ];
+    const gates = baseGates.map((gate) => {
+      const gateNumberValue = gateNumber(gate.code);
+      if (gate.code === currentCode) {
+        return {
+          ...gate,
+          label: project.gate,
+          tone: project.sessionStatus === "review-required" ? "orange" : "cyan",
+          progress: project.sessionStatus === "review-required" ? 55 : 72,
+          gate: true,
+          kind: "hub",
+          footer: "当前"
+        };
+      }
+      if (gate.code === nextCode) {
+        return {
+          ...gate,
+          label: project.nextGate,
+          tone: "yellow",
+          progress: 20,
+          gate: true,
+          footer: "下一步"
+        };
+      }
+      if (currentNumber && gateNumberValue < currentNumber) {
+        return { ...gate, tone: "green", progress: 100, footer: "已完成" };
+      }
+      return { ...gate, tone: "gray", progress: 0, footer: "未开始" };
+    });
     return renderModuleGraph({
       id: "planning",
       className: "planning-flow",
       caption: "规划中心把 Gate、Controller、Planner、Splitter 三个责任点连成可回溯推进线。",
       nodes: [
         ...gates,
-        { id: "controller", label: "Controller", meta: "全局路线判断", progress: 100, tone: "cyan", x: 25, y: 77, agentId: "controller" },
-        { id: "planner", label: "Work Planner", meta: "路线已完成", progress: 100, tone: "green", x: 42, y: 78, agentId: "planner" },
-        { id: "splitter", label: "Work Splitter", meta: "编组已完成", progress: 100, tone: "green", x: 60, y: 78, agentId: "splitter" }
+        { id: "controller", label: "Controller", meta: "全局路线判断", progress: 100, tone: "cyan", x: 22, y: 86, agentId: "controller" },
+        { id: "planner", label: "Work Planner", meta: "路线已完成", progress: 100, tone: "green", x: 43, y: 86, agentId: "planner" },
+        { id: "splitter", label: "Work Splitter", meta: "编组已完成", progress: 100, tone: "green", x: 63, y: 86, agentId: "splitter" }
       ],
       edges: [
         { from: "xb1", to: "xb2", tone: "green" },
@@ -1692,28 +1775,39 @@
         { from: "xb3", to: "xb4", tone: "cyan" },
         { from: "xb4", to: "xb5", tone: "yellow" },
         { from: "xb5", to: "xb6", tone: "gray" },
-        { from: "controller", to: "xb4", tone: "cyan", bend: -5 },
-        { from: "planner", to: "xb4", tone: "green", bend: -3 },
-        { from: "splitter", to: "xb5", tone: "green", bend: -3 }
+        { from: "controller", to: currentCode.toLowerCase().replace("-", ""), tone: "cyan", bend: -5 },
+        { from: "planner", to: currentCode.toLowerCase().replace("-", ""), tone: "green", bend: -3 },
+        { from: "splitter", to: nextCode ? nextCode.toLowerCase().replace("-", "") : "xb6", tone: "green", bend: -3 }
       ],
       aside: renderModuleAside("当前 Gate", [
-        { label: "当前", value: data.project.gate, tone: "cyan", attrs: "data-gate" },
-        { label: "下一步", value: data.project.nextGate, tone: "yellow", attrs: "data-gate" },
-        { label: "状态", value: data.project.status, tone: "green", attrs: "data-action=\"system-health\"" }
+        { label: "当前", value: project.gate, tone: project.sessionStatus === "review-required" ? "orange" : "cyan", attrs: "data-gate" },
+        { label: "下一步", value: project.nextGate, tone: "yellow", attrs: "data-gate" },
+        { label: "状态", value: project.status, tone: project.sessionStatus === "review-required" ? "orange" : "green", attrs: "data-action=\"system-health\"" },
+        { label: "证据", value: project.gateEvidence || "等待回写", tone: project.gateEvidence ? "green" : "blue", attrs: "data-open-nav=\"测试证据\"" }
       ], "查看 Gate", "data-gate")
     });
   }
 
   function renderEvidenceModule() {
     const stats = issueStats();
+    const evidencePositions = [
+      { x: 29, y: 29 },
+      { x: 45, y: 29 },
+      { x: 61, y: 29 },
+      { x: 77, y: 29 },
+      { x: 29, y: 65 },
+      { x: 45, y: 65 },
+      { x: 61, y: 65 },
+      { x: 77, y: 65 }
+    ];
     const evidenceNodes = data.evidence.map((item, index) => ({
       id: item.id,
       label: item.name,
       meta: `${item.type} / ${item.source}`,
       footer: item.status,
       tone: item.status === "PASS" ? "green" : item.filter === "git" ? "green" : index % 2 ? "blue" : "yellow",
-      x: 31 + (index % 4) * 15,
-      y: 31 + Math.floor(index / 4) * 34,
+      x: evidencePositions[index]?.x ?? 33 + (index % 4) * 16,
+      y: evidencePositions[index]?.y ?? 29 + Math.floor(index / 4) * 36,
       kind: "evidence",
       evidenceId: item.id
     }));
@@ -1725,9 +1819,9 @@
       className: "evidence-flow",
       caption: "测试证据模块把 QA、浏览器截图、测试报告、Git diff 与 555 审查入口连接在同一证据闭环。",
       nodes: [
-        { id: "qa", label: "QA Team", meta: "测试与质量保障", progress: 45, tone: "yellow", x: 12, y: 49, agentId: "qa-team", kind: "hub" },
+        { id: "qa", label: "QA Team", meta: "测试与质量保障", progress: 45, tone: "yellow", x: 13, y: 47, agentId: "qa-team", kind: "hub" },
         ...evidenceNodes,
-        { id: "review", label: "555 Review", meta: "等待补证据", progress: 20, tone: "orange", x: 91, y: 49, reviewPackage: true, kind: "review" }
+        { id: "review", label: "555 Review", meta: "等待补证据", progress: 20, tone: "orange", x: 91, y: 47, reviewPackage: true, kind: "review" }
       ],
       edges: [
         ...evidenceNodes.map((node) => ({ from: "qa", to: node.id, tone: node.tone })),
@@ -1746,11 +1840,11 @@
   function renderReviewModule() {
     const reviewAgents = ["core", "audit", "reviewer-a", "reviewer-b", "reviewer-c"].map((id) => findOfficeAgent(id)).filter(Boolean);
     const positions = [
-      ["core", 15, 46],
-      ["reviewer-a", 52, 22],
-      ["reviewer-b", 52, 46],
-      ["reviewer-c", 52, 70],
-      ["audit", 71, 46]
+      ["core", 45, 22],
+      ["reviewer-a", 22, 49],
+      ["reviewer-b", 35, 73],
+      ["reviewer-c", 57, 73],
+      ["audit", 69, 49]
     ];
     const nodes = positions.map(([id, x, y]) => {
       const agent = reviewAgents.find((item) => item.id === id);
@@ -1770,9 +1864,9 @@
       className: "review-flow",
       caption: "555 审查室围绕证据包运转：Core Challenger 质疑，Audit Specialist 查证据，Reviewer A/B/C 给出审查意见。",
       nodes: [
-        { id: "package", label: "证据包 2/5", meta: "Browser / Test / Git 待闭环", progress: 40, tone: "orange", x: 33, y: 46, reviewPackage: true, kind: "hub" },
+        { id: "package", label: "证据包 2/5", meta: "Browser / Test / Git 待闭环", progress: 40, tone: "orange", x: 45, y: 49, reviewPackage: true, kind: "hub" },
         ...nodes,
-        { id: "release", label: "Release Gate", meta: "审查通过后解锁", progress: 0, tone: "gray", x: 88, y: 46, nav: "Agent 办公室" }
+        { id: "release", label: "Release Gate", meta: "审查通过后解锁", progress: 0, tone: "gray", x: 87, y: 49, nav: "Agent 办公室" }
       ],
       edges: [
         { from: "core", to: "package", tone: "red", risk: true },
@@ -1792,14 +1886,20 @@
   }
 
   function renderWorktreeModule() {
+    const worktreePositions = [
+      { x: 40, y: 30 },
+      { x: 40, y: 70 },
+      { x: 59, y: 30 },
+      { x: 59, y: 70 }
+    ];
     const nodes = data.worktrees.map((tree, index) => ({
       id: `tree-${index}`,
       label: tree.name,
       meta: `HEAD ${tree.head}`,
       footer: tree.status === "有修改" ? "需隔离" : "干净可验证",
       tone: tree.tone,
-      x: 36 + (index % 2) * 19,
-      y: 34 + Math.floor(index / 2) * 32,
+      x: worktreePositions[index]?.x ?? 40 + (index % 2) * 19,
+      y: worktreePositions[index]?.y ?? 30 + Math.floor(index / 2) * 40,
       worktreeName: tree.name
     }));
     return renderModuleGraph({
@@ -1807,9 +1907,9 @@
       className: "worktree-flow",
       caption: "Worktree 管理保持只读状态展示：写入任务必须一任务一分支，dirty ownership 不明确时停止。",
       nodes: [
-        { id: "controller", label: "Controller", meta: "分支所有权判断", progress: 100, tone: "cyan", x: 15, y: 50, agentId: "controller", kind: "hub" },
+        { id: "controller", label: "Controller", meta: "分支所有权判断", progress: 100, tone: "cyan", x: 18, y: 50, agentId: "controller", kind: "hub" },
         ...nodes,
-        { id: "git", label: "Git 集成", meta: "diff / commit / push 边界", tone: "green", x: 80, y: 50, nav: "Git 集成" }
+        { id: "git", label: "Git 集成", meta: "diff / commit / push 边界", tone: "green", x: 82, y: 50, nav: "Git 集成" }
       ],
       edges: [
         ...nodes.map((node) => ({ from: "controller", to: node.id, tone: node.tone, risk: node.tone === "yellow" })),
@@ -1824,14 +1924,24 @@
   }
 
   function renderStatsModule() {
+    const lanePositions = [
+      { x: 18, y: 43 },
+      { x: 38, y: 43 },
+      { x: 58, y: 43 },
+      { x: 78, y: 43 },
+      { x: 18, y: 74 },
+      { x: 38, y: 74 },
+      { x: 58, y: 74 },
+      { x: 78, y: 74 }
+    ];
     const laneNodes = effectiveLanes().map((lane, index) => ({
       id: lane.id,
       label: lane.label,
       meta: lane.status,
       progress: lane.progress,
       tone: lane.tone,
-      x: 18 + (index % 4) * 21,
-      y: 46 + Math.floor(index / 4) * 26,
+      x: lanePositions[index]?.x ?? 18 + (index % 4) * 20,
+      y: lanePositions[index]?.y ?? 43 + Math.floor(index / 4) * 31,
       laneId: lane.id
     }));
     return renderModuleGraph({
@@ -1839,7 +1949,7 @@
       className: "stats-flow",
       caption: "项目统计用泳道节点展示进度，低于 50% 的 QA / 555 / Release 会进入风险观察。",
       nodes: [
-        { id: "hub", label: "运行指标 Hub", meta: `${activityStream.length} 实时事件 / ${data.evidence.length} 证据`, tone: runtimeStep().tone, x: 50, y: 21, nav: "总览", kind: "hub" },
+        { id: "hub", label: "运行指标 Hub", meta: `${activityStream.length} 实时事件 / ${data.evidence.length} 证据`, tone: runtimeStep().tone, x: 49, y: 18, nav: "总览", kind: "hub" },
         ...laneNodes
       ],
       edges: laneNodes.map((node) => ({ from: "hub", to: node.id, tone: node.tone, risk: node.progress < 50 })),
@@ -1858,7 +1968,7 @@
       className: "git-flow",
       caption: "Git 集成模块只做状态和证据编排，不在 HTML 中执行 git add、commit、push 或 reset。",
       nodes: [
-        { id: "worktree", label: "Worktree 状态", meta: `${data.worktrees.length} 个分支`, tone: "green", x: 15, y: 50, nav: "Worktree 管理" },
+        { id: "worktree", label: "Worktree 状态", meta: `${data.worktrees.length} 个分支`, tone: "green", x: 14, y: 50, nav: "Worktree 管理" },
         { id: "diff", label: "git-diff.patch", meta: "+128 -23", tone: "green", x: 33, y: 34, evidenceId: "diff" },
         { id: "test", label: "api-test.json", meta: "PASS", tone: "green", x: 52, y: 34, evidenceId: "api" },
         { id: "review", label: "555 Review", meta: "证据包 2/5", progress: 20, tone: "orange", x: 69, y: 50, reviewPackage: true },
@@ -1885,12 +1995,12 @@
 
   function renderSettingsModule() {
     const settingsHealthPositions = [
-      { x: 18, y: 31 },
-      { x: 38, y: 31 },
-      { x: 18, y: 55 },
-      { x: 38, y: 55 },
-      { x: 18, y: 78 },
-      { x: 38, y: 78 }
+      { x: 16, y: 32 },
+      { x: 32, y: 32 },
+      { x: 16, y: 56 },
+      { x: 32, y: 56 },
+      { x: 16, y: 78 },
+      { x: 32, y: 78 }
     ];
     const healthNodes = (data.runtime?.health || []).map((item, index) => ({
       id: `health-${index}`,
@@ -1906,10 +2016,10 @@
       className: "settings-flow",
       caption: "系统设置展示当前 runtime 数据源、桥接模式、健康状态和安全控制，不直接执行外部命令。",
       nodes: [
-        { id: "source", label: data.runtime?.source || "mock-runtime", meta: data.runtime?.mode || "mirror", tone: "cyan", x: 55, y: 20, action: "system-health", kind: "hub" },
+        { id: "source", label: data.runtime?.source || "mock-runtime", meta: data.runtime?.mode || "mirror", tone: "cyan", x: 48, y: 20, action: "system-health", kind: "hub" },
         ...healthNodes,
-        { id: "bridge", label: "Codex Bridge", meta: codexBridgeStatus, tone: "purple", x: 76, y: 42, action: "focus-codex-request", kind: "wide" },
-        { id: "guard", label: "安全边界", meta: "外部动作需人工批准", tone: "yellow", x: 76, y: 64, action: "system-health", kind: "wide" }
+        { id: "bridge", label: "Codex Bridge", meta: codexBridgeStatus, tone: "purple", x: 72, y: 39, action: "focus-codex-request", kind: "wide" },
+        { id: "guard", label: "安全边界", meta: "外部动作需人工批准", tone: "yellow", x: 72, y: 66, action: "system-health", kind: "wide" }
       ],
       edges: [
         ...healthNodes.map((node) => ({ from: "source", to: node.id, tone: node.tone })),
@@ -2044,6 +2154,7 @@
     const activeRun = bridgeRuntime?.state?.activeRun;
     const controller = bridgeRuntime?.state?.controller;
     const projectSession = bridgeRuntime?.state?.projectSession;
+    const project = effectiveProject();
     const blockerCount = bridgeRuntime?.state?.blockers?.length || 0;
     const statusTone = blockerCount ? "orange" : activeRun ? "cyan" : requestTone;
     const bridgeFeed = [
@@ -2051,7 +2162,7 @@
         <div class="codex-feed-row live">
           <span>Project Session</span>
           <strong>${escapeHtml(projectSession.status || projectSession.lifecycle || "active")}</strong>
-          <em>${escapeHtml(`${projectSession.gate || data.project.gate} -> ${projectSession.nextGate || data.project.nextGate}`)}</em>
+          <em>${escapeHtml(`${project.gate} -> ${project.nextGate}`)}</em>
         </div>
       ` : "",
       controller ? `
@@ -2552,18 +2663,19 @@
   }
 
   function openModuleActionDetail(label) {
+    const project = effectiveProject();
     const actionLabel = label || "模块动作";
     submitBridgeAction("module.action.inspect", "查看模块动作", {
       id: `${activeNav}:${actionLabel}`,
       name: actionLabel,
       type: "module-action"
-    }, { activeNav, label: actionLabel, gate: data.project.gate, runtime: data.runtime });
+    }, { activeNav, label: actionLabel, gate: project.gate, runtime: data.runtime });
     openModal({
       kicker: activeNav,
       title: actionLabel,
       body: `${actionLabel} 已接入 ${activeNav} 模块反馈。当前展示本地运行镜像，同时已提交到 Codex Bridge 等待 Controller 检查。`,
       rows: [
-        { label: "当前 Gate", value: data.project.gate },
+        { label: "当前 Gate", value: project.gate },
         { label: "模块", value: activeNav },
         { label: "运行源", value: data.runtime?.source || "mock" },
         { label: "真实联动", value: "已提交到 Codex Bridge" }
@@ -2657,30 +2769,33 @@
   }
 
   function openGateDetail() {
+    const project = effectiveProject();
+    const nextCode = gateCode(project.nextGate) || "下一 Gate";
     submitBridgeAction("gate.inspect", "检查 Gate 状态", {
-      id: data.project.gate,
-      name: data.project.gate
-    }, { gate: data.project.gate, nextGate: data.project.nextGate });
+      id: project.gate,
+      name: project.gate
+    }, { gate: project.gate, nextGate: project.nextGate });
     openModal({
       kicker: "Gate",
       title: "Gate 详情",
-      body: "Gate 检查请求已提交到 Codex Bridge。当前阶段进入 XB-4 开发与验证，下一步是 XB-5 集成与审查。",
+      body: `Gate 检查请求已提交到 Codex Bridge。当前阶段是 ${project.gate}，下一步是 ${project.nextGate}。`,
       rows: [
-        { label: "当前 Gate", value: data.project.gate },
-        { label: "下一 Gate", value: data.project.nextGate },
-        { label: "状态", value: data.project.status },
+        { label: "当前 Gate", value: project.gate },
+        { label: "下一 Gate", value: project.nextGate },
+        { label: "状态", value: project.status },
+        ...(project.gateEvidence ? [{ label: "核验证据", value: project.gateEvidence }] : []),
         { label: "Codex 承接", value: "右侧 Codex Bridge 卡片 / 下方流程推进入口 / 复制任务包给当前 Codex 线程" }
       ],
       actions: [
         {
-          label: "申请进入 XB-5",
+          label: `申请进入 ${nextCode}`,
           type: "bridge",
           primary: true,
           actionType: "gate.advance.request",
-          bridgeLabel: "申请进入 XB-5 集成与审查",
+          bridgeLabel: `申请进入 ${project.nextGate}`,
           target: {
-            id: data.project.nextGate,
-            name: data.project.nextGate,
+            id: project.nextGate,
+            name: project.nextGate,
             type: "gate"
           }
         },
@@ -2695,14 +2810,16 @@
 
   function openGateAdvanceQueued() {
     const latest = codexRequests[0];
+    const project = effectiveProject();
+    const nextCode = gateCode(project.nextGate) || "下一 Gate";
     openModal({
       kicker: "Codex Bridge",
-      title: "XB-5 申请已进入队列",
+      title: `${nextCode} 申请已进入队列`,
       body: "页面已经提交 gate.advance.request。真实推进由 Codex Controller 在本地队列中读取后执行；页面会继续显示队列、执行和证据回写状态。",
       rows: [
         { label: "当前请求", value: latest?.id || "gate.advance.request" },
         { label: "页面承接", value: "右侧 Codex Bridge 卡片查看队列；下方流程推进入口补充说明" },
-        { label: "Codex 承接", value: "在当前 Codex 线程确认 XB-5 前置条件、执行核验并回写 Gate 结果" },
+        { label: "Codex 承接", value: `在当前 Codex 线程确认 ${nextCode} 前置条件、执行核验并回写 Gate 结果` },
         { label: "核验范围", value: "QA、555 审查、证据墙、Git / Worktree 状态" }
       ],
       list: [
@@ -3183,18 +3300,20 @@
       });
     }
     if (action === "gate-advance") {
-      submitBridgeAction("gate.advance.request", "申请进入 XB-5 集成与审查", {
-        id: data.project.nextGate,
-        name: data.project.nextGate,
+      const project = effectiveProject();
+      const nextCode = gateCode(project.nextGate) || "下一 Gate";
+      submitBridgeAction("gate.advance.request", `申请进入 ${project.nextGate}`, {
+        id: project.nextGate,
+        name: project.nextGate,
         type: "gate"
       }, {
-        currentGate: data.project.gate,
-        nextGate: data.project.nextGate,
+        currentGate: project.gate,
+        nextGate: project.nextGate,
         lanes: effectiveLanes(),
         evidence: data.evidence,
-        note: "HTML 只提交 Gate 推进申请；是否进入 XB-5 必须由 Codex/QA/555 根据证据回写确认。"
+        note: `HTML 只提交 Gate 推进申请；是否进入 ${nextCode} 必须由 Codex/QA/555 根据证据回写确认。`
       });
-      pushActivity("Controller", "已提交进入 XB-5 的 Gate 推进申请", "Gate 推进", "green");
+      pushActivity("Controller", `已提交进入 ${nextCode} 的 Gate 推进申请`, "Gate 推进", "green");
       addConversationMessage(selectedAgent, "Gate 推进申请已进入 Codex Bridge 队列。下一步请看右侧 Codex Bridge 或下方流程推进入口，由 Codex Controller 核对 QA、555、证据墙和 Worktree 后回写。", "green");
       openGateAdvanceQueued();
       setToast("已进入 Codex Bridge 队列：看右侧 Bridge 或下方流程入口");
@@ -3217,10 +3336,11 @@
   }
 
   function openSystemHealth() {
+    const project = effectiveProject();
     submitBridgeAction("system.health.inspect", "检查系统健康", {
       id: "system-health",
       name: "系统健康"
-    }, { runtime: data.runtime, bridgeStatus: codexBridgeStatus });
+    }, { runtime: data.runtime, bridgeStatus: codexBridgeStatus, project });
     const healthRows = (data.runtime?.health || []).map((item) => ({
       label: item.label,
       value: item.value
@@ -3231,10 +3351,10 @@
       title: "系统健康",
       body: "当前前端运行正常，静态资源、mock 数据和 Agent 对话镜像已加载。",
       rows: [
-        { label: "项目", value: data.project.name },
-        { label: "分支", value: data.project.branch },
-        { label: "阶段", value: data.project.stage },
-        { label: "基础状态", value: data.project.systemStatus },
+        { label: "项目", value: project.name },
+        { label: "分支", value: project.branch },
+        { label: "阶段", value: project.stage },
+        { label: "基础状态", value: project.systemStatus },
         { label: "运行源", value: data.runtime?.source || "mock" },
         ...healthRows
       ],
