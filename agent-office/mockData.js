@@ -27,6 +27,7 @@ window.JUDGMENT_OFFICE_DATA = {
       { label: "办公室模式", value: "通过", tone: "green" },
       { label: "拓扑模式", value: "通过", tone: "green" },
       { label: "证据墙交互", value: "通过", tone: "green" },
+      { label: "问题单闭环", value: "3/3 已处理", tone: "green" },
       { label: "真实 Agent 运行", value: "待接入", tone: "yellow" }
     ]
   },
@@ -266,22 +267,54 @@ window.JUDGMENT_OFFICE_DATA = {
     }
   ],
   flowLines: [
-    { from: [20, 30], to: [39, 30], tone: "blue" },
-    { from: [44, 30], to: [53, 30], tone: "purple" },
-    { from: [59, 30], to: [72, 30], tone: "green" },
-    { from: [56, 33], to: [56, 45], tone: "purple" },
-    { from: [72, 32], to: [72, 67], tone: "yellow" },
-    { from: [27, 32], to: [27, 67], tone: "blue" },
-    { from: [27, 67], to: [46, 67], tone: "blue" },
-    { from: [70, 67], to: [84, 67], tone: "red" }
+    { points: [[24.8, 31.5], [31.2, 31.5], [32.8, 31.5], [38.2, 31.5]], tone: "blue" },
+    { points: [[48.5, 31.5], [55.2, 31.5]], tone: "purple" },
+    { points: [[68.2, 31.5], [71.4, 31.5], [72.8, 31.5]], tone: "green" },
+    { points: [[62.2, 39.2], [62.2, 45.5], [57.4, 45.5], [57.4, 55.4]], tone: "purple" },
+    { points: [[78.8, 39.2], [72.4, 39.2], [72.4, 55.6], [67.8, 55.6], [67.8, 62.6]], tone: "yellow" },
+    { points: [[24.2, 75.0], [27.4, 75.0], [27.4, 69.4], [36.6, 69.4], [36.6, 74.8]], tone: "blue" },
+    { points: [[42.4, 69.4], [56.0, 69.4], [56.0, 73.8]], tone: "purple" },
+    { points: [[68.8, 68.2], [73.2, 68.2], [73.2, 65.8], [81.6, 65.8], [81.6, 74.0]], tone: "red" }
   ],
   activities: [
     { time: "18:36:21", agent: "UI Agent", text: "完成页面布局开发，提交代码到 feature/ui-dashboard", tag: "代码提交", tone: "green" },
-    { time: "18:35:48", agent: "QA Agent", text: "发现 3 个问题，已创建缺陷单", tag: "问题单", tone: "red" },
+    { time: "18:35:48", agent: "QA Agent", text: "3 个交互问题已逐项处理，等待回归复核", tag: "问题已处理", tone: "green" },
     { time: "18:35:02", agent: "Backend Agent", text: "API 接口开发完成，等待前端联调", tag: "代码提交", tone: "green" },
     { time: "18:34:10", agent: "555 审查室", text: "要求补充 Browser 证据", tag: "审查要求", tone: "orange" },
     { time: "18:33:45", agent: "UI Agent", text: "上传初版截图", tag: "证据提交", tone: "blue" },
     { time: "18:32:16", agent: "QA Agent", text: "开始测试暗色模式", tag: "运行中", tone: "green" }
+  ],
+  issues: [
+    {
+      id: "AO-ISSUE-001",
+      title: "活动动态详情缺少可理解说明",
+      severity: "P2",
+      owner: "Frontend",
+      status: "resolved",
+      symptom: "点击活动动态后只看到原始文案、标签和来源，用户无法判断这条事件代表什么。",
+      fix: "新增活动详情解释器，按问题、审查、证据、代码提交、Bridge、Git、Gate、运行中等类型生成当前含义、影响范围和建议下一步。",
+      evidence: "点击 QA Agent 问题单后可看到当前含义、影响范围、建议下一步和检查项。"
+    },
+    {
+      id: "AO-ISSUE-002",
+      title: "问题单没有列出具体缺陷",
+      severity: "P2",
+      owner: "QA",
+      status: "resolved",
+      symptom: "页面只写“发现 3 个问题”，没有可展开的问题清单、处理状态或复核证据。",
+      fix: "新增 issues 数据源和问题闭环弹窗，问题单会展示每个缺陷的症状、处理动作、证据和状态。",
+      evidence: "Activity Feed 的问题单详情和测试证据模块都能打开问题闭环。"
+    },
+    {
+      id: "AO-ISSUE-003",
+      title: "弹窗承载长解释时过窄",
+      severity: "P3",
+      owner: "UX",
+      status: "resolved",
+      symptom: "活动详情从短字段扩展成长解释后，原 420px 弹窗容易显得拥挤。",
+      fix: "把详情弹窗扩展到 560px，并增加最大高度、滚动和长文本行高。",
+      evidence: "QA 问题单弹窗能完整显示多行解释，不挤压标签和值。"
+    }
   ],
   evidenceFilters: [
     { id: "all", label: "全部" },
@@ -297,7 +330,10 @@ window.JUDGMENT_OFFICE_DATA = {
     { id: "report", name: "test-report.html", type: "测试报告", source: "QA Agent", time: "18:35:02", visual: "report", status: "READY", filter: "report" },
     { id: "video", name: "responsive.mp4", type: "交互录屏", source: "UI Agent", time: "18:34:45", visual: "video", status: "READY", filter: "browser" },
     { id: "diff", name: "git-diff.patch", type: "代码变更", source: "Backend Agent", time: "18:34:10", visual: "code", status: "+128 -23", filter: "git" },
-    { id: "api", name: "api-test.json", type: "API 测试结果", source: "QA Agent", time: "18:33:22", visual: "json", status: "PASS", filter: "report" }
+    { id: "api", name: "api-test.json", type: "API 测试结果", source: "QA Agent", time: "18:33:22", visual: "json", status: "PASS", filter: "report" },
+    { id: "activity-detail-fix", name: "activity-detail-check.json", type: "交互回归", source: "QA Agent", time: "18:38:12", visual: "json", status: "PASS", filter: "report", issueId: "AO-ISSUE-001", description: "活动动态弹窗已显示当前含义、影响范围、建议下一步和检查项。" },
+    { id: "issue-board-fix", name: "issue-board-check.json", type: "问题单闭环", source: "QA Agent", time: "18:38:34", visual: "json", status: "PASS", filter: "report", issueId: "AO-ISSUE-002", description: "问题单已能展示 3 个缺陷的症状、处理动作和复核状态。" },
+    { id: "modal-readability-fix", name: "modal-readability-check.json", type: "可读性回归", source: "UX Agent", time: "18:38:51", visual: "json", status: "PASS", filter: "browser", issueId: "AO-ISSUE-003", description: "详情弹窗宽度、最大高度和长文本行高已调整。" }
   ],
   worktrees: [
     { name: "main", status: "干净", head: "a1b2c3d", tone: "green" },

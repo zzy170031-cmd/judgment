@@ -20,9 +20,13 @@
   const activityStream = [...data.activities];
   const agentConversations = JSON.parse(JSON.stringify(data.agentConversations || {}));
   const codexRequests = [...(data.codexBridge?.requests || [])];
+  const issueBacklog = JSON.parse(JSON.stringify(data.issues || []));
   const seenBridgeEventIds = new Set();
+  const AUTO_REFRESH_MS = 90000;
   let streamTick = 0;
   let codexRequestSeq = codexRequests.length + 1;
+  let nextAutoRefreshAt = Date.now() + AUTO_REFRESH_MS;
+  let lastInteractionAt = 0;
 
   const runtimeMessages = [
     { agent: "Controller", text: "同步 Agent 状态快照", tag: "心跳", tone: "cyan" },
@@ -79,6 +83,34 @@
 
   function toneClass(tone) {
     return `tone-${tone || "blue"}`;
+  }
+
+  function autoRefreshSeconds() {
+    return Math.max(0, Math.ceil((nextAutoRefreshAt - Date.now()) / 1000));
+  }
+
+  function renderAutoRefreshPill() {
+    return `<span class="auto-refresh-pill" data-auto-refresh><i></i>${autoRefreshSeconds()}s 自动刷新</span>`;
+  }
+
+  function syncAutoRefreshPill() {
+    const pill = document.querySelector("[data-auto-refresh]");
+    if (pill) pill.innerHTML = `<i></i>${autoRefreshSeconds()}s 自动刷新`;
+  }
+
+  function startAutoRefresh() {
+    window.setInterval(() => {
+      if (Date.now() >= nextAutoRefreshAt) {
+        if (shouldDeferPageRefresh()) {
+          nextAutoRefreshAt = Date.now() + AUTO_REFRESH_MS;
+          syncAutoRefreshPill();
+          return;
+        }
+        window.location.reload();
+        return;
+      }
+      syncAutoRefreshPill();
+    }, 1000);
   }
 
   function initialNav() {
@@ -191,6 +223,110 @@
     };
   }
 
+  function workflowGuide() {
+    const step = runtimeStep();
+    const stats = issueStats();
+    const lanes = effectiveLanes();
+    const reviewLane = lanes.find((lane) => lane.id === "review");
+    const qaLane = lanes.find((lane) => lane.id === "qa");
+    const blockers = bridgeRuntime?.state?.blockers || [];
+    const latest = codexRequests[0];
+
+    if (blockers.length) {
+      return {
+        tone: "orange",
+        label: "发现卡点",
+        problem: `${blockers.length} 个卡点等待处理`,
+        next: "先查看当前执行详情，确认卡点责任方和证据要求。",
+        html: "HTML 展示卡点、责任泳道和证据入口。",
+        codex: "Codex 处理卡点并回写 /codex/event。",
+        actions: [
+          { label: "查看当前执行", attrs: "data-action=\"runtime-step\"", primary: true },
+          { label: "查看证据墙", attrs: "data-open-nav=\"测试证据\"" }
+        ]
+      };
+    }
+
+    if (stats.open > 0) {
+      return {
+        tone: "orange",
+        label: "问题待闭环",
+        problem: `${stats.open} 个问题仍需处理，${stats.resolved}/${stats.total} 已关闭`,
+        next: "先打开问题闭环，再补充对应证据，最后回到 555 审查确认。",
+        html: "HTML 指出问题单、证据墙和审查入口。",
+        codex: "Codex 修复问题、跑验证并回写处理结果。",
+        actions: [
+          { label: "处理问题", attrs: "data-action=\"open-issues\"", primary: true },
+          { label: "补证据", attrs: "data-open-nav=\"测试证据\"" },
+          { label: "去 555 审查", attrs: "data-open-nav=\"555 审查\"" }
+        ]
+      };
+    }
+
+    if (reviewLane && reviewLane.progress < 100) {
+      return {
+        tone: "orange",
+        label: "审查未完成",
+        problem: `555 审查仍是 ${reviewLane.progress}%：${reviewLane.status}`,
+        next: "优先补齐 Browser、测试报告、Git diff 或 API 证据，再让审查节点复核。",
+        html: "HTML 展示缺口、证据墙和 555 审查状态。",
+        codex: "Codex 生成证据、执行验证并提交审查包。",
+        actions: [
+          { label: "去 555 审查", attrs: "data-open-nav=\"555 审查\"", primary: true },
+          { label: "查看证据墙", attrs: "data-open-nav=\"测试证据\"" },
+          { label: "继续推进", attrs: "data-action=\"focus-codex-input\"" }
+        ]
+      };
+    }
+
+    if (qaLane && /等待|审查|测试/.test(qaLane.status)) {
+      return {
+        tone: "yellow",
+        label: "等待验证",
+        problem: `QA 当前 ${qaLane.status}，进度 ${qaLane.progress}%`,
+        next: "先查看测试证据，确认哪些验证已完成、哪些需要 Codex 继续执行。",
+        html: "HTML 展示测试证据和 QA 状态。",
+        codex: "Codex 执行测试并把报告回写到证据墙。",
+        actions: [
+          { label: "查看证据墙", attrs: "data-open-nav=\"测试证据\"", primary: true },
+          { label: "刷新输出", attrs: "data-action=\"stream-agent\"" },
+          { label: "继续推进", attrs: "data-action=\"focus-codex-input\"" }
+        ]
+      };
+    }
+
+    if (latest && ["queued", "accepted"].includes(latest.status)) {
+      const displayId = latest.id && latest.id.length > 28 ? `${latest.id.slice(0, 25)}...` : latest.id;
+      return {
+        tone: "cyan",
+        label: "请求已排队",
+        problem: `${displayId} 等待 Codex 侧处理`,
+        next: "查看当前执行或 Bridge 契约，确认请求已接收、正在排队还是需要补充任务说明。",
+        html: "HTML 展示队列、当前请求和下一步入口。",
+        codex: "Codex 读取任务包，执行后回写状态和证据。",
+        actions: [
+          { label: "查看当前执行", attrs: "data-action=\"runtime-step\"", primary: true },
+          { label: "Bridge 契约", attrs: "data-action=\"focus-codex-request\"" },
+          { label: "补充需求", attrs: "data-action=\"focus-codex-input\"" }
+        ]
+      };
+    }
+
+    return {
+      tone: step.tone || "cyan",
+      label: "等待下一步",
+      problem: step.title.replace(/^当前执行：/, ""),
+      next: "在下方 Codex 需求入口输入下一步，或点击泳道/证据/Worktree 查看具体缺口。",
+      html: "HTML 负责选择流程、定位问题、查看证据。",
+      codex: "Codex 负责执行修改、测试和回写结果。",
+      actions: [
+        { label: "发起需求", attrs: "data-action=\"focus-codex-input\"", primary: true },
+        { label: "查看执行", attrs: "data-action=\"runtime-step\"" },
+        { label: "查看证据", attrs: "data-open-nav=\"测试证据\"" }
+      ]
+    };
+  }
+
   function currentMode() {
     if (activeNav === "项目拓扑") return "topology";
     return "office";
@@ -241,6 +377,224 @@
   function pushActivity(agent, text, tag, tone) {
     activityStream.unshift({ time: nowTime(), agent, text, tag, tone });
     if (activityStream.length > 10) activityStream.length = 10;
+  }
+
+  function issueStats() {
+    const total = issueBacklog.length;
+    const resolved = issueBacklog.filter((issue) => issue.status === "resolved").length;
+    const open = total - resolved;
+    return { total, resolved, open };
+  }
+
+  function issueStatusLabel(status) {
+    return {
+      resolved: "已处理",
+      open: "待处理",
+      blocked: "卡点",
+      review: "待复核"
+    }[status] || status || "未知";
+  }
+
+  function issueTone(issue) {
+    if (issue.status === "resolved") return "green";
+    if (issue.status === "blocked") return "red";
+    if (issue.status === "review") return "orange";
+    return "yellow";
+  }
+
+  function isIssueActivity(item) {
+    const text = String(item?.text || "");
+    const tag = String(item?.tag || "");
+    return tag.includes("问题") || tag.includes("缺陷") || text.includes("问题") || text.includes("缺陷");
+  }
+
+  function activityDetailFor(item) {
+    const text = String(item?.text || "");
+    const tag = String(item?.tag || "");
+    const agent = String(item?.agent || "Agent");
+    const tone = String(item?.tone || "");
+    const signal = `${tag} ${text}`.toLowerCase();
+    const isResolvedIssue = isIssueActivity(item) && issueBacklog.length > 0 && issueStats().open === 0;
+    const isProblem = tone === "red" || tag.includes("问题") || tag.includes("缺陷") || text.includes("问题") || text.includes("缺陷") || signal.includes("fail");
+    const isReview = tag.includes("审查") || agent.includes("555") || text.includes("555");
+    const isEvidence = tag.includes("证据") || text.includes("证据") || signal.includes("evidence") || tag.includes("截图") || text.includes("截图");
+    const isCommit = tag.includes("代码") || tag.includes("提交") || text.includes("提交代码") || signal.includes("commit");
+    const isBridge = tag.includes("桥接") || agent.includes("Bridge") || text.includes("bridge");
+    const isRunning = tag.includes("运行") || text.includes("等待") || text.includes("开始") || signal.includes("running");
+    const isGate = tag.includes("Gate") || text.includes("Gate");
+    const isGit = tag.includes("Git") || text.includes("worktree") || text.includes("Worktree") || agent.includes("Git");
+
+    if (isResolvedIssue) {
+      const stats = issueStats();
+      return {
+        summary: `这条问题单已经形成闭环：${stats.resolved}/${stats.total} 个问题已处理，当前等待 QA 或用户回归确认。`,
+        meaning: "问题不再只是提示文字，页面已记录每个缺陷的症状、处理动作和证据。",
+        impact: "当前不再阻塞基础交互，但进入下一 Gate 前仍需要保留回归证据。",
+        next: "打开问题闭环或 Evidence Wall，逐项核对处理记录和 PASS 证据。",
+        surface: "问题闭环 / Evidence Wall / 测试证据",
+        checks: issueBacklog.map((issue) => `${issue.id} · ${issueStatusLabel(issue.status)} · ${issue.title}`)
+      };
+    }
+
+    if (isProblem) {
+      return {
+        summary: "这条动态表示当前检查或 QA 环节发现了需要处理的问题，不能只当成普通日志跳过。",
+        meaning: "有缺陷或阻塞项需要回到对应实现泳道修复，并补充验证证据。",
+        impact: "相关节点在修复和复测前不应进入下一 Gate 或 555 通过状态。",
+        next: "打开测试证据或 Evidence Wall，确认具体失败点、责任泳道、修复状态和复测结果。",
+        surface: "测试证据 / Evidence Wall / 555 审查",
+        checks: ["确认问题清单是否有明确标题和复现条件。", "确认修复后是否有截图、测试报告或日志证据。", "如果影响交付，升级到 555 审查而不是直接标记完成。"]
+      };
+    }
+
+    if (isReview) {
+      return {
+        summary: "这条动态来自审查链路，通常表示当前证据还不足或交付需要独立确认。",
+        meaning: "555/审查角色正在要求补充证据、解释风险或关闭争议。",
+        impact: "审查要求关闭前，当前交付只能算条件通过或待确认。",
+        next: "补齐审查要求指向的 Browser、测试、Git 或交互证据，再重新打开审查节点确认。",
+        surface: "555 审查 / Evidence Wall",
+        checks: ["确认审查要求对应哪一类证据。", "确认证据是否能直接证明用户可见行为。", "保留未关闭风险，不要把审查要求当成普通提醒。"]
+      };
+    }
+
+    if (isEvidence) {
+      return {
+        summary: "这条动态表示有新的证据材料进入页面，用来支撑某个节点的完成或问题判断。",
+        meaning: "证据已提交，但还需要看它能否证明目标行为、测试结果或代码状态。",
+        impact: "证据可以推进验收，但证据本身不等于节点自动完成。",
+        next: "在 Evidence Wall 打开对应卡片，检查来源、时间、类型和是否覆盖当前 Gate 的验收标准。",
+        surface: "Evidence Wall",
+        checks: ["确认该证据是否与当前任务直接相关。", "确认证据是否足够新，避免使用过期截图或旧日志。", "需要时补一条说明，把证据和验收项对应起来。"]
+      };
+    }
+
+    if (isCommit) {
+      return {
+        summary: "这条动态表示某个实现泳道提交或更新了代码，后续重点是验证而不是只看提交动作。",
+        meaning: "代码变更已经进入流程，需要用语法检查、测试、Browser 或 Git diff 证明它可用。",
+        impact: "没有验证证据时，代码提交只能代表实现尝试，不能代表交付完成。",
+        next: "查看 Git / Worktree 状态、相关 diff 和测试结果，再决定是否进入 QA 或审查。",
+        surface: "Git 集成 / Worktree 管理 / 测试证据",
+        checks: ["确认提交所在分支或 worktree。", "确认是否有对应测试、截图或运行日志。", "确认有没有影响共享文件、路由、schema 或锁文件。"]
+      };
+    }
+
+    if (isBridge) {
+      return {
+        summary: "这条动态来自本地 Codex Bridge，说明 HTML 页面和 Codex 运行状态之间发生了同步。",
+        meaning: "页面请求被接收、排队或执行了 allowlist 验证；真实项目动作仍由 Codex 线程推进。",
+        impact: "Bridge 状态能说明页面联动是否通畅，但不能替代人工确认或 Git/测试证据。",
+        next: "查看 Codex Bridge 面板和 `/codex/state`，确认请求状态、当前节点、卡点和最新证据。",
+        surface: "Codex Bridge / 当前焦点 / Activity Feed",
+        checks: ["确认请求是已接收、已排队、已执行还是失败。", "确认自由文本需求没有被 HTML 直接执行。", "需要真实推进时由 Codex 线程读取任务包并按权限执行。"]
+      };
+    }
+
+    if (isGit) {
+      return {
+        summary: "这条动态表示 Git 或 Worktree 状态被查看或发生了变化，需要关注分支边界。",
+        meaning: "当前事件与代码隔离、分支、HEAD 或工作区干净状态有关。",
+        impact: "如果 worktree 不干净或分支被占用，后续执行、合并和清理都要先确认所有权。",
+        next: "打开 Worktree 管理，确认路径、分支、HEAD、dirty 状态和责任泳道。",
+        surface: "Worktree 管理 / Git 集成",
+        checks: ["确认是否是当前任务拥有的改动。", "确认是否存在并行 worker 或分支占用。", "不要在所有权不清楚时执行清理、reset 或强制切换。"]
+      };
+    }
+
+    if (isGate) {
+      return {
+        summary: "这条动态与 Gate 判断有关，用来说明项目当前是否能进入下一阶段。",
+        meaning: "Gate 需要有清晰验收标准和证据，不是单纯的进度标签。",
+        impact: "缺少证据时只能停留在当前 Gate 或给出条件通过。",
+        next: "打开 Gate 详情，核对当前 Gate、下一 Gate、完成标准、阻塞项和验收证据。",
+        surface: "Gate 详情 / Evidence Wall",
+        checks: ["确认 Gate 是否有明确通过条件。", "确认 Browser、测试、Git 或审查证据是否齐全。", "如果是发布或里程碑，交给 555 做独立审查。"]
+      };
+    }
+
+    if (isRunning) {
+      return {
+        summary: "这条动态表示某个节点正在运行、等待联调或刚开始执行。",
+        meaning: "当前不是最终结果，重点是等待下一条完成、失败、阻塞或证据事件。",
+        impact: "运行中状态只能说明流程在推进，不能直接证明功能已可交付。",
+        next: "观察当前焦点、泳道进度和后续 Activity Feed，直到出现验证结果或明确卡点。",
+        surface: "当前焦点 / 泳道进度 / Activity Feed",
+        checks: ["确认当前节点是谁在推进。", "确认它等待的下游是谁。", "确认超时或卡住时是否需要写入 blocker。"]
+      };
+    }
+
+    return {
+      summary: "这条动态是项目运行流水中的一条事件，用来帮助判断当前推进到哪里。",
+      meaning: "它记录了来源 Agent、事件内容和标签，但是否完成仍要看证据、测试或审查结果。",
+      impact: "该事件本身是线索，不是最终验收结论。",
+      next: "根据来源 Agent 和标签，跳到对应模块查看更完整的证据或状态。",
+      surface: "Activity Feed / 当前 Agent / Evidence Wall",
+      checks: ["确认事件来源和标签是否可信。", "确认是否有对应证据或下游节点。", "如果它描述问题、阻塞或审查要求，优先处理而不是忽略。"]
+    };
+  }
+
+  function modalForActivity(item) {
+    if (item?.summaryItems) {
+      return {
+        kicker: "Activity Feed",
+        title: "桥接队列摘要",
+        body: item.text,
+        rows: [
+          { label: "状态", value: item.tag },
+          { label: "来源", value: item.agent },
+          { label: "处理方式", value: "普通页面点击已折叠；真正的缺陷、阻塞、审查需求仍会逐条显示。" }
+        ],
+        list: item.summaryItems
+      };
+    }
+    const detail = activityDetailFor(item);
+    const stats = issueStats();
+    const issueRows = isIssueActivity(item) && issueBacklog.length
+      ? [
+          { label: "问题闭环", value: `${stats.resolved}/${stats.total} 已处理${stats.open ? `，${stats.open} 待处理` : ""}` },
+          ...issueBacklog.map((issue) => ({
+            label: issue.id,
+            value: `${issueStatusLabel(issue.status)} · ${issue.title} · ${issue.fix}`
+          }))
+        ]
+      : [];
+    return {
+      kicker: "Activity Feed",
+      title: `${item.time} · ${item.agent}`,
+      body: detail.summary,
+      rows: [
+        { label: "原始动态", value: item.text || "暂无原始描述" },
+        { label: "当前含义", value: detail.meaning },
+        { label: "影响范围", value: detail.impact },
+        { label: "建议下一步", value: detail.next },
+        { label: "查看位置", value: detail.surface },
+        ...issueRows,
+        { label: "标签", value: item.tag || "未标记" },
+        { label: "来源", value: item.agent || "未知" }
+      ],
+      list: detail.checks
+    };
+  }
+
+  function modalForIssueBoard() {
+    const stats = issueStats();
+    return {
+      kicker: "Issue Board",
+      title: `问题闭环 ${stats.resolved}/${stats.total}`,
+      body: stats.open
+        ? "仍有问题未关闭，进入下一 Gate 前需要继续处理。"
+        : "3 个交互问题已逐项处理，当前状态为等待回归复核。",
+      rows: issueBacklog.map((issue) => ({
+        label: issue.id,
+        value: `${issueStatusLabel(issue.status)} · ${issue.severity} · ${issue.owner} · ${issue.title}`
+      })),
+      list: issueBacklog.flatMap((issue) => [
+        `${issue.id} 症状：${issue.symptom}`,
+        `${issue.id} 处理：${issue.fix}`,
+        `${issue.id} 证据：${issue.evidence}`
+      ])
+    };
   }
 
   function getConversation(agent) {
@@ -313,6 +667,28 @@
     return before !== after;
   }
 
+  function isBridgeLifecycleEvent(event) {
+    const tag = String(event?.tag || "");
+    const text = String(event?.text || "");
+    return tag === "request-queued" ||
+      tag === "request-complete" ||
+      tag === "codex-read" ||
+      text.includes("Queued in local Codex request queue") ||
+      text.includes("Read-only HTML inspection recorded") ||
+      text.includes("Codex 已读取并闭环 HTML 请求");
+  }
+
+  function isBridgeLifecycleActivity(item) {
+    const tag = String(item?.tag || "");
+    const text = String(item?.text || "");
+    return tag === "request-queued" ||
+      tag === "request-complete" ||
+      tag === "codex-read" ||
+      text.includes("Queued in local Codex request queue") ||
+      text.includes("Read-only HTML inspection recorded") ||
+      text.includes("Codex 已读取并闭环 HTML 请求");
+  }
+
   function mergeBridgeEvent(event) {
     if (!event?.id || seenBridgeEventIds.has(event.id)) return false;
     seenBridgeEventIds.add(event.id);
@@ -322,11 +698,15 @@
       agent: event.agent || event.source || "Codex",
       text: event.text || "Codex 运行事件已更新",
       tag: event.tag || statusLabel(event.status),
-      tone
+      tone,
+      requestId: event.requestId || event.id,
+      status: event.status
     });
-    if (activityStream.length > 12) activityStream.length = 12;
+    if (activityStream.length > 40) activityStream.length = 40;
     const agent = agentFromRuntimeEvent(event);
-    addConversationMessage(agent, event.text || "Codex 运行事件已更新", tone);
+    if (!isBridgeLifecycleEvent(event)) {
+      addConversationMessage(agent, event.text || "Codex 运行事件已更新", tone);
+    }
     return true;
   }
 
@@ -350,7 +730,16 @@
   }
 
   function shouldDeferRuntimeRender() {
-    return document.activeElement?.matches?.("[data-codex-input], [data-search-input]");
+    return Boolean(
+      activeModal ||
+      activePopover ||
+      Date.now() - lastInteractionAt < 600 ||
+      document.activeElement?.matches?.("[data-codex-input], [data-search-input]")
+    );
+  }
+
+  function shouldDeferPageRefresh() {
+    return shouldDeferRuntimeRender();
   }
 
   function pollBridgeState() {
@@ -373,8 +762,9 @@
       });
   }
 
-  function buildCodexRequestPacket(text) {
-    const id = `codex-${String(codexRequestSeq++).padStart(3, "0")}`;
+  function buildCodexRequestPacket(text, options = {}) {
+    const stamp = new Date().toISOString().replace(/[^0-9]/g, "").slice(0, 14);
+    const id = `codex-${stamp}-${String(codexRequestSeq++).padStart(3, "0")}`;
     return {
       id,
       createdAt: new Date().toISOString(),
@@ -383,6 +773,10 @@
       branch: data.project.branch,
       gate: data.project.gate,
       module: activeNav,
+      actionType: options.actionType || "freeform-request",
+      actionLabel: options.actionLabel || "Codex request",
+      target: options.target || null,
+      payload: options.payload || null,
       selectedAgent: {
         id: selectedAgent.id,
         name: selectedAgent.name,
@@ -411,14 +805,14 @@
     return JSON.stringify(packet, null, 2);
   }
 
-  function submitCodexRequest(text) {
+  function submitCodexRequest(text, options = {}) {
     const trimmed = text.trim();
     if (!trimmed) {
       setToast("请输入要交给 Codex 的需求");
       focusCodexAfterRender = true;
       return;
     }
-    const packet = buildCodexRequestPacket(trimmed);
+    const packet = buildCodexRequestPacket(trimmed, options);
     packet.status = "queued";
     packet.statusText = "本地队列等待桥接";
     codexRequests.unshift(packet);
@@ -460,6 +854,26 @@
     });
   }
 
+  function submitBridgeAction(actionType, actionLabel, target, payload = {}) {
+    const targetLabel = target?.name || target?.label || target?.id || selectedAgent.name;
+    const request = `执行页面动作：${actionLabel}。目标：${targetLabel}。请由 Judgment Controller 按权限、证据 gate 和 stop condition 路由处理，并回写 /codex/event。`;
+    return submitCodexRequest(request, {
+      actionType,
+      actionLabel,
+      target,
+      payload: {
+        activeNav,
+        selectedAgent: {
+          id: selectedAgent.id,
+          name: selectedAgent.name,
+          status: selectedAgent.status,
+          progress: selectedAgent.progress
+        },
+        ...payload
+      }
+    });
+  }
+
   function copyText(text, successMessage) {
     if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(text).then(() => {
@@ -484,12 +898,120 @@
     });
   }
 
+  function modalText(modal) {
+    return [
+      modal.kicker,
+      modal.title,
+      modal.body,
+      ...(modal.rows || []).flatMap((row) => [row.label, row.value]),
+      ...(modal.list || [])
+    ].filter(Boolean).join(" ");
+  }
+
+  function actionKey(action) {
+    return `${action.type || "bridge"}:${action.value || action.label || action.actionType || ""}`;
+  }
+
+  function modalContextActions(modal) {
+    const text = modalText(modal);
+    const isBridgeContract = modal.kicker === "Codex Bridge" && /契约|Contract/.test(modal.title || "");
+    const actions = [];
+    if (/555|审查|Review|Reviewer/.test(text)) {
+      actions.push({ label: "打开 555 审查", type: "nav", value: "555 审查", primary: true });
+    }
+    if (/证据|Evidence|Browser|测试报告|截图|Git diff|补证据/.test(text)) {
+      actions.push({ label: "查看证据墙", type: "nav", value: "测试证据", primary: actions.length === 0 });
+    }
+    if (/Worktree|Git|分支|HEAD|dirty/i.test(text)) {
+      actions.push({ label: "打开 Worktree", type: "nav", value: "Worktree 管理", primary: actions.length === 0 });
+    }
+    if (/Gate|阶段|XB-/.test(text)) {
+      actions.push({ label: "查看 Gate", type: "gate", primary: actions.length === 0 });
+    }
+    if (!isBridgeContract && /Codex|Bridge|桥接|任务包|队列/.test(text)) {
+      actions.push({ label: "查看 Bridge 契约", type: "action", value: "focus-codex-request", primary: actions.length === 0 });
+    }
+    if (/Agent|泳道|办公室|拓扑|节点/.test(text)) {
+      actions.push({ label: "回到办公室", type: "nav", value: "Agent 办公室", primary: actions.length === 0 });
+    }
+    return actions;
+  }
+
+  function normalizeModalActions(modal) {
+    const baseActions = modal.actions || [];
+    const contextActions = modalContextActions(modal);
+    const nextAction = {
+      label: "继续推进到 Codex",
+      type: "bridge",
+      primary: ![...baseActions, ...contextActions].some((action) => action.primary),
+      actionType: "modal.next-step",
+      bridgeLabel: `继续推进：${modal.title || modal.kicker || activeNav}`
+    };
+    const copyAction = { label: "复制任务包", type: "copy-packet" };
+    const reservedCount = 2;
+    const contextLimit = Math.max(0, 5 - baseActions.length - reservedCount);
+    const actions = [...baseActions, ...contextActions.slice(0, contextLimit), nextAction, copyAction];
+    const seen = new Set();
+    return actions.filter((action) => {
+      const key = actionKey(action);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 5);
+  }
+
+  function submitModalNextStep(modal, action) {
+    const target = action.target || {
+      id: action.actionType || "modal.next-step",
+      name: modal.title || modal.kicker || activeNav,
+      type: "modal-next-step"
+    };
+    const rows = (modal.rows || []).map((row) => ({ label: row.label, value: row.value }));
+    submitBridgeAction(action.actionType || "modal.next-step", action.bridgeLabel || action.label || "继续推进", target, {
+      modal: {
+        kicker: modal.kicker,
+        title: modal.title,
+        body: modal.body,
+        rows,
+        list: modal.list || []
+      },
+      requestedFrom: activeNav
+    });
+    pushActivity("Controller", `从弹窗继续推进：${modal.title || modal.kicker}`, "下一步推进", "cyan");
+    setToast("已提交下一步推进到 Codex Bridge");
+  }
+
+  function handleModalAction(index) {
+    const modal = activeModal;
+    const action = modal?.actions?.[index];
+    if (!modal || !action) return;
+    if (action.type === "nav") {
+      closeModal();
+      showModule(action.value);
+      setToast(`已打开 ${action.value}`);
+      return;
+    }
+    if (action.type === "gate") {
+      openGateDetail();
+      return;
+    }
+    if (action.type === "action") {
+      handleAction(action.value);
+      return;
+    }
+    if (action.type === "copy-packet") {
+      copyText(latestCodexPacketText(), "已复制 Codex 任务包");
+      return;
+    }
+    submitModalNextStep(modal, action);
+  }
+
   function runtimeToneClass(item) {
     return toneClass(item?.tone || "blue");
   }
 
   function openModal(modal) {
-    activeModal = modal;
+    activeModal = { ...modal, actions: normalizeModalActions(modal) };
     activePopover = null;
   }
 
@@ -570,6 +1092,7 @@
             <span>分支 <strong>${escapeHtml(data.project.branch)}</strong></span>
             <span>阶段 <strong>${escapeHtml(data.project.stage)}</strong></span>
             <span class="status-pill">${escapeHtml(data.project.status)}</span>
+            ${renderAutoRefreshPill()}
           </div>
           <div class="top-actions">
             <div class="mode-toggle">
@@ -586,6 +1109,7 @@
           </div>
         </div>
         ${renderRuntimeStepBar()}
+        ${renderWorkflowDirector()}
         <div class="lane-row">${lanes}</div>
       </header>
     `;
@@ -601,6 +1125,29 @@
         <b>${escapeHtml(step.status)} · ${step.progress}%</b>
         <i>${step.blockerCount ? `卡点 ${step.blockerCount}` : "无卡点"}</i>
       </button>
+    `;
+  }
+
+  function renderWorkflowDirector() {
+    const guide = workflowGuide();
+    const actions = guide.actions.map((action) => `
+      <button class="${action.primary ? "primary" : ""}" type="button" ${action.attrs}>
+        ${escapeHtml(action.label)}
+      </button>
+    `).join("");
+    return `
+      <section class="workflow-director ${toneClass(guide.tone)}">
+        <div class="workflow-summary">
+          <span>${escapeHtml(guide.label)}</span>
+          <strong>${escapeHtml(guide.problem)}</strong>
+          <em>${escapeHtml(guide.next)}</em>
+        </div>
+        <div class="workflow-roles">
+          <b>HTML：${escapeHtml(guide.html)}</b>
+          <b>Codex：${escapeHtml(guide.codex)}</b>
+        </div>
+        <div class="workflow-actions">${actions}</div>
+      </section>
     `;
   }
 
@@ -633,8 +1180,8 @@
   }
 
   function renderNotificationPopover() {
-    const rows = activityStream.slice(0, 6).map((item) => `
-      <button class="notify-row" type="button" data-notification="${escapeHtml(item.time)}">
+    const rows = activityDisplayItems().slice(0, 6).map((item, index) => `
+      <button class="notify-row" type="button" data-notification-index="${index}">
         <time>${escapeHtml(item.time)}</time>
         <strong class="${toneClass(item.tone)}">${escapeHtml(item.agent)}</strong>
         <span>${escapeHtml(item.text)}</span>
@@ -730,6 +1277,7 @@
           ${renderFurniture()}
           ${renderFlowLines()}
           ${renderOfficeAgents()}
+          ${renderOfficeRoomHotspots()}
           <div class="scanline"></div>
         </div>
       </section>
@@ -738,10 +1286,19 @@
 
   function renderOfficeRooms() {
     return roomRects.map((room) => `
-      <button class="office-room ${toneClass(room.tone)} room-${room.id}" type="button" data-room="${room.id}"
+      <div class="office-room ${toneClass(room.tone)} room-${room.id}" aria-hidden="true"
         style="left:${room.x}%; top:${room.y}%; width:${room.w}%; height:${room.h}%;">
         <div class="room-grid"></div>
         <span class="room-label">${escapeHtml(room.label)}</span>
+      </div>
+    `).join("");
+  }
+
+  function renderOfficeRoomHotspots() {
+    return roomRects.map((room) => `
+      <button class="room-hotspot ${toneClass(room.tone)}" type="button" data-room="${room.id}"
+        style="left:${room.x + room.w / 2}%; top:${room.y + 2}%;">
+        ${escapeHtml(room.label)}
       </button>
     `).join("");
   }
@@ -791,16 +1348,16 @@
 
   function renderFlowLines() {
     const lines = data.flowLines.map((line, index) => {
-      const [x1, y1] = line.from;
-      const [x2, y2] = line.to;
-      const points = line.bend ? `${x1},${y1} ${x1},${y2} ${x2},${y2}` : `${x1},${y1} ${x2},${y2}`;
+      const route = line.points || [line.from, line.to].filter(Boolean);
+      const points = route.map(([x, y]) => `${x},${y}`).join(" ");
+      const motionPath = `M ${points.replaceAll(" ", " L ")}`;
       return `
         <polyline class="flow-line ${toneClass(line.tone)}" points="${points}" marker-end="url(#arrow-${line.tone})"></polyline>
         <circle class="flow-dot ${toneClass(line.tone)}" r="0.34">
-          <animateMotion dur="${4 + index * 0.55}s" repeatCount="indefinite" path="M ${points.replaceAll(" ", " L ")}" />
+          <animateMotion dur="${4 + index * 0.55}s" repeatCount="indefinite" path="${motionPath}" />
         </circle>
         <circle class="flow-dot ghost ${toneClass(line.tone)}" r="0.24">
-          <animateMotion begin="-${(index + 1) * 0.55}s" dur="${4 + index * 0.55}s" repeatCount="indefinite" path="M ${points.replaceAll(" ", " L ")}" />
+          <animateMotion begin="-${(index + 1) * 0.55}s" dur="${4 + index * 0.55}s" repeatCount="indefinite" path="${motionPath}" />
         </circle>
       `;
     }).join("");
@@ -1112,6 +1669,7 @@
   }
 
   function renderEvidenceModule() {
+    const stats = issueStats();
     const evidenceNodes = data.evidence.map((item, index) => ({
       id: item.id,
       label: item.name,
@@ -1139,6 +1697,7 @@
         { label: "布局截图", value: "1440 / 1920", tone: "blue", attrs: "data-module-evidence=\"dashboard\"" },
         { label: "模式切换", value: "办公室 / 拓扑", tone: "green", attrs: "data-open-nav=\"Agent 办公室\"" },
         { label: "Agent 对话", value: "镜像流", tone: "cyan", attrs: "data-action=\"stream-agent\"" },
+        { label: "问题闭环", value: `${stats.resolved}/${stats.total}`, tone: stats.open ? "orange" : "green", attrs: "data-action=\"open-issues\"" },
         { label: "证据筛选", value: "可点击", tone: "yellow", attrs: "data-open-nav=\"测试证据\"" }
       ], "记录事件", "data-action=\"simulate-event\"")
     });
@@ -1281,13 +1840,21 @@
   }
 
   function renderSettingsModule() {
+    const settingsHealthPositions = [
+      { x: 20, y: 28 },
+      { x: 50, y: 40 },
+      { x: 20, y: 54 },
+      { x: 50, y: 66 },
+      { x: 20, y: 78 },
+      { x: 50, y: 78 }
+    ];
     const healthNodes = (data.runtime?.health || []).map((item, index) => ({
       id: `health-${index}`,
       label: item.label,
       meta: item.value,
       tone: item.tone,
-      x: 24 + (index % 2) * 31,
-      y: 26 + Math.floor(index / 2) * 24,
+      x: settingsHealthPositions[index]?.x ?? 20 + (index % 2) * 30,
+      y: settingsHealthPositions[index]?.y ?? 28 + Math.floor(index / 2) * 18,
       action: "system-health"
     }));
     return renderModuleGraph({
@@ -1295,10 +1862,10 @@
       className: "settings-flow",
       caption: "系统设置展示当前 runtime 数据源、桥接模式、健康状态和安全控制，不直接执行外部命令。",
       nodes: [
-        { id: "source", label: data.runtime?.source || "mock-runtime", meta: data.runtime?.mode || "mirror", tone: "cyan", x: 49, y: 12, action: "system-health", kind: "hub" },
+        { id: "source", label: data.runtime?.source || "mock-runtime", meta: data.runtime?.mode || "mirror", tone: "cyan", x: 50, y: 15, action: "system-health", kind: "hub" },
         ...healthNodes,
-        { id: "bridge", label: "Codex Bridge", meta: codexBridgeStatus, tone: "purple", x: 78, y: 72, action: "focus-codex-request" },
-        { id: "guard", label: "安全边界", meta: "外部动作需人工批准", tone: "yellow", x: 26, y: 78, action: "system-health" }
+        { id: "bridge", label: "Codex Bridge", meta: codexBridgeStatus, tone: "purple", x: 80, y: 50, action: "focus-codex-request" },
+        { id: "guard", label: "安全边界", meta: "外部动作需人工批准", tone: "yellow", x: 80, y: 78, action: "system-health" }
       ],
       edges: [
         ...healthNodes.map((node) => ({ from: "source", to: node.id, tone: node.tone })),
@@ -1375,7 +1942,7 @@
             <p>${escapeHtml(selectedAgent.details)}</p>
           <div class="detail-actions">
             <button type="button" data-action="selected-agent-detail">详情</button>
-            <button type="button" data-action="dispatch-agent">派发</button>
+            <button type="button" data-action="dispatch-agent" title="提交到 Codex Bridge 队列，由 Codex Controller 执行或路由">派发到 Codex</button>
           </div>
           </div>
           ${renderAgentConversation(selectedAgent)}
@@ -1414,7 +1981,9 @@
   }
 
   function renderCodexBridgeBox() {
-    const latest = codexRequests[0];
+    const bridgeRequests = bridgeRuntime?.recentRequests || [];
+    const latest = codexRequests[0] || bridgeRequests[0];
+    const pendingRequests = bridgeRequests.filter((request) => ["queued", "accepted"].includes(request.status));
     const requestTone = latest?.status === "accepted" ? "green" : latest ? "yellow" : "purple";
     const activeRun = bridgeRuntime?.state?.activeRun;
     const blockerCount = bridgeRuntime?.state?.blockers?.length || 0;
@@ -1431,6 +2000,13 @@
           <strong>等待输入</strong>
         </div>
       `,
+      bridgeRuntime ? `
+        <div class="codex-feed-row ${pendingRequests.length ? "live" : ""}">
+          <span>Codex 收件箱</span>
+          <strong>${pendingRequests.length ? `${pendingRequests.length} 条待读取` : "暂无待处理"}</strong>
+          <em>${bridgeRequests[0]?.id ? escapeHtml(bridgeRequests[0].id) : "等待 HTML 提交"}</em>
+        </div>
+      ` : "",
       latest?.execution ? `
         <div class="codex-feed-row">
           <span>${escapeHtml(latest.execution.kind || "execution")}</span>
@@ -1472,13 +2048,13 @@
       <section class="codex-command-dock ${toneClass(activeRun?.tone || selectedAgent.tone || "cyan")}">
         <div class="dock-head">
           <div>
-            <strong>Codex 需求入口</strong>
-            <span>在这里发起需求，页面生成任务包并投递本地 Codex bridge。</span>
+            <strong>流程推进入口</strong>
+            <span>HTML 选择下一步；Codex 执行、验证并回写流程状态。</span>
           </div>
           <button type="button" data-action="focus-codex-request">安全契约</button>
         </div>
         <form class="codex-request-form dock-request-form" data-codex-request>
-          <textarea data-codex-input rows="2" placeholder="输入要交给 Codex 推进的需求，例如：继续实现某个模块、验证当前页面、补充证据。">${escapeHtml(codexDraft)}</textarea>
+          <textarea data-codex-input rows="2" placeholder="写清下一步要 Codex 做什么：修复哪个问题、补哪类证据、验证哪个页面或推进哪个泳道。">${escapeHtml(codexDraft)}</textarea>
           <div>
             <button type="submit">发起需求</button>
             <button type="button" data-action="copy-codex-packet">复制任务包</button>
@@ -1505,8 +2081,39 @@
     `;
   }
 
+  function activityDisplayItems() {
+    const lifecycle = activityStream.filter(isBridgeLifecycleActivity);
+    const direct = activityStream.filter((item) => !isBridgeLifecycleActivity(item));
+    if (!lifecycle.length) return direct.slice(0, 12);
+    const closedIds = new Set(lifecycle
+      .filter((item) => item.tag === "codex-read" || item.tag === "request-complete" || item.status === "completed")
+      .map((item) => item.requestId || item.text)
+      .filter(Boolean));
+    const queuedItems = lifecycle.filter((item) => (
+      item.tag === "request-queued" ||
+      String(item.text || "").includes("Queued in local Codex request queue")
+    ) && !closedIds.has(item.requestId || item.text));
+    const completed = closedIds.size || lifecycle.filter((item) => item.tag === "codex-read" || item.tag === "request-complete").length;
+    const queued = queuedItems.length;
+    const latest = lifecycle[0];
+    return [
+      {
+        time: latest.time,
+        agent: "Codex Bridge",
+        text: queued
+          ? `桥接队列已闭环 ${completed} 条，仍有 ${queued} 条待 Codex 读取。普通点击事件已折叠，真实问题会单独显示。`
+          : `桥接队列已闭环 ${completed} 条。普通点击事件已折叠，真实问题/审查/阻塞会单独显示。`,
+        tag: queued ? "队列摘要" : "已闭环",
+        tone: queued ? "yellow" : "green",
+        summaryItems: lifecycle.slice(0, 10).map((item) => `${item.time} · ${item.agent} · ${item.tag} · ${item.text}`)
+      },
+      ...direct
+    ].slice(0, 12);
+  }
+
   function renderActivityFeed() {
-    const rows = activityStream.map((item, index) => `
+    const items = activityDisplayItems();
+    const rows = items.map((item, index) => `
       <button class="activity-row" type="button" data-activity="${index}">
         <time>${escapeHtml(item.time)}</time>
         <strong class="${toneClass(item.tone)}">${escapeHtml(item.agent)}</strong>
@@ -1526,6 +2133,33 @@
     `;
   }
 
+  function evidenceForFilter(filterId = activeEvidenceFilter) {
+    return filterId === "all"
+      ? data.evidence
+      : data.evidence.filter((item) => item.filter === filterId);
+  }
+
+  function evidenceFilterLabel(filterId = activeEvidenceFilter) {
+    return data.evidenceFilters.find((filter) => filter.id === filterId)?.label || "全部";
+  }
+
+  function evidenceStatusTone(item) {
+    const status = String(item?.status || "").toLowerCase();
+    if (status.includes("pass") || status.includes("ready")) return "green";
+    if (status.includes("fail") || status.includes("block")) return "red";
+    if (status.includes("+") || status.includes("-")) return "yellow";
+    return "cyan";
+  }
+
+  function evidenceNextStep(item) {
+    if (item?.description) return item.description;
+    const type = String(item?.filter || item?.type || "");
+    if (type.includes("git")) return "用于审查代码变更范围，必要时继续打开 Git / Worktree。";
+    if (type.includes("browser") || type.includes("screenshot")) return "用于确认页面真实渲染，必要时补充 Browser 复核。";
+    if (type.includes("report")) return "用于确认测试结果，必要时交给 555 审查复核。";
+    return "点开查看证据详情，并按下一步动作继续推进。";
+  }
+
   function renderEvidenceWall() {
     const filters = data.evidenceFilters.map((filter) => `
       <button class="${activeEvidenceFilter === filter.id ? "active" : ""}" type="button" data-evidence-filter="${filter.id}">
@@ -1533,25 +2167,34 @@
       </button>
     `).join("");
 
-    const evidence = activeEvidenceFilter === "all"
-      ? data.evidence
-      : data.evidence.filter((item) => item.filter === activeEvidenceFilter);
+    const evidence = evidenceForFilter(activeEvidenceFilter);
 
     const cards = evidence.map((item) => `
-      <button class="evidence-card" type="button" data-evidence="${item.id}">
-        <span class="evidence-preview ${item.visual}">${renderEvidenceVisual(item)}</span>
-        <strong>${escapeHtml(item.name)}</strong>
-        <em>${escapeHtml(item.type)}</em>
-        <small>${escapeHtml(item.time)}</small>
-        <span>${escapeHtml(item.source)}</span>
+      <button class="evidence-card" type="button" data-evidence="${item.id}" title="查看 ${escapeHtml(item.name)}">
+        <span class="evidence-card-top">
+          <span class="evidence-preview ${item.visual}">${renderEvidenceVisual(item)}</span>
+          <span class="evidence-status-pill ${toneClass(evidenceStatusTone(item))}">${escapeHtml(item.status || "READY")}</span>
+        </span>
+        <span class="evidence-card-main">
+          <strong>${escapeHtml(item.name)}</strong>
+          <em>${escapeHtml(item.type)}</em>
+        </span>
+        <span class="evidence-card-meta">
+          <small>${escapeHtml(item.time)}</small>
+          <span>${escapeHtml(item.source)}</span>
+        </span>
+        <span class="evidence-card-next">${escapeHtml(evidenceNextStep(item))}</span>
       </button>
     `).join("");
 
     return `
-      <section class="bottom-card evidence-wall">
+      <section class="bottom-card evidence-wall" data-evidence-wall>
         <div class="panel-head evidence-head">
-          <h2>证据墙 <span>Evidence Wall</span></h2>
-          <div class="filter-tabs">${filters}</div>
+          <h2>证据墙 <span>Evidence Wall</span><b>${escapeHtml(evidenceFilterLabel(activeEvidenceFilter))} · ${evidence.length}/${data.evidence.length}</b></h2>
+          <div class="evidence-actions">
+            <button class="evidence-list-button" type="button" data-evidence-list-open>查看列表</button>
+            <div class="filter-tabs">${filters}</div>
+          </div>
         </div>
         <div class="evidence-list">${cards || "<div class='empty-state'>当前筛选下暂无证据</div>"}</div>
       </section>
@@ -1560,8 +2203,8 @@
 
   function renderEvidenceVisual(item) {
     if (item.visual === "video") return "<i class='play-mark'></i>";
-    if (item.visual === "code") return "<code>+128 -23</code>";
-    if (item.visual === "json") return "<code>PASS</code>";
+    if (item.visual === "code") return `<code>${escapeHtml(item.status || "+128 -23")}</code>`;
+    if (item.visual === "json") return `<code>${escapeHtml(item.status || "PASS")}</code>`;
     if (item.visual === "report") return "<span class='report-preview'></span>";
     return "<span class='screen-preview'></span>";
   }
@@ -1600,6 +2243,11 @@
       </div>
     `).join("");
     const list = (activeModal.list || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+    const actions = (activeModal.actions || []).map((action, index) => `
+      <button class="${action.primary ? "primary" : ""}" type="button" data-modal-action="${index}">
+        ${escapeHtml(action.label)}
+      </button>
+    `).join("");
     return `
       <div class="modal-backdrop" data-close-modal>
         <section class="modal-card" role="dialog" aria-modal="true">
@@ -1609,6 +2257,12 @@
           ${activeModal.body ? `<p>${escapeHtml(activeModal.body)}</p>` : ""}
           ${rows ? `<div class="modal-rows">${rows}</div>` : ""}
           ${list ? `<ul class="modal-list">${list}</ul>` : ""}
+          ${actions ? `
+            <div class="modal-next">
+              <span>下一步推进</span>
+              <div class="modal-actions">${actions}</div>
+            </div>
+          ` : ""}
         </section>
       </div>
     `;
@@ -1681,19 +2335,180 @@
     };
   }
 
+  function openAgentBridgeDetail(agent, context = "Agent 详情") {
+    if (!agent) return;
+    selectedAgent = agent;
+    submitBridgeAction("agent.inspect", "查看 Agent 详情", {
+      id: agent.id,
+      name: agent.name,
+      role: agent.role || agent.status
+    }, { context, agent });
+    openModal(modalForAgent(agent));
+    pushActivity(agent.name, `查看 ${context}`, "Agent 详情", agent.tone);
+  }
+
+  function openLaneDetail(lane) {
+    if (!lane) return;
+    const agent = data.agents.find((item) => item.id === laneAgentMap[lane.id]);
+    if (agent) selectedAgent = agent;
+    submitBridgeAction("lane.inspect", "查看泳道状态", {
+      id: lane.id,
+      name: lane.label,
+      type: "lane"
+    }, { lane, boundAgent: agent || null });
+    openModal({
+      kicker: "泳道状态",
+      title: lane.label,
+      body: `${lane.label} 当前处于 ${lane.status}，进度 ${lane.progress}%。检查请求已提交到 Codex Bridge。`,
+      rows: [
+        { label: "状态", value: lane.status },
+        { label: "进度", value: `${lane.progress}%` },
+        { label: "绑定 Agent", value: agent ? agent.name : "未绑定" },
+        { label: "真实联动", value: "已提交到 Codex Bridge" }
+      ]
+    });
+    pushActivity("Controller", `查看 ${lane.label} 泳道`, "泳道检查", lane.tone);
+  }
+
+  function openRoomDetail(room) {
+    if (!room) return;
+    const agents = officeAgents.filter((agent) => agent.zoneId === room.id);
+    submitBridgeAction("office.room.inspect", "查看办公室分区", {
+      id: room.id,
+      name: room.label,
+      type: "office-room"
+    }, { room, agents });
+    openModal({
+      kicker: "Office Zone",
+      title: room.label,
+      body: "办公室分区已接入可点击反馈。检查请求已提交到 Codex Bridge。",
+      rows: [
+        { label: "Agent 数量", value: `${agents.length}` },
+        { label: "Agent", value: agents.map((agent) => agent.name).join(", ") || "无" },
+        { label: "真实联动", value: "已提交到 Codex Bridge" }
+      ]
+    });
+    pushActivity("Controller", `查看 ${room.label}`, "分区", room.tone);
+  }
+
+  function openTopologyNodeDetail(node) {
+    if (!node) return;
+    const outgoing = data.topologyEdges.filter((edge) => edge.from === node.id).map((edge) => edge.to);
+    const incoming = data.topologyEdges.filter((edge) => edge.to === node.id).map((edge) => edge.from);
+    submitBridgeAction("topology.node.inspect", "查看拓扑节点", {
+      id: node.id,
+      name: node.label,
+      type: "topology-node"
+    }, { node, incoming, outgoing });
+    openModal({
+      kicker: "Agent Graph",
+      title: node.label,
+      body: "拓扑节点已接入可点击详情。检查请求已提交到 Codex Bridge。",
+      rows: [
+        { label: "上游", value: incoming.join(", ") || "无" },
+        { label: "下游", value: outgoing.join(", ") || "无" },
+        { label: "真实联动", value: "已提交到 Codex Bridge" }
+      ]
+    });
+    pushActivity("Controller", `查看拓扑节点 ${node.label}`, "拓扑", node.tone);
+  }
+
+  function openActivityDetail(item, context = "Activity Feed") {
+    if (!item) return;
+    const shouldSubmit = !item.summaryItems && !isBridgeLifecycleActivity(item);
+    if (shouldSubmit) {
+      submitBridgeAction("activity.inspect", "查看活动详情", {
+        id: item.time,
+        name: `${item.time} ${item.agent}`,
+        type: "activity"
+      }, { context, item });
+    }
+    openModal(modalForActivity(item));
+    if (shouldSubmit) {
+      pushActivity("Controller", `查看活动 ${item.time}`, "活动详情", item.tone || "cyan");
+    }
+  }
+
+  function openModuleActionDetail(label) {
+    const actionLabel = label || "模块动作";
+    submitBridgeAction("module.action.inspect", "查看模块动作", {
+      id: `${activeNav}:${actionLabel}`,
+      name: actionLabel,
+      type: "module-action"
+    }, { activeNav, label: actionLabel, gate: data.project.gate, runtime: data.runtime });
+    openModal({
+      kicker: activeNav,
+      title: actionLabel,
+      body: `${actionLabel} 已接入 ${activeNav} 模块反馈。当前展示本地运行镜像，同时已提交到 Codex Bridge 等待 Controller 检查。`,
+      rows: [
+        { label: "当前 Gate", value: data.project.gate },
+        { label: "模块", value: activeNav },
+        { label: "运行源", value: data.runtime?.source || "mock" },
+        { label: "真实联动", value: "已提交到 Codex Bridge" }
+      ]
+    });
+    pushActivity("Controller", `${activeNav} 模块查看 ${actionLabel}`, "模块操作", moduleToneMap[activeNav] || "cyan");
+  }
+
+  function openEvidenceList(filterId = activeEvidenceFilter) {
+    activeEvidenceFilter = filterId;
+    const label = evidenceFilterLabel(filterId);
+    const evidence = evidenceForFilter(filterId);
+    submitBridgeAction("evidence.list.inspect", "查看证据列表", {
+      id: filterId,
+      name: label,
+      type: "evidence-filter"
+    }, {
+      filterId,
+      label,
+      evidenceCount: evidence.length,
+      evidence: evidence.map((item) => ({
+        id: item.id,
+        name: item.name,
+        type: item.type,
+        source: item.source,
+        time: item.time,
+        status: item.status
+      }))
+    });
+    openModal({
+      kicker: "Evidence Wall",
+      title: `证据列表 · ${label}`,
+      body: evidence.length
+        ? `当前筛选共 ${evidence.length} 条证据。列表查看请求已提交到 Codex Bridge，后续可由 Controller 回写真实验证结果。`
+        : "当前筛选暂无证据。列表查看请求已提交到 Codex Bridge，可由 Controller 补充生成或回写证据。",
+      rows: [
+        { label: "当前筛选", value: label },
+        { label: "证据数量", value: `${evidence.length}` },
+        { label: "真实联动", value: "已提交到 Codex Bridge" }
+      ],
+      list: evidence.length
+        ? evidence.map((item) => `${item.name} · ${item.type} · ${item.source} · ${item.time} · ${statusLabel(item.status)}`)
+        : ["当前筛选暂无证据，等待 Codex Controller 生成或回写。"]
+    });
+    pushActivity("Evidence Wall", `查看证据列表 ${label}`, "证据列表", "blue");
+  }
+
   function openEvidenceDetail(id) {
     const evidence = data.evidence.find((item) => item.id === id);
     if (!evidence) return;
     activeEvidenceFilter = evidence.filter;
+    submitBridgeAction("evidence.inspect", "检查证据详情", {
+      id: evidence.id,
+      name: evidence.name,
+      type: evidence.type
+    }, { evidence });
     openModal({
       kicker: "Evidence Wall",
       title: evidence.name,
-      body: "证据详情已打开。当前为 mock 证据镜像，后续可接真实文件或报告链接。",
+      body: "证据检查请求已提交到 Codex Bridge。当前页面先展示本地证据镜像，真实验证结果由 Codex 回写事件。",
       rows: [
         { label: "类型", value: evidence.type },
         { label: "来源", value: evidence.source },
         { label: "时间", value: evidence.time },
-        { label: "状态", value: evidence.status }
+        { label: "状态", value: evidence.status },
+        ...(evidence.issueId ? [{ label: "关联问题", value: evidence.issueId }] : []),
+        ...(evidence.description ? [{ label: "说明", value: evidence.description }] : [])
       ]
     });
     pushActivity(evidence.source, `查看证据 ${evidence.name}`, "证据查看", "blue");
@@ -1702,10 +2517,14 @@
   function openWorktreeDetail(name) {
     const tree = data.worktrees.find((item) => item.name === name);
     if (!tree) return;
+    submitBridgeAction("worktree.inspect", "检查 Worktree 状态", {
+      id: tree.name,
+      name: tree.name
+    }, { worktree: tree });
     openModal({
       kicker: "Git / Worktree",
       title: tree.name,
-      body: "Worktree 状态详情。当前页面只展示状态，不执行 Git 修改。",
+      body: "Worktree 检查请求已提交到 Codex Bridge。页面只展示状态，不执行 Git 修改。",
       rows: [
         { label: "状态", value: tree.status },
         { label: "HEAD", value: tree.head },
@@ -1716,10 +2535,14 @@
   }
 
   function openGateDetail() {
+    submitBridgeAction("gate.inspect", "检查 Gate 状态", {
+      id: data.project.gate,
+      name: data.project.gate
+    }, { gate: data.project.gate, nextGate: data.project.nextGate });
     openModal({
       kicker: "Gate",
       title: "Gate 详情",
-      body: "当前阶段进入 XB-4 开发与验证，下一步是 XB-5 集成与审查。",
+      body: "Gate 检查请求已提交到 Codex Bridge。当前阶段进入 XB-4 开发与验证，下一步是 XB-5 集成与审查。",
       rows: [
         { label: "当前 Gate", value: data.project.gate },
         { label: "下一 Gate", value: data.project.nextGate },
@@ -1730,6 +2553,10 @@
   }
 
   function openReviewPackage() {
+    submitBridgeAction("review.package.inspect", "检查 555 证据包", {
+      id: "review-package",
+      name: "证据包 2/5"
+    }, { requiredEvidence: ["Browser 证据", "Git diff", "API 测试结果"] });
     openModal({
       kicker: "555 Review",
       title: "证据包 2/5",
@@ -1790,23 +2617,28 @@
       });
     });
 
+    document.querySelectorAll("[data-notification]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const item = activityStream.find((entry) => entry.time === button.dataset.notification);
+        openActivityDetail(item, "Notification Center");
+        activePopover = null;
+        renderApp();
+      });
+    });
+
+    document.querySelectorAll("[data-notification-index]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const item = activityDisplayItems()[Number(button.dataset.notificationIndex)];
+        openActivityDetail(item, "Notification Center");
+        activePopover = null;
+        renderApp();
+      });
+    });
+
     document.querySelectorAll("[data-lane]").forEach((button) => {
       button.addEventListener("click", () => {
         const lane = effectiveLanes().find((item) => item.id === button.dataset.lane);
-        if (!lane) return;
-        const agent = data.agents.find((item) => item.id === laneAgentMap[lane.id]);
-        if (agent) selectedAgent = agent;
-        openModal({
-          kicker: "泳道状态",
-          title: lane.label,
-          body: `${lane.label} 当前处于 ${lane.status}，进度 ${lane.progress}%。`,
-          rows: [
-            { label: "状态", value: lane.status },
-            { label: "进度", value: `${lane.progress}%` },
-            { label: "绑定 Agent", value: agent ? agent.name : "未绑定" }
-          ]
-        });
-        pushActivity("Controller", `查看 ${lane.label} 泳道`, "泳道检查", lane.tone);
+        openLaneDetail(lane);
         renderApp();
       });
     });
@@ -1826,7 +2658,7 @@
     document.querySelectorAll("[data-agent]").forEach((button) => {
       button.addEventListener("click", () => {
         selectAgentById(button.dataset.agent, false);
-        pushActivity(selectedAgent.name, "打开 Agent 状态详情", "状态查看", selectedAgent.tone);
+        openAgentBridgeDetail(selectedAgent, "右侧 Agent 状态卡");
         setToast(`已选中 ${selectedAgent.name}`);
         renderApp();
       });
@@ -1836,16 +2668,15 @@
       button.addEventListener("click", () => {
         const officeAgent = officeAgents.find((agent) => agent.id === button.dataset.officeAgent);
         if (!officeAgent) return;
-        selectedAgent = officeAgentToAgent(officeAgent);
-        openModal(modalForAgent(selectedAgent));
-        pushActivity(officeAgent.name, "打开办公室节点详情", "节点查看", officeAgent.tone);
+        openAgentBridgeDetail(officeAgentToAgent(officeAgent), "办公室节点");
         renderApp();
       });
     });
 
     document.querySelectorAll("[data-module-agent]").forEach((button) => {
       button.addEventListener("click", () => {
-        selectAgentById(button.dataset.moduleAgent, true);
+        selectAgentById(button.dataset.moduleAgent, false);
+        openAgentBridgeDetail(selectedAgent, `${activeNav} 模块联动`);
         addConversationMessage(selectedAgent, `从 ${activeNav} 模块联动打开。`, selectedAgent.tone);
         pushActivity(selectedAgent.name, `从 ${activeNav} 联动 Agent`, "模块联动", selectedAgent.tone);
         renderApp();
@@ -1855,18 +2686,7 @@
     document.querySelectorAll("[data-room]").forEach((button) => {
       button.addEventListener("click", () => {
         const room = roomRects.find((item) => item.id === button.dataset.room);
-        if (!room) return;
-        const agents = officeAgents.filter((agent) => agent.zoneId === room.id);
-        openModal({
-          kicker: "Office Zone",
-          title: room.label,
-          body: "办公室分区已接入可点击反馈。",
-          rows: [
-            { label: "Agent 数量", value: `${agents.length}` },
-            { label: "Agent", value: agents.map((agent) => agent.name).join(", ") || "无" }
-          ]
-        });
-        pushActivity("Controller", `查看 ${room.label}`, "分区", room.tone);
+        openRoomDetail(room);
         renderApp();
       });
     });
@@ -1874,34 +2694,45 @@
     document.querySelectorAll("[data-topology-node]").forEach((button) => {
       button.addEventListener("click", () => {
         const node = data.topologyNodes.find((item) => item.id === button.dataset.topologyNode);
-        if (!node) return;
-        const outgoing = data.topologyEdges.filter((edge) => edge.from === node.id).map((edge) => edge.to);
-        const incoming = data.topologyEdges.filter((edge) => edge.to === node.id).map((edge) => edge.from);
-        openModal({
-          kicker: "Agent Graph",
-          title: node.label,
-          body: "拓扑节点已接入可点击详情。",
-          rows: [
-            { label: "上游", value: incoming.join(", ") || "无" },
-            { label: "下游", value: outgoing.join(", ") || "无" }
-          ]
-        });
-        pushActivity("Controller", `查看拓扑节点 ${node.label}`, "拓扑", node.tone);
+        openTopologyNodeDetail(node);
         renderApp();
       });
     });
 
     document.querySelectorAll("[data-evidence-filter]").forEach((button) => {
-      button.addEventListener("click", () => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
         activeEvidenceFilter = button.dataset.evidenceFilter;
-        const label = data.evidenceFilters.find((filter) => filter.id === activeEvidenceFilter)?.label || "全部";
+        const label = evidenceFilterLabel(activeEvidenceFilter);
         setToast(`证据筛选：${label}`);
+        openEvidenceList(activeEvidenceFilter);
+        renderApp();
+      });
+    });
+
+    document.querySelectorAll("[data-evidence-list-open]").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const label = evidenceFilterLabel(activeEvidenceFilter);
+        setToast(`打开证据列表：${label}`);
+        openEvidenceList(activeEvidenceFilter);
+        renderApp();
+      });
+    });
+
+    document.querySelectorAll("[data-evidence-wall]").forEach((section) => {
+      section.addEventListener("click", (event) => {
+        if (event.target.closest("[data-evidence], [data-evidence-filter], [data-evidence-list-open]")) return;
+        const label = evidenceFilterLabel(activeEvidenceFilter);
+        setToast(`打开证据列表：${label}`);
+        openEvidenceList(activeEvidenceFilter);
         renderApp();
       });
     });
 
     document.querySelectorAll("[data-evidence]").forEach((button) => {
-      button.addEventListener("click", () => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
         openEvidenceDetail(button.dataset.evidence);
         renderApp();
       });
@@ -1930,35 +2761,15 @@
 
     document.querySelectorAll("[data-activity]").forEach((button) => {
       button.addEventListener("click", () => {
-        const item = activityStream[Number(button.dataset.activity)];
-        if (!item) return;
-        openModal({
-          kicker: "Activity Feed",
-          title: `${item.time} · ${item.agent}`,
-          body: item.text,
-          rows: [
-            { label: "标签", value: item.tag },
-            { label: "来源", value: item.agent }
-          ]
-        });
+        const item = activityDisplayItems()[Number(button.dataset.activity)];
+        openActivityDetail(item);
         renderApp();
       });
     });
 
     document.querySelectorAll("[data-module-action]").forEach((button) => {
       button.addEventListener("click", () => {
-        const label = button.dataset.moduleAction;
-        openModal({
-          kicker: activeNav,
-          title: label,
-          body: `${label} 已接入 ${activeNav} 模块反馈。当前展示 mock-runtime 运行镜像，后续可接真实项目状态源。`,
-          rows: [
-            { label: "当前 Gate", value: data.project.gate },
-            { label: "模块", value: activeNav },
-            { label: "运行源", value: data.runtime?.source || "mock" }
-          ]
-        });
-        pushActivity("Controller", `${activeNav} 模块查看 ${label}`, "模块操作", moduleToneMap[activeNav] || "cyan");
+        openModuleActionDetail(button.dataset.moduleAction);
         renderApp();
       });
     });
@@ -1975,6 +2786,14 @@
         event.preventDefault();
         const input = form.querySelector("[data-codex-input]");
         submitCodexRequest(input?.value || "");
+        renderApp();
+      });
+    });
+
+    document.querySelectorAll("[data-modal-action]").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        handleModalAction(Number(button.dataset.modalAction));
         renderApp();
       });
     });
@@ -2029,24 +2848,13 @@
     if (kind === "agent") {
       const agent = data.agents.find((item) => item.id === id);
       if (agent) {
-        selectedAgent = agent;
-        openModal(modalForAgent(agent));
+        openAgentBridgeDetail(agent, "搜索结果");
       }
     }
     if (kind === "office-agent") {
       const agent = officeAgents.find((item) => item.id === id);
       if (agent) {
-        selectedAgent = {
-          id: agent.id,
-          name: agent.name,
-          role: agent.zoneLabel,
-          meta: `进度：${agent.progress}%`,
-          progress: agent.progress,
-          status: agent.status,
-          tone: agent.tone,
-          details: `${agent.name} 当前处于 ${agent.status}，进度 ${agent.progress}%。`
-        };
-        openModal(modalForAgent(selectedAgent));
+        openAgentBridgeDetail(officeAgentToAgent(agent), "搜索结果");
       }
     }
     if (kind === "evidence") {
@@ -2065,6 +2873,7 @@
       const item = runtimeMessages[Math.floor(Math.random() * runtimeMessages.length)];
       pushActivity(item.agent, item.text, item.tag, item.tone);
       addConversationMessage(selectedAgent, `收到实时事件：${item.text}`, item.tone);
+      submitBridgeAction("runtime.event.refresh", "刷新运行事件", { id: "activity-feed", name: "Activity Feed" }, item);
       setToast("已生成一条实时事件");
     }
     if (action === "runtime-step") {
@@ -2073,6 +2882,11 @@
       const run = state.activeRun || {};
       const blockers = (state.blockers || []).map((item) => `${item.agent || item.lane}: ${item.text}`);
       const recent = (bridgeRuntime?.recentEvents || []).slice(0, 5).map((item) => `${eventTime(item.time)} ${item.agent}: ${item.text}`);
+      submitBridgeAction("runtime.step.inspect", "查看当前执行状态", {
+        id: "runtime-step",
+        name: step.title,
+        type: "runtime"
+      }, { step, activeRun: run, blockers: state.blockers || [], recentEvents: bridgeRuntime?.recentEvents || [] });
       openModal({
         kicker: "Codex Runtime",
         title: step.title,
@@ -2089,32 +2903,70 @@
       });
     }
     if (action === "system-menu" || action === "system-health") openSystemHealth();
+    if (action === "open-issues") {
+      openModal(modalForIssueBoard());
+      pushActivity("QA Agent", "查看 3 个问题的处理闭环", "问题复核", "green");
+      submitBridgeAction("qa.issue-review", "复核问题闭环", { id: "issue-board", name: "问题闭环" }, { issues: issueBacklog });
+    }
     if (action === "agent-all") {
+      submitBridgeAction("agent.list.inspect", "查看全部 Agent", {
+        id: "agent-list",
+        name: "全部 Agent",
+        type: "agent-list"
+      }, { agents: data.agents, selectedAgent });
       openModal({
         kicker: "Agent 状态",
         title: "全部 Agent",
-        body: "当前所有 Agent 状态来自 mock 运行镜像。",
+        body: "当前所有 Agent 状态来自本地运行镜像。列表检查请求已提交到 Codex Bridge。",
         list: data.agents.map((agent) => `${agent.name} · ${agent.status} · ${agent.progress}%`)
       });
     }
-    if (action === "selected-agent-detail") openModal(modalForAgent(selectedAgent));
+    if (action === "selected-agent-detail") openAgentBridgeDetail(selectedAgent, "当前选中 Agent");
     if (action === "dispatch-agent") {
-      pushActivity(selectedAgent.name, "收到模拟派发任务，等待真实运行接入", "派发", selectedAgent.tone);
-      addConversationMessage(selectedAgent, "已收到模拟派发任务。当前为 HTML 镜像反馈，不执行真实外部动作。", selectedAgent.tone);
-      setToast(`已向 ${selectedAgent.name} 派发模拟任务`);
+      submitBridgeAction("agent.dispatch", "派发 Agent 任务", {
+        id: selectedAgent.id,
+        name: selectedAgent.name,
+        role: selectedAgent.role
+      });
+      pushActivity(selectedAgent.name, "Agent 派发请求已进入 Codex Bridge 队列", "真实派发", selectedAgent.tone);
+      addConversationMessage(selectedAgent, "派发请求已提交到 Codex Bridge。等待 Codex Controller 读取队列、路由执行并回写事件。", selectedAgent.tone);
+      setToast(`已向 Codex 提交 ${selectedAgent.name} 派发请求`);
     }
     if (action === "stream-agent") {
       streamTick += 1;
       addConversationMessage(
         selectedAgent,
-        `镜像输出刷新 #${streamTick}：${selectedAgent.name} 当前 ${selectedAgent.status}，进度 ${selectedAgent.progress}%。`,
+        `输出刷新请求 #${streamTick} 已提交到 Codex Bridge。当前本地镜像：${selectedAgent.name} ${selectedAgent.status}，进度 ${selectedAgent.progress}%。`,
         selectedAgent.tone
       );
-      pushActivity(selectedAgent.name, "刷新 Agent 对话流", "流式输出", selectedAgent.tone);
-      setToast(`已刷新 ${selectedAgent.name} 输出`);
+      submitBridgeAction("agent.output.refresh", "刷新 Agent 输出", {
+        id: selectedAgent.id,
+        name: selectedAgent.name
+      }, { streamTick });
+      pushActivity(selectedAgent.name, "刷新 Agent 输出请求已进入队列", "输出请求", selectedAgent.tone);
+      setToast(`已提交 ${selectedAgent.name} 输出刷新请求`);
+    }
+    if (action === "focus-codex-input") {
+      const guide = workflowGuide();
+      if (!codexDraft.trim()) {
+        codexDraft = `请继续推进当前项目：${guide.next}。请先确认问题位置、需要的证据、执行步骤和回写结果。`;
+      }
+      activeModal = null;
+      focusCodexAfterRender = true;
+      setToast("已定位到 Codex 需求入口");
     }
     if (action === "focus-codex-request") {
       focusCodexAfterRender = true;
+      submitBridgeAction("bridge.contract.inspect", "查看 Bridge 安全契约", {
+        id: "codex-bridge-contract",
+        name: "HTML 发起需求契约",
+        type: "bridge-contract"
+      }, {
+        endpoint: data.codexBridge?.endpoint || "/codex/request",
+        stateEndpoint: data.codexBridge?.stateEndpoint || "/codex/state",
+        eventEndpoint: data.codexBridge?.eventEndpoint || "/codex/event",
+        bridgeStatus: codexBridgeStatus
+      });
       openModal({
         kicker: "Codex Bridge",
         title: "HTML 发起需求契约",
@@ -2130,16 +2982,24 @@
       copyText(latestCodexPacketText(), "已复制 Codex 任务包");
     }
     if (action === "worktree-all" || action === "worktree-manage") {
+      submitBridgeAction(action === "worktree-manage" ? "worktree.manage.request" : "worktree.list.request", action === "worktree-manage" ? "请求 Worktree 管理" : "请求 Worktree 全量状态", {
+        id: "worktree",
+        name: "Git / Worktree"
+      }, { worktrees: data.worktrees });
       openModal({
         kicker: "Git / Worktree",
         title: action === "worktree-manage" ? "Worktree 管理" : "全部 Worktree",
-        body: "当前页面只做状态展示，不执行 Git 写操作。",
+        body: "请求已提交到 Codex Bridge。页面仍不直接执行 Git 写操作；Codex Controller 会按 worktree 安全边界处理。",
         list: data.worktrees.map((tree) => `${tree.name} · ${tree.status} · HEAD ${tree.head}`)
       });
     }
   }
 
   function openSystemHealth() {
+    submitBridgeAction("system.health.inspect", "检查系统健康", {
+      id: "system-health",
+      name: "系统健康"
+    }, { runtime: data.runtime, bridgeStatus: codexBridgeStatus });
     const healthRows = (data.runtime?.health || []).map((item) => ({
       label: item.label,
       value: item.value
@@ -2163,6 +3023,7 @@
   }
 
   document.addEventListener("keydown", (event) => {
+    lastInteractionAt = Date.now();
     if (event.key === "Escape") {
       activePopover = null;
       activeModal = null;
@@ -2170,6 +3031,10 @@
       renderApp();
     }
   });
+
+  document.addEventListener("pointerdown", () => {
+    lastInteractionAt = Date.now();
+  }, true);
 
   window.addEventListener("hashchange", () => {
     const next = initialNav();
@@ -2182,4 +3047,5 @@
   renderApp();
   pollBridgeState();
   window.setInterval(pollBridgeState, 2200);
+  startAutoRefresh();
 })();

@@ -250,6 +250,32 @@ function applyRuntimeEvent(event) {
   return saveRuntimeState(state);
 }
 
+function updateRequestFromEvent(event) {
+  if (!event.requestId) return null;
+  const requestPath = path.join(requestsDir, `${safeId(event.requestId)}.json`);
+  if (!fs.existsSync(requestPath)) return null;
+  try {
+    const record = JSON.parse(fs.readFileSync(requestPath, "utf8"));
+    record.status = event.status || record.status;
+    record.statusText = event.text || record.statusText;
+    record.lastEventAt = event.time;
+    record.lastEvent = {
+      id: event.id,
+      status: event.status,
+      agent: event.agent,
+      lane: event.lane,
+      module: event.module,
+      node: event.node,
+      progress: event.progress,
+      tag: event.tag
+    };
+    fs.writeFileSync(requestPath, JSON.stringify(record, null, 2), "utf8");
+    return record;
+  } catch {
+    return null;
+  }
+}
+
 function recentEvents(limit = 20) {
   if (!fs.existsSync(eventsPath)) return [];
   return fs.readFileSync(eventsPath, "utf8")
@@ -324,6 +350,30 @@ function shouldExecuteAllowlisted(requestText) {
   return /\u9a8c\u8bc1|\u6821\u9a8c|\u68c0\u67e5|\u6d4b\u8bd5|\u9a8c\u6536|check|validate|test|syntax|resource|status|js|browser|evidence/.test(text);
 }
 
+function requestDisplayName(payload) {
+  const target = payload?.target || {};
+  const targetName = target.name || target.label || target.id;
+  const label = payload?.actionLabel || payload?.actionType || "HTML interaction";
+  return targetName ? `${label} -> ${targetName}` : label;
+}
+
+function isReadOnlyAction(payload) {
+  const actionType = String(payload?.actionType || "");
+  const inspectActions = new Set([
+    "agent.list.inspect",
+    "bridge.contract.inspect",
+    "gate.inspect",
+    "runtime.event.refresh",
+    "worktree.list.request",
+    "system.health.inspect",
+    "qa.issue-review"
+  ]);
+  return inspectActions.has(actionType) ||
+    actionType.endsWith(".inspect") ||
+    actionType.endsWith(".list.inspect") ||
+    actionType.endsWith(".list.request");
+}
+
 function recentRequests() {
   if (!fs.existsSync(requestsDir)) return [];
   return fs.readdirSync(requestsDir)
@@ -339,6 +389,25 @@ function recentRequests() {
     .filter(Boolean)
     .sort((a, b) => String(b.receivedAt || "").localeCompare(String(a.receivedAt || "")))
     .slice(0, 12);
+}
+
+function allRequests() {
+  if (!fs.existsSync(requestsDir)) return [];
+  return fs.readdirSync(requestsDir)
+    .filter((name) => name.endsWith(".json"))
+    .map((name) => {
+      const file = path.join(requestsDir, name);
+      try {
+        return {
+          file: path.relative(root, file).replace(/\\/g, "/"),
+          ...JSON.parse(fs.readFileSync(file, "utf8"))
+        };
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean)
+    .sort((a, b) => String(b.receivedAt || "").localeCompare(String(a.receivedAt || "")));
 }
 
 async function handleCodexRequest(req, res) {
@@ -376,6 +445,14 @@ async function handleCodexRequest(req, res) {
   if (!requestText) {
     record.status = "rejected";
     record.statusText = "Empty request rejected";
+  } else if (isReadOnlyAction(payload)) {
+    record.status = "completed";
+    record.statusText = `Read-only HTML inspection recorded: ${requestDisplayName(payload)}`;
+    record.execution = {
+      kind: "read-only-html-inspection",
+      status: "completed",
+      note: `Handled in HTML and recorded for Codex/HTML trace: ${requestDisplayName(payload)}.`
+    };
   } else if (shouldExecuteAllowlisted(requestText)) {
     const execution = runStaticChecks();
     record.status = execution.status === "pass" ? "executed" : "failed";
@@ -393,6 +470,7 @@ async function handleCodexRequest(req, res) {
 
   const requestPath = path.join(requestsDir, `${id}.json`);
   fs.writeFileSync(requestPath, JSON.stringify(record, null, 2), "utf8");
+  const completeStatuses = ["executed", "completed"];
   const requestEvent = normalizeEvent({
     id,
     source: "HTML",
@@ -402,10 +480,10 @@ async function handleCodexRequest(req, res) {
     status: record.status,
     module: record.module,
     requestId: id,
-    progress: record.status === "executed" ? 100 : 10,
-    text: record.status === "executed" ? record.statusText : `${record.statusText}: ${requestText}`,
-    tag: record.status === "executed" ? "validation-complete" : "request-queued",
-    tone: record.status === "executed" ? "green" : "purple",
+    progress: completeStatuses.includes(record.status) ? 100 : 10,
+    text: completeStatuses.includes(record.status) ? record.statusText : `${record.statusText}: ${requestText}`,
+    tag: completeStatuses.includes(record.status) ? "request-complete" : "request-queued",
+    tone: completeStatuses.includes(record.status) ? "green" : "purple",
     controller: record.controller,
     loop: record.loop
   });
@@ -448,10 +526,12 @@ async function handleCodexEvent(req, res) {
   const event = normalizeEvent(payload);
   appendEvent(event);
   const state = applyRuntimeEvent(event);
+  const request = updateRequestFromEvent(event);
   sendJson(res, 200, {
     ok: true,
     status: "accepted",
     event,
+    request,
     state
   });
 }
@@ -468,11 +548,28 @@ function handleStatus(_req, res) {
       id: item.id,
       status: item.status,
       statusText: item.statusText,
+      actionType: item.actionType,
+      actionLabel: item.actionLabel,
       module: item.module,
       selectedAgent: item.selectedAgent,
       receivedAt: item.receivedAt
     })),
     recentEvents: recentEvents(8)
+  });
+}
+
+function handleRequests(req, res) {
+  const parsed = url.parse(req.url || "/", true);
+  const status = parsed.query.status ? String(parsed.query.status) : "";
+  const limit = Number(parsed.query.limit || 50);
+  const requests = allRequests()
+    .filter((item) => !status || item.status === status)
+    .slice(0, Number.isFinite(limit) && limit > 0 ? limit : 50);
+  sendJson(res, 200, {
+    ok: true,
+    service: "judgment-agent-office-bridge",
+    count: requests.length,
+    requests
   });
 }
 
@@ -486,6 +583,8 @@ function handleState(_req, res) {
       id: item.id,
       status: item.status,
       statusText: item.statusText,
+      actionType: item.actionType,
+      actionLabel: item.actionLabel,
       module: item.module,
       selectedAgent: item.selectedAgent,
       receivedAt: item.receivedAt
@@ -539,6 +638,10 @@ const server = http.createServer((req, res) => {
   }
   if (req.method === "GET" && pathname === "/codex/state") {
     handleState(req, res);
+    return;
+  }
+  if (req.method === "GET" && pathname === "/codex/requests") {
+    handleRequests(req, res);
     return;
   }
   if (req.method === "GET" && pathname === "/codex/status") {

@@ -131,8 +131,8 @@ window.JUDGMENT_OFFICE_DATA = {
 - 点击办公室分区：打开分区和 Agent 列表详情。
 - 点击右侧 Agent 卡片：更新右侧详情区域。
 - 点击办公室 Agent 卡片：更新右侧详情区域，并切换右侧 Agent 对话流。
-- 点击右侧 `刷新输出`：在当前 Agent 对话流中追加一条镜像输出，并同步追加活动动态。
-- 点击右侧 `派发`：追加模拟派发反馈；当前不执行真实任务、不调用子代理。
+- 点击右侧 `刷新输出`：提交 `agent.output.refresh` action packet 到本地 Codex Bridge 队列；页面保留当前镜像输出作为即时反馈，真实输出由 Codex 回写 `/codex/event`。
+- 点击右侧 `派发到 Codex`：提交 `agent.dispatch` action packet 到本地 Codex Bridge 队列；页面不直接启动子代理，由 Judgment Controller 在 Codex 线程中读取队列、路由执行并回写事件。
 - 在右侧 `Codex 需求入口` 提交需求：页面生成任务包，追加活动动态和 Agent 对话，尝试 `POST /codex/request`；如果桥接服务不可用，状态显示为页面队列等待接入。
 - 点击 `复制包`：复制最近一次 Codex 任务包，便于手动交给 Codex 线程执行。
 - 点击拓扑节点：打开节点上下游详情。
@@ -184,9 +184,15 @@ window.JUDGMENT_OFFICE_DATA = {
 
 页面和 Codex 的双向联动通过本地 bridge 完成：
 
-- `POST /codex/request`：由 HTML 页面发起。输入是结构化 request packet，至少包含 `id`、`project`、`branch`、`gate`、`module`、`selectedAgent`、`request`。输出包含 `status`、`statusText`、`execution`、`requestPath`。
+- `POST /codex/request`：由 HTML 页面发起。输入是结构化 request packet，至少包含 `id`、`project`、`branch`、`gate`、`module`、`selectedAgent`、`request`；按钮联动还必须包含 `actionType`、`actionLabel`、`target`、`payload`。输出包含 `status`、`statusText`、`execution`、`requestPath`。
 - `POST /codex/event`：由 Codex 线程或本地验证脚本发起。输入事件字段为 `id`、`source`、`agentId`、`agent`、`lane`、`module`、`node`、`status`、`progress`、`text`、`tag`、`tone`、可选 `evidenceId` 和 `requestId`。
 - `GET /codex/state`：由页面轮询。输出包含 `state.activeRun`、`state.currentLane`、`state.laneProgress`、`state.blockers`、`state.evidence`、`recentEvents` 和 `recentRequests`。
+- `GET /codex/requests`：由 Codex 线程读取，用于消费 HTML 提交的 action/request 队列。支持 `?status=queued&limit=20`。
+
+Codex 侧辅助脚本：
+
+- `scripts/list-agent-office-requests.js`：读取 `agent-office/runtime/requests` 中的 HTML 请求队列。
+- `scripts/post-agent-office-event.js`：把 Codex 执行、阻塞、完成或验证结果写回 `/codex/event`，页面在下一次轮询或自动刷新时显示。
 
 运行状态约定：
 

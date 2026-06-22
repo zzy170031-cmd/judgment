@@ -256,15 +256,16 @@ button {
   min-width: 0;
   height: 100vh;
   display: grid;
-  grid-template-rows: 150px minmax(0, 1fr);
+  grid-template-rows: 206px minmax(0, 1fr);
 }
 
 .topbar {
   min-width: 0;
-  padding: 10px 14px 12px 16px;
+  overflow: hidden;
+  padding: 9px 14px 12px 16px;
   display: grid;
-  grid-template-rows: 30px 32px minmax(0, 1fr);
-  gap: 7px;
+  grid-template-rows: 30px 34px 52px 62px;
+  gap: 6px;
   background: linear-gradient(180deg, rgba(4, 13, 24, 0.96), rgba(4, 13, 24, 0.78));
   border-bottom: 1px solid var(--line);
 }
@@ -294,6 +295,7 @@ button {
 }
 
 .status-pill,
+.auto-refresh-pill,
 .live-chip,
 .agent-state {
   display: inline-flex;
@@ -306,6 +308,20 @@ button {
   background: rgba(60, 223, 136, 0.12);
   font-size: 12px;
   font-weight: 650;
+}
+
+.auto-refresh-pill {
+  color: #7ccaff;
+  background: rgba(77, 180, 255, 0.12);
+  border: 1px solid rgba(124, 202, 255, 0.22);
+}
+
+.auto-refresh-pill i {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 12px currentColor;
 }
 
 .top-actions {
@@ -542,9 +558,9 @@ button {
 
 .runtime-step-bar {
   min-width: 0;
-  height: 32px;
+  height: 34px;
   display: grid;
-  grid-template-columns: 14px minmax(180px, 0.78fr) minmax(220px, 1.2fr) minmax(110px, auto) minmax(72px, auto);
+  grid-template-columns: 14px minmax(170px, 0.72fr) minmax(260px, 1.3fr) minmax(112px, auto) minmax(72px, auto);
   align-items: center;
   gap: 10px;
   padding: 0 12px;
@@ -604,6 +620,99 @@ button {
   animation: runtimePulse 1.5s ease-in-out infinite;
 }
 
+.workflow-director {
+  min-width: 0;
+  min-height: 52px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(310px, 0.92fr) minmax(270px, auto);
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, currentColor 11%, transparent), rgba(7, 20, 35, 0.78) 46%, rgba(5, 14, 25, 0.72)),
+    rgba(5, 16, 29, 0.76);
+  color: var(--cyan);
+}
+
+.workflow-summary,
+.workflow-roles {
+  min-width: 0;
+  overflow: hidden;
+  display: grid;
+  gap: 2px;
+}
+
+.workflow-summary span {
+  color: currentColor;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.workflow-summary strong,
+.workflow-summary em,
+.workflow-roles b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workflow-summary strong {
+  color: #f3f9ff;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.workflow-summary em,
+.workflow-roles b {
+  color: #9fb4c9;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.workflow-actions {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-content: center;
+  gap: 7px;
+  max-height: 42px;
+  overflow: hidden;
+}
+
+.workflow-actions button {
+  height: 26px;
+  min-width: 76px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  color: #a9dbff;
+  background: rgba(20, 49, 78, 0.66);
+  font-size: 12px;
+  font-weight: 740;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.workflow-actions button.primary {
+  color: #f3fbff;
+  background: color-mix(in srgb, currentColor 24%, rgba(20, 49, 78, 0.76));
+  border-color: color-mix(in srgb, currentColor 58%, transparent);
+}
+
+.workflow-actions button:hover,
+.workflow-actions button:focus-visible {
+  background: color-mix(in srgb, currentColor 28%, rgba(20, 49, 78, 0.78));
+  border-color: currentColor;
+}
+
 @keyframes runtimePulse {
   0%,
   100% {
@@ -618,17 +727,20 @@ button {
 
 .lane-row {
   min-width: 0;
+  height: 62px;
+  overflow: hidden;
   display: grid;
-  grid-template-columns: repeat(8, minmax(104px, 1fr));
+  grid-template-columns: repeat(8, minmax(118px, 1fr));
   gap: 8px;
 }
 
 .lane-card {
   min-width: 0;
+  height: 62px;
   display: grid;
-  grid-template-rows: 24px 7px 14px;
-  gap: 6px;
-  padding: 10px 12px;
+  grid-template-rows: 20px 7px 13px;
+  gap: 5px;
+  padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(13, 27, 46, 0.82);
@@ -670,7 +782,7 @@ button {
   min-height: 0;
   padding: 10px 14px 10px 16px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(330px, 19vw, 370px);
+  grid-template-columns: minmax(0, 1fr) clamp(348px, 21vw, 402px);
   gap: 10px;
 }
 
@@ -783,22 +895,20 @@ button {
 
 .office-map {
   position: relative;
-  width: min(calc(100% - 28px), 1088px);
-  justify-self: center;
+  width: 100%;
+  justify-self: stretch;
   min-width: 0;
   min-height: 420px;
-  margin: 9px auto 10px;
+  margin: 0;
   overflow: hidden;
-  border: 1px solid rgba(151, 188, 216, 0.22);
-  border-radius: 6px;
+  border: 0;
+  border-radius: 0;
   background:
     linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     #101925;
   background-size: 18px 18px, 18px 18px, auto;
-  box-shadow:
-    inset 0 0 0 3px rgba(0, 0, 0, 0.34),
-    inset 0 0 80px rgba(0, 0, 0, 0.35);
+  box-shadow: none;
 }
 
 .office-map.reference-office {
@@ -837,6 +947,12 @@ button {
   opacity: 1;
 }
 
+.office-map.reference-office .room-hotspot {
+  z-index: 14;
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .office-map.reference-office .desk-agent:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 8px;
@@ -850,22 +966,22 @@ button {
 }
 
 .office-map.reference-office .flow-line {
-  stroke-width: 2.2px;
+  stroke-width: 1.75px;
   vector-effect: non-scaling-stroke;
-  stroke-dasharray: 10 12;
+  stroke-dasharray: 8 10;
   stroke-dashoffset: 0;
-  opacity: 0.78;
+  opacity: 0.66;
   filter:
-    drop-shadow(0 0 3px currentColor)
-    drop-shadow(0 0 7px currentColor);
-  animation: dashPx 1.8s linear infinite;
+    drop-shadow(0 0 2px currentColor)
+    drop-shadow(0 0 5px currentColor);
+  animation: dashPx 2.2s linear infinite;
 }
 
 .office-map.reference-office .flow-dot {
-  opacity: 0.92;
+  opacity: 0.84;
   filter:
-    drop-shadow(0 0 4px currentColor)
-    drop-shadow(0 0 9px currentColor);
+    drop-shadow(0 0 3px currentColor)
+    drop-shadow(0 0 7px currentColor);
 }
 
 .office-room {
@@ -911,6 +1027,30 @@ button {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.26);
   font-size: 12px;
   font-weight: 750;
+}
+
+.room-hotspot {
+  position: absolute;
+  transform: translateX(-50%);
+  min-width: 92px;
+  height: 24px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 12px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(9, 13, 22, 0.78);
+  color: #f4f9ff;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.room-hotspot:hover,
+.room-hotspot:focus-visible {
+  border-color: rgba(117, 210, 255, 0.72);
+  background: rgba(12, 35, 56, 0.9);
 }
 
 .furniture,
@@ -1382,7 +1522,7 @@ button {
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) 190px;
+  grid-template-rows: minmax(0, 1fr) 180px;
   gap: 10px;
 }
 
@@ -1409,8 +1549,8 @@ button {
 
 .agent-panel {
   display: grid;
-  grid-template-rows: 30px 28px minmax(150px, 1fr) minmax(76px, auto) minmax(86px, 0.45fr) minmax(128px, auto);
-  gap: 7px;
+  grid-template-rows: 30px 28px minmax(150px, 1fr) 88px minmax(112px, 0.58fr) 78px;
+  gap: 6px;
 }
 
 .agent-panel > .primary-button {
@@ -1441,20 +1581,20 @@ button {
   min-height: 0;
   overflow: auto;
   display: grid;
-  gap: 8px;
+  gap: 6px;
   padding-right: 2px;
 }
 
 .agent-status-card {
   position: relative;
   min-width: 0;
-  min-height: 46px;
+  min-height: 42px;
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
+  grid-template-columns: 32px minmax(0, 1fr);
   grid-template-rows: 1fr 10px;
-  gap: 3px 8px;
+  gap: 2px 7px;
   align-items: center;
-  padding: 6px 56px 6px 7px;
+  padding: 5px 56px 5px 7px;
   border-radius: 8px;
   border: 1px solid rgba(126, 184, 235, 0.11);
   background: rgba(12, 28, 46, 0.58);
@@ -1468,8 +1608,8 @@ button {
 
 .avatar {
   position: relative;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
   overflow: hidden;
   background: rgba(35, 55, 78, 0.85) center / cover no-repeat;
@@ -1617,20 +1757,21 @@ button {
 
 .agent-state {
   position: absolute;
-  top: 6px;
+  top: 5px;
   right: 8px;
-  height: 18px;
-  max-width: 54px;
-  padding: 0 8px;
+  height: 17px;
+  max-width: 62px;
+  padding: 0 7px;
   justify-content: center;
   color: currentColor;
   background: rgba(255, 255, 255, 0.06);
+  font-size: 10px;
   line-height: 1;
 }
 
 .selected-detail {
   min-height: 0;
-  padding: 10px;
+  padding: 8px;
   border-radius: 8px;
   background: rgba(49, 148, 255, 0.08);
   border: 1px solid rgba(77, 166, 255, 0.15);
@@ -1639,8 +1780,8 @@ button {
 .focus-card {
   min-width: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) 26px;
-  gap: 6px;
+  grid-template-rows: auto minmax(0, 1fr) 24px;
+  gap: 5px;
   background:
     radial-gradient(circle at 0 0, color-mix(in srgb, currentColor 16%, transparent), transparent 42%),
     rgba(8, 22, 39, 0.78);
@@ -1650,9 +1791,9 @@ button {
 .focus-card > div:first-child {
   min-width: 0;
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 9px;
+  gap: 7px;
 }
 
 .focus-card em {
@@ -1675,25 +1816,25 @@ button {
 }
 
 .selected-detail p {
-  margin: 5px 0 0;
+  margin: 3px 0 0;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   color: var(--muted);
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: 11px;
+  line-height: 1.28;
 }
 
 .detail-actions {
   display: flex;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 6px;
+  margin-top: 5px;
 }
 
 .detail-actions button {
   flex: 1;
-  height: 26px;
+  height: 24px;
   border: 1px solid rgba(83, 177, 255, 0.22);
   border-radius: 6px;
   color: #8ed2ff;
@@ -1704,9 +1845,9 @@ button {
 .conversation-box {
   min-height: 0;
   display: grid;
-  grid-template-rows: 26px 22px minmax(0, 1fr);
-  gap: 6px;
-  padding: 9px;
+  grid-template-rows: 24px minmax(0, 1fr);
+  gap: 5px;
+  padding: 8px;
   border: 1px solid rgba(102, 178, 255, 0.16);
   border-radius: 8px;
   background:
@@ -1722,6 +1863,10 @@ button {
   gap: 8px;
 }
 
+.conversation-head > div {
+  min-width: 0;
+}
+
 .conversation-head strong {
   display: block;
   font-size: 13px;
@@ -1730,27 +1875,37 @@ button {
 .conversation-head span,
 .runtime-source em {
   display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--muted);
   font-size: 11px;
   font-style: normal;
 }
 
 .conversation-head button {
-  height: 26px;
-  padding: 0 9px;
+  height: 24px;
+  flex: 0 0 auto;
+  padding: 0 8px;
   border: 1px solid rgba(57, 213, 255, 0.24);
   border-radius: 6px;
   color: #a8e9ff;
   background: rgba(57, 213, 255, 0.08);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .runtime-source {
-  min-height: 24px;
+  min-height: 20px;
   justify-content: flex-start;
   padding: 0 8px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.035);
+}
+
+.agent-panel .runtime-source {
+  display: none;
 }
 
 .source-dot {
@@ -1771,16 +1926,17 @@ button {
   overflow: auto;
   display: grid;
   align-content: start;
-  gap: 7px;
+  gap: 4px;
   padding-right: 3px;
 }
 
 .conversation-row {
   position: relative;
   display: grid;
-  grid-template-columns: 46px minmax(0, 1fr);
-  gap: 2px 8px;
-  padding: 6px 8px;
+  grid-template-columns: 44px 76px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  padding: 4px 7px;
   border-radius: 7px;
   background: rgba(3, 12, 24, 0.44);
   border: 1px solid rgba(145, 196, 255, 0.09);
@@ -1813,15 +1969,15 @@ button {
 }
 
 .conversation-row p {
-  grid-column: 1 / -1;
+  grid-column: auto;
   margin: 0;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  display: block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: #b8c8d9;
-  font-size: 11px;
-  line-height: 1.42;
+  font-size: 10.5px;
+  line-height: 1.2;
 }
 
 .primary-button {
@@ -1993,12 +2149,33 @@ button {
 
 .evidence-wall {
   display: grid;
-  grid-template-rows: 34px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 8px;
+  cursor: default;
 }
 
 .evidence-head {
   margin-bottom: 0;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.evidence-head h2 {
+  min-width: 190px;
+}
+
+.evidence-head h2 b {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  margin-left: 8px;
+  padding: 0 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(76, 169, 255, 0.22);
+  background: rgba(35, 139, 255, 0.12);
+  color: #8ed5ff;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .evidence-head h2 span {
@@ -2007,9 +2184,37 @@ button {
   font-weight: 500;
 }
 
+.evidence-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.evidence-list-button {
+  height: 27px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(76, 169, 255, 0.26);
+  background: rgba(35, 139, 255, 0.16);
+  color: #a7ddff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.evidence-list-button:hover,
+.evidence-list-button:focus-visible {
+  border-color: rgba(88, 194, 255, 0.58);
+  background: rgba(35, 139, 255, 0.28);
+}
+
 .filter-tabs {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 5px;
 }
 
@@ -2021,6 +2226,7 @@ button {
   background: rgba(8, 19, 33, 0.66);
   color: #8ea3bb;
   font-size: 12px;
+  cursor: pointer;
 }
 
 .filter-tabs button.active {
@@ -2032,49 +2238,121 @@ button {
 .evidence-list {
   min-height: 0;
   display: grid;
-  grid-template-columns: repeat(5, minmax(84px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  grid-auto-rows: minmax(132px, auto);
   gap: 9px;
-  overflow: hidden;
+  overflow: auto;
+  padding-right: 2px;
 }
 
 .evidence-card {
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-rows: minmax(64px, 1fr) auto auto auto auto;
-  gap: 4px;
-  padding: 7px;
+  grid-template-rows: 42px minmax(32px, auto) auto minmax(28px, auto);
+  gap: 6px;
+  padding: 8px;
   border-radius: 8px;
   border: 1px solid rgba(126, 184, 235, 0.13);
   background: rgba(9, 22, 38, 0.7);
   text-align: left;
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
 }
 
-.evidence-card strong,
-.evidence-card em,
-.evidence-card small,
-.evidence-card span:not(.evidence-preview) {
+.evidence-card:hover,
+.evidence-card:focus-visible {
+  border-color: rgba(90, 190, 255, 0.46);
+  background: rgba(16, 37, 62, 0.82);
+  box-shadow: 0 0 0 1px rgba(63, 169, 255, 0.12);
+}
+
+.evidence-card-top {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.evidence-status-pill {
+  min-width: 0;
+  justify-self: start;
+  max-width: 100%;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.evidence-card-main {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.evidence-card-main strong {
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.2;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+.evidence-card-main em {
+  min-width: 0;
+  color: var(--muted);
+  font-style: normal;
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.evidence-card-meta {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.evidence-card-meta small,
+.evidence-card-meta span {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.evidence-card strong {
-  font-size: 12px;
-}
-
-.evidence-card em,
-.evidence-card small,
-.evidence-card span:not(.evidence-preview) {
-  color: var(--muted);
-  font-style: normal;
+.evidence-card-next {
+  min-width: 0;
+  padding-top: 6px;
+  border-top: 1px solid rgba(126, 184, 235, 0.11);
+  color: #aac3d9;
   font-size: 11px;
+  line-height: 1.35;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
 }
 
 .evidence-preview {
   position: relative;
-  min-height: 54px;
+  width: 56px;
+  min-height: 40px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -2119,6 +2397,8 @@ button {
   color: #92ff91;
   font-family: Consolas, monospace;
   font-weight: 700;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .empty-state {
@@ -2408,15 +2688,39 @@ button {
 }
 
 .planning-flow .module-flow-node {
-  width: 108px;
+  width: 118px;
 }
 
 .planning-flow .module-flow-node.node-hub {
-  width: 122px;
+  width: 132px;
 }
 
 .settings-flow .module-flow-node {
-  width: 138px;
+  width: 116px;
+  min-height: 62px;
+  gap: 3px;
+  padding: 8px 9px 7px;
+}
+
+.settings-flow .module-flow-node.node-hub {
+  width: 136px;
+  min-height: 70px;
+}
+
+.settings-flow .module-flow-node strong {
+  font-size: 11px;
+  line-height: 1.15;
+}
+
+.settings-flow .module-flow-node em {
+  font-size: 9.5px;
+}
+
+.settings-flow .module-node-dot {
+  right: 8px;
+  top: 8px;
+  width: 8px;
+  height: 8px;
 }
 
 .module-node-dot {
@@ -2449,10 +2753,13 @@ button {
 }
 
 .module-flow-node strong {
+  display: block;
+  max-width: calc(100% - 18px);
   min-width: 0;
-  overflow: visible;
-  text-overflow: clip;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: normal;
+  overflow-wrap: anywhere;
   line-height: 1.18;
   color: #f3f9ff;
   font-size: 12px;
@@ -2580,9 +2887,9 @@ button {
 .codex-bridge-box {
   min-height: 0;
   display: grid;
-  grid-template-rows: 30px minmax(0, 1fr);
-  gap: 6px;
-  padding: 9px;
+  grid-template-rows: 28px minmax(0, 1fr);
+  gap: 5px;
+  padding: 8px;
   border-radius: 8px;
   border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
   background:
@@ -2597,6 +2904,12 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+.codex-bridge-head button {
+  flex: 0 0 auto;
+  min-width: 64px;
+  white-space: nowrap;
 }
 
 .codex-bridge-head div {
@@ -2666,8 +2979,8 @@ button {
   display: grid;
   grid-template-columns: minmax(82px, 0.8fr) minmax(0, 1fr);
   align-items: center;
-  gap: 8px;
-  padding: 5px 7px;
+  gap: 7px;
+  padding: 4px 7px;
   border-radius: 6px;
   border: 1px solid rgba(126, 184, 235, 0.12);
   background: rgba(2, 10, 19, 0.52);
@@ -2837,8 +3150,8 @@ button {
 .topology-map {
   position: relative;
   min-height: 420px;
-  margin: 10px 14px 12px;
-  border-radius: 8px;
+  margin: 0;
+  border-radius: 0;
   overflow: hidden;
   background:
     radial-gradient(circle at 50% 34%, rgba(53, 167, 255, 0.16), transparent 30%),
@@ -2846,7 +3159,7 @@ button {
     linear-gradient(90deg, rgba(88, 153, 220, 0.06) 1px, transparent 1px),
     rgba(3, 11, 22, 0.84);
   background-size: auto, 28px 28px, 28px 28px, auto;
-  border: 1px solid rgba(126, 184, 235, 0.16);
+  border: 0;
 }
 
 .topology-map svg {
@@ -2902,7 +3215,9 @@ button {
 
 .modal-card {
   position: relative;
-  width: min(420px, calc(100vw - 32px));
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
   padding: 22px;
   border-radius: 8px;
   background: #071524;
@@ -2926,6 +3241,7 @@ button {
 .modal-card p {
   margin: 8px 0;
   color: #b8c8da;
+  line-height: 1.55;
 }
 
 .modal-rows {
@@ -2936,7 +3252,7 @@ button {
 
 .modal-row {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-columns: 108px minmax(0, 1fr);
   gap: 10px;
   padding: 8px 10px;
   border-radius: 7px;
@@ -2951,6 +3267,7 @@ button {
 .modal-row strong {
   min-width: 0;
   overflow-wrap: anywhere;
+  line-height: 1.45;
 }
 
 .modal-list {
@@ -2961,6 +3278,52 @@ button {
 
 .modal-list li + li {
   margin-top: 6px;
+}
+
+.modal-next {
+  margin-top: 16px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(83, 177, 255, 0.16);
+  background: rgba(35, 139, 255, 0.07);
+}
+
+.modal-next > span {
+  display: block;
+  margin-bottom: 8px;
+  color: #8bb8dc;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.modal-actions button {
+  min-width: 112px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(83, 177, 255, 0.24);
+  background: rgba(20, 49, 78, 0.72);
+  color: #a7d9ff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal-actions button.primary {
+  border-color: rgba(57, 213, 255, 0.54);
+  background: rgba(35, 139, 255, 0.26);
+  color: #e8f8ff;
+}
+
+.modal-actions button:hover,
+.modal-actions button:focus-visible {
+  border-color: rgba(83, 177, 255, 0.6);
+  background: rgba(31, 85, 132, 0.88);
 }
 
 .modal-close {
@@ -3013,7 +3376,7 @@ button {
   }
 
   .content-grid {
-    grid-template-columns: minmax(0, 1fr) 304px;
+    grid-template-columns: minmax(0, 1fr) 328px;
   }
 
   .lane-row {
@@ -3026,7 +3389,7 @@ button {
   }
 
   .agent-status-card {
-    grid-template-columns: 38px minmax(0, 1fr);
+    grid-template-columns: 32px minmax(0, 1fr);
   }
 
   .module-flow-layout {
@@ -3048,11 +3411,11 @@ button {
 
 @media (max-height: 860px) {
   .main {
-    grid-template-rows: 136px minmax(0, 1fr);
+    grid-template-rows: 168px minmax(0, 1fr);
   }
 
   .topbar {
-    grid-template-rows: 28px 28px minmax(0, 1fr);
+    grid-template-rows: 28px 28px 34px minmax(0, 1fr);
     gap: 6px;
     padding-top: 8px;
     padding-bottom: 9px;
@@ -3060,6 +3423,23 @@ button {
 
   .runtime-step-bar {
     height: 28px;
+  }
+
+  .workflow-director {
+    grid-template-columns: minmax(220px, 1.2fr) minmax(180px, 0.86fr) minmax(220px, auto);
+    padding: 5px 8px;
+  }
+
+  .workflow-summary em,
+  .workflow-roles b {
+    font-size: 10px;
+  }
+
+  .workflow-actions button {
+    height: 24px;
+    min-width: 68px;
+    padding: 0 8px;
+    font-size: 11px;
   }
 
   .lane-card {
@@ -3097,11 +3477,11 @@ button {
   }
 
   .right-rail {
-    grid-template-rows: minmax(0, 1fr) 176px;
+    grid-template-rows: minmax(0, 1fr) 164px;
   }
 
   .agent-panel {
-    grid-template-rows: 28px 24px minmax(116px, 1fr) minmax(66px, auto) minmax(74px, 0.42fr) minmax(116px, auto);
+    grid-template-rows: 28px 24px minmax(124px, 1fr) 80px minmax(96px, 0.52fr) 72px;
     gap: 6px;
   }
 
@@ -3110,7 +3490,7 @@ button {
   }
 
   .conversation-box {
-    grid-template-rows: 26px 22px minmax(0, 1fr);
+    grid-template-rows: 24px minmax(0, 1fr);
     padding: 8px;
   }
 
