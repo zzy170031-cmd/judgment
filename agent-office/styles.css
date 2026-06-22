@@ -3594,9 +3594,9 @@ button {
   }
 
   .center-stack {
-    grid-template-rows: minmax(360px, auto) minmax(324px, auto);
+    grid-template-rows: 360px minmax(0, 1fr);
     align-content: start;
-    overflow-y: auto;
+    overflow: hidden;
     padding-right: 4px;
   }
 
@@ -3662,8 +3662,8 @@ button {
   }
 
   .bottom-stack {
-    min-height: 324px;
-    grid-template-rows: 130px minmax(0, 1fr);
+    min-height: 0;
+    grid-template-rows: 124px minmax(0, 1fr);
     gap: 8px;
   }
 
