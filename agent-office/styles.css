@@ -3520,13 +3520,18 @@ button {
   }
 
   .center-stack {
-    grid-template-rows: 430px 300px;
+    grid-template-rows: auto 300px;
     overflow-y: auto;
     padding-right: 4px;
   }
 
   .office-map-panel {
     min-height: 430px;
+    height: var(--office-panel-height, 430px);
+  }
+
+  .office-map-panel .office-stage {
+    min-height: var(--office-map-height, 386px);
   }
 
   .bottom-stack {

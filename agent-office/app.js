@@ -2352,17 +2352,26 @@
     const rect = stage.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
 
+    const panel = stage.closest(".office-map-panel");
     const aspect = OFFICE_REFERENCE_WIDTH / OFFICE_REFERENCE_HEIGHT;
+    const isCompressedViewport = window.innerHeight <= 940;
     let mapWidth = rect.width;
     let mapHeight = mapWidth / aspect;
 
-    if (mapHeight > rect.height) {
+    if (!isCompressedViewport && mapHeight > rect.height) {
       mapHeight = rect.height;
       mapWidth = mapHeight * aspect;
     }
 
     stage.style.setProperty("--office-map-width", `${Math.max(1, Math.floor(mapWidth))}px`);
     stage.style.setProperty("--office-map-height", `${Math.max(1, Math.floor(mapHeight))}px`);
+    if (panel) {
+      if (isCompressedViewport) {
+        panel.style.setProperty("--office-panel-height", `${Math.max(430, Math.ceil(mapHeight + 44))}px`);
+      } else {
+        panel.style.removeProperty("--office-panel-height");
+      }
+    }
   }
 
   function bindOfficeResizeObserver() {
