@@ -793,6 +793,7 @@
       createdAt: new Date().toISOString(),
       source: "judgment-agent-office-html",
       project: data.project.name,
+      projectSessionId: bridgeRuntime?.state?.projectSession?.id || null,
       branch: data.project.branch,
       gate: data.project.gate,
       module: activeNav,
@@ -2032,9 +2033,25 @@
     const pendingRequests = bridgeRequests.filter((request) => ["queued", "accepted"].includes(request.status));
     const requestTone = latest?.status === "accepted" ? "green" : latest ? "yellow" : "purple";
     const activeRun = bridgeRuntime?.state?.activeRun;
+    const controller = bridgeRuntime?.state?.controller;
+    const projectSession = bridgeRuntime?.state?.projectSession;
     const blockerCount = bridgeRuntime?.state?.blockers?.length || 0;
     const statusTone = blockerCount ? "orange" : activeRun ? "cyan" : requestTone;
     const bridgeFeed = [
+      projectSession ? `
+        <div class="codex-feed-row live">
+          <span>Project Session</span>
+          <strong>${escapeHtml(projectSession.status || projectSession.lifecycle || "active")}</strong>
+          <em>${escapeHtml(`${projectSession.gate || data.project.gate} -> ${projectSession.nextGate || data.project.nextGate}`)}</em>
+        </div>
+      ` : "",
+      controller ? `
+        <div class="codex-feed-row ${controller.state === "review" ? "blocker" : "live"}">
+          <span>Controller Inbox</span>
+          <strong>${escapeHtml(controller.state || "route")}</strong>
+          <em>${escapeHtml(controller.nextAction || controller.waitsFor || "waiting")}</em>
+        </div>
+      ` : "",
       latest ? `
         <div class="codex-feed-row">
           <span>${escapeHtml(latest.id)}</span>
@@ -2093,6 +2110,14 @@
   function renderCodexCommandDock() {
     const latest = codexRequests[0];
     const activeRun = bridgeRuntime?.state?.activeRun;
+    const controller = bridgeRuntime?.state?.controller;
+    const projectSession = bridgeRuntime?.state?.projectSession;
+    const dockStatus = controller?.nextAction || projectSession?.nextAction || activeRun?.text || codexBridgeStatus;
+    const dockSource = controller
+      ? `Controller ${controller.state || "route"}`
+      : activeRun
+        ? `${activeRun.agent || "Codex"} -> ${activeRun.node || activeRun.module || "runtime"}`
+        : "waiting runtime event";
     return `
       <section class="codex-command-dock ${toneClass(activeRun?.tone || selectedAgent.tone || "cyan")}">
         <div class="dock-head">
@@ -2110,9 +2135,9 @@
           </div>
         </form>
         <div class="dock-status">
-          <span>${latest ? escapeHtml(latest.id) : "暂无请求"}</span>
-          <strong>${latest ? escapeHtml(latest.statusText || latest.status) : escapeHtml(codexBridgeStatus)}</strong>
-          <em>${activeRun ? `${escapeHtml(activeRun.agent || "Codex")} · ${escapeHtml(activeRun.node || activeRun.module || "运行节点")}` : "等待运行事件"}</em>
+          <span>${projectSession ? escapeHtml(projectSession.id || "project-session") : latest ? escapeHtml(latest.id) : "暂无请求"}</span>
+          <strong>${escapeHtml(dockStatus)}</strong>
+          <em>${escapeHtml(dockSource)}</em>
         </div>
       </section>
     `;
@@ -2693,6 +2718,8 @@
   function openBridgeQueueDetail() {
     const queue = bridgeQueueItems();
     const latest = queue[0];
+    const controller = bridgeRuntime?.state?.controller;
+    const projectSession = bridgeRuntime?.state?.projectSession;
     submitBridgeAction("bridge.queue.inspect", "查看 Codex Bridge 队列", {
       id: "codex-bridge-queue",
       name: "Codex Bridge 队列",
@@ -2704,9 +2731,11 @@
       body: "这里显示 HTML 已提交给 Codex Bridge 的请求。真实执行仍在 Codex 线程里完成，页面负责展示队列、执行事件、证据和 Gate 回写。",
       rows: [
         { label: "当前状态", value: codexBridgeStatus },
+        { label: "项目会话", value: projectSession ? `${projectSession.id || "project-session"} · ${projectSession.status || projectSession.lifecycle || "active"}` : "等待 Controller 建立项目会话" },
+        { label: "Controller", value: controller ? `${controller.state || "route"} · ${controller.nextAction || controller.waitsFor || "waiting"}` : "等待 Codex 侧读取收件箱" },
         { label: "最近请求", value: latest ? `${latest.id} · ${latest.statusText || latest.status || "pending"}` : "暂无请求" },
         { label: "页面下一步", value: "点定位流程入口补充要求，或复制任务包交给 Codex 继续执行" },
-        { label: "Codex 下一步", value: "读取队列、执行核验、处理卡点并回写 /codex/event" }
+        { label: "Codex 下一步", value: "运行 node scripts/controller-agent-office-inbox.js --limit 20，读取队列、处理卡点并回写 /codex/event" }
       ],
       list: queue.length
         ? queue.map((request) => `${request.id} · ${request.statusText || request.status || "pending"}`)

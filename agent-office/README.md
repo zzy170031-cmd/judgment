@@ -58,4 +58,12 @@ Start-Process -FilePath 'E:\coderely\tools\node\node.exe' -ArgumentList @('scrip
 - `POST /codex/event`：Codex 推进项目时写入运行事件，页面会同步当前节点、泳道进度、活动流和右侧 Agent 对话。
 - `GET /codex/state`：页面每 2.2 秒轮询一次，显示当前执行到哪一步、是否存在卡点、最新证据和最近请求。
 
+Codex 侧承接 HTML 队列：
+
+```powershell
+node scripts\controller-agent-office-inbox.js --limit 20
+```
+
+这个脚本是 Judgment Controller 的收件箱。它读取 `queued/accepted` 请求，按 `intake -> orient -> route -> persist` 写回 Controller 决策、项目会话、下一步、oracle 和 stop condition。它不会由 HTML 触发文件、Git、安装、发布或删除动作。
+
 安全边界：HTML 不能直接执行任意文件、Git、网络、安装或发布动作。自由文本需求只进入队列；真实执行仍由 Codex 线程按权限、测试和证据 gate 推进。
