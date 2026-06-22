@@ -592,6 +592,22 @@ function main() {
     lastRequest = requestSummary(recordToWrite);
   }
 
+  if (!dryRun && requests.length && state.projectSession) {
+    const queueUpdatedAt = new Date().toISOString();
+    const pendingAfter = recentRequests(requestsDir, 500).filter((item) => statuses.has(item.status)).length;
+    state.projectSession = {
+      ...state.projectSession,
+      queue: {
+        ...queueStats,
+        handled: results.length,
+        pendingAfter,
+        updatedAt: queueUpdatedAt
+      },
+      updatedAt: queueUpdatedAt
+    };
+    writeJson(statePath, state);
+  }
+
   if (!dryRun) {
     updateStatusFile(statusPath, root, runtimeDir, requestsDir, lastRequest || undefined);
   }
