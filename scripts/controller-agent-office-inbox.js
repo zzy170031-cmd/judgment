@@ -66,6 +66,22 @@ function isReadOnlyRequest(request) {
     ]).has(actionType);
 }
 
+function requestCurrentGate(request, fallback = "当前 Gate") {
+  return request.payload?.currentGate ||
+    request.payload?.gate ||
+    request.gate ||
+    fallback;
+}
+
+function requestTargetGate(request, fallback = "下一 Gate") {
+  return request.payload?.nextGate ||
+    request.payload?.target?.name ||
+    request.payload?.target?.id ||
+    request.target?.name ||
+    request.target?.id ||
+    fallback;
+}
+
 function classifyRequest(request) {
   const lane = inferLane(request);
   const actionType = String(request.actionType || "freeform-request");
@@ -91,8 +107,8 @@ function classifyRequest(request) {
   }
 
   if (actionType === "gate.advance.request") {
-    const currentGate = request.payload?.currentGate || request.gate || "当前 Gate";
-    const requestedGate = request.payload?.nextGate || request.target?.name || targetName;
+    const currentGate = requestCurrentGate(request);
+    const requestedGate = requestTargetGate(request, targetName);
     return {
       lane: "review",
       node: "gate.advance.review",
@@ -669,6 +685,14 @@ function buildEvent(request, route, now) {
 
 function applyEventToState(state, event, route, request, queueStats, now) {
   const next = { ...defaultRuntimeState(), ...state };
+  const previousSession = next.projectSession || {};
+  const isGateAdvanceRequest = request.actionType === "gate.advance.request";
+  const sessionGate = isGateAdvanceRequest
+    ? requestCurrentGate(request, previousSession.gate || "XB-4 开发与验证")
+    : previousSession.gate || request.gate || "XB-4 开发与验证";
+  const sessionNextGate = isGateAdvanceRequest
+    ? requestTargetGate(request, previousSession.nextGate || "XB-5 集成与审查")
+    : previousSession.nextGate || "XB-5 集成与审查";
   next.status = event.status === "blocked" || event.status === "failed" ? event.status : "running";
   next.currentNode = event.node;
   next.currentLane = event.lane;
@@ -687,12 +711,12 @@ function applyEventToState(state, event, route, request, queueStats, now) {
   };
   next.controller = event.controller;
   next.projectSession = {
-    id: next.projectSession?.id || `project-${new Date(now).toISOString().slice(0, 10).replace(/-/g, "")}`,
-    project: request.project || "OpenClaw Platform",
-    branch: request.branch || "main",
-    gate: request.gate || "XB-4 开发与验证",
-    nextGate: request.payload?.nextGate || request.payload?.target?.name || "XB-5 集成与审查",
-    lifecycle: "active",
+    id: previousSession.id || `project-${new Date(now).toISOString().slice(0, 10).replace(/-/g, "")}`,
+    project: previousSession.project || request.project || "OpenClaw Platform",
+    branch: previousSession.branch || request.branch || "main",
+    gate: sessionGate,
+    nextGate: sessionNextGate,
+    lifecycle: previousSession.lifecycle || "active",
     status: event.status === "blocked" ? "review-required" : "running",
     currentRequestId: request.id,
     currentLane: event.lane,

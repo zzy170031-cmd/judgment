@@ -2168,7 +2168,7 @@
       return {
         tone: "blocker",
         title: "Codex 已接收，等待核验",
-        detail: controller?.nextAction || controller?.waitsFor || "需要 QA、555、证据墙或 Git/Worktree 证据。"
+        detail: activeRun?.text || latest?.statusText || controller?.decision || controller?.nextAction || controller?.waitsFor || "需要 QA、555、证据墙或 Git/Worktree 证据。"
       };
     }
     if (["completed", "executed", "resolved", "pass", "passed"].includes(status)) {
@@ -2201,6 +2201,7 @@
     const controller = bridgeRuntime?.state?.controller;
     const projectSession = bridgeRuntime?.state?.projectSession;
     const project = effectiveProject();
+    const blocker = bridgeRuntime?.state?.blockers?.[0];
     const blockerCount = bridgeRuntime?.state?.blockers?.length || 0;
     const statusTone = blockerCount ? "orange" : activeRun ? "cyan" : requestTone;
     const feedback = codexFeedbackSummary(latest, activeRun, controller, pendingRequests.length);
@@ -2254,13 +2255,14 @@
         <div class="codex-feed-row live">
           <span>${escapeHtml(activeRun.agent || "Codex")}</span>
           <strong>${escapeHtml(activeRun.node || activeRun.module || "运行节点")}</strong>
-          <em>${escapeHtml(statusLabel(activeRun.status))} · ${Number.isFinite(Number(activeRun.progress)) ? Number(activeRun.progress) : 0}%</em>
+          <em>${escapeHtml(activeRun.text || `${statusLabel(activeRun.status)} · ${Number.isFinite(Number(activeRun.progress)) ? Number(activeRun.progress) : 0}%`)}</em>
         </div>
       ` : "",
       blockerCount ? `
         <div class="codex-feed-row blocker">
           <span>卡点</span>
-          <strong>当前 ${blockerCount} 个，点击顶部运行条查看</strong>
+          <strong>当前 ${blockerCount} 个</strong>
+          <em>${escapeHtml(blocker?.nextAction || blocker?.text || "点击顶部运行条查看")}</em>
         </div>
       ` : ""
     ].filter(Boolean).join("");
@@ -2289,7 +2291,11 @@
     const projectSession = bridgeRuntime?.state?.projectSession;
     const pendingRequests = bridgeRequests.filter((request) => ["queued", "accepted"].includes(request.status));
     const feedback = codexFeedbackSummary(latest, activeRun, controller, pendingRequests.length);
-    const dockStatus = controller?.nextAction || projectSession?.nextAction || feedback.detail || activeRun?.text || codexBridgeStatus;
+    const gatePair = projectSession
+      ? `${projectSession.gate || "当前 Gate"} -> ${projectSession.nextGate || "下一 Gate"}`
+      : "";
+    const dockStatus = activeRun?.text || latest?.statusText || controller?.decision || feedback.detail || codexBridgeStatus;
+    const dockNext = controller?.nextAction || projectSession?.nextAction || feedback.detail || "等待 HTML 提交或 Codex 回写。";
     const dockSource = controller
       ? `Controller ${controller.state || "route"}`
       : activeRun
@@ -2314,7 +2320,8 @@
         <div class="dock-status">
           <span>${projectSession ? escapeHtml(projectSession.id || "project-session") : latest ? escapeHtml(latest.id) : "暂无请求"}</span>
           <strong>${escapeHtml(dockStatus)}</strong>
-          <em>${escapeHtml(dockSource)}</em>
+          <em>${escapeHtml(gatePair || dockSource)}</em>
+          <small>${escapeHtml(`Codex 下一步：${dockNext}`)}</small>
         </div>
       </section>
     `;

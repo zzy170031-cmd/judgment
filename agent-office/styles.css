@@ -2029,7 +2029,7 @@ button {
 .bottom-stack {
   min-height: 0;
   display: grid;
-  grid-template-rows: 86px minmax(0, 1fr);
+  grid-template-rows: minmax(102px, auto) minmax(0, 1fr);
   gap: 10px;
 }
 
@@ -2115,9 +2115,25 @@ button {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
   color: #eaf4ff;
   font-size: 12px;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.dock-status small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #9fc0dd;
+  font-size: 11px;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .bottom-grid {
@@ -3136,6 +3152,12 @@ button {
 .codex-feed-row.feedback em {
   white-space: normal;
   line-height: 1.28;
+}
+
+.codex-feed-row.live em,
+.codex-feed-row.blocker em {
+  white-space: normal;
+  line-height: 1.25;
 }
 
 .codex-feed-row.feedback em {
