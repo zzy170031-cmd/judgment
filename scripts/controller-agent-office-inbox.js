@@ -91,6 +91,8 @@ function classifyRequest(request) {
   }
 
   if (actionType === "gate.advance.request") {
+    const currentGate = request.payload?.currentGate || request.gate || "当前 Gate";
+    const requestedGate = request.payload?.nextGate || request.target?.name || targetName;
     return {
       lane: "review",
       node: "gate.advance.review",
@@ -98,8 +100,8 @@ function classifyRequest(request) {
       progress: 60,
       tone: "orange",
       tag: "gate-review-required",
-      statusText: "Controller 已接收 XB-5 申请：需要 QA/555/证据墙/Worktree 核验后才能推进 Gate",
-      decision: "Gate 申请不能由 HTML 直接改变；先进入审查阻塞态，等待证据闭环。",
+      statusText: `Controller 已接收 Gate 申请：${currentGate} -> ${requestedGate}；需要 QA/555/证据墙/Worktree 核验后才能推进`,
+      decision: `Gate 申请不能由 HTML 直接改变；${requestedGate} 先进入审查阻塞态，等待证据闭环。`,
       delegatesTo: "QA Agent + 555 Review",
       waitsFor: "QA 通过、555 审查、证据墙和 Git/Worktree 状态",
       oracle: "测试报告、浏览器证据、Git diff、555 verdict",
