@@ -9,5 +9,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install Node dependencies
+        run: npm ci
       - name: Validate skill and plugin consistency
         run: bash scripts/check-consistency.sh
+      - name: Validate skill lint
+        run: npm run check:skills
+      - name: Validate Agent Office runtime contract
+        run: npm run check:runtime-contract
+      - name: Validate Agent Office syntax
+        run: npm run check:agent-office

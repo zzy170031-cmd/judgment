@@ -32,6 +32,23 @@ function writeJson(file, value) {
   fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
+function readSessionTemplate(root) {
+  const templateArg = argValue("--template", "");
+  if (!templateArg) return {};
+  const templatePath = path.isAbsolute(templateArg) ? templateArg : path.join(root, templateArg);
+  const template = readJson(templatePath, null);
+  if (!template || typeof template !== "object" || Array.isArray(template)) {
+    throw new Error(`Invalid project session template: ${templatePath}`);
+  }
+  return template.projectSession && typeof template.projectSession === "object"
+    ? { ...template, ...template.projectSession }
+    : template;
+}
+
+function optionalArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
 function appendJsonl(file, value) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.appendFileSync(file, `${JSON.stringify(value)}\n`, "utf8");
@@ -535,9 +552,10 @@ function handleGateAction({ action, root, runtimeDir, requestsDir, statePath, st
 
 function handleSessionAction({ action, root, runtimeDir, requestsDir, statePath, statusPath, eventsPath, statuses, dryRun }) {
   const now = new Date().toISOString();
-  const reason = argValue("--reason", "");
   const current = readJson(statePath, defaultRuntimeState());
   const queue = queueStatsFor(requestsDir, statuses);
+  const template = action === "new" ? readSessionTemplate(root) : {};
+  const reason = argValue("--reason", template.reason || "");
 
   if (action === "status") {
     console.log(JSON.stringify({
@@ -559,16 +577,16 @@ function handleSessionAction({ action, root, runtimeDir, requestsDir, statePath,
   }
 
   const previousSession = current.projectSession || {};
-  const project = argValue("--project", previousSession.project || "OpenClaw Platform");
-  const branch = argValue("--branch", previousSession.branch || "main");
-  const gate = argValue("--gate", action === "new" ? "XB-1 需求冻结" : previousSession.gate || "XB-4 开发与验证");
-  const nextGate = argValue("--next-gate", action === "new" ? "XB-2 拆分编组" : previousSession.nextGate || "XB-5 集成与审查");
+  const project = argValue("--project", template.project || previousSession.project || "OpenClaw Platform");
+  const branch = argValue("--branch", template.branch || previousSession.branch || "main");
+  const gate = argValue("--gate", action === "new" ? template.gate || "XB-1 需求冻结" : previousSession.gate || "XB-4 开发与验证");
+  const nextGate = argValue("--next-gate", action === "new" ? template.nextGate || "XB-2 拆分编组" : previousSession.nextGate || "XB-5 集成与审查");
   const sessionId = action === "new"
     ? argValue("--session-id", `project-${compactTimestamp(now)}`)
     : previousSession.id || `project-${compactTimestamp(now)}`;
 
   const session = {
-    ...previousSession,
+    ...(action === "close" ? previousSession : {}),
     id: sessionId,
     project,
     branch,
@@ -581,8 +599,11 @@ function handleSessionAction({ action, root, runtimeDir, requestsDir, statePath,
     currentNode: `project.session.${action}`,
     nextAction: action === "close"
       ? "当前项目已结束；进入新项目时请运行 --session-action new 创建新的项目会话。"
-      : "新项目已建立；在页面流程推进入口提交第一步，或运行 Controller 收件箱消费现有队列。",
+      : template.nextAction || "新项目已建立；在页面流程推进入口提交第一步，或运行 Controller 收件箱消费现有队列。",
     queue,
+    template: template.template || template.name || null,
+    acceptanceCriteria: optionalArray(template.acceptanceCriteria),
+    reviewChecklist: optionalArray(template.reviewChecklist),
     reason: reason || (action === "close" ? "project finished" : "project started"),
     createdAt: action === "new" ? now : previousSession.createdAt || now,
     closedAt: action === "close" ? now : null,

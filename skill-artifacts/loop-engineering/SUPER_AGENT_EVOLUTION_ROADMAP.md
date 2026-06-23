@@ -322,14 +322,15 @@ Implemented in this upgrade:
 - `scripts/summarize-agent-office-trajectory.js` and `npm run agent-office:trajectory:summary` for compact Controller-readable trajectory summaries.
 - `scripts/lint-skills.js` and `npm run check:skills` for skill boundary and evidence lint.
 - `skills/judgment` as an explicit alias over the canonical Judgment router stack.
+- `/codex/state` now includes `trajectorySummary`, and Agent Office renders it as a right-rail Controller trajectory panel with a detail modal.
+- GitHub Actions now runs consistency, skill lint, runtime-contract validation, and Agent Office syntax checks.
+- `agent-office/templates/project-session.template.json` plus `agent-office:session:new:template` provide clean project-session defaults for starting the next independent project.
 
-The next concrete implementation should be:
+The remaining concrete implementation needs real runtime interfaces beyond the static HTML surface:
 
-1. Feed the trajectory summary into Agent Office as a visible Controller timeline panel.
-2. Add Browser-visible evidence capture into Evidence Wall for every UI-facing node.
-3. Add a transcript mirror contract for real Codex subagent outputs without allowing HTML to launch agents directly.
-4. Add CI wiring for `check:skills`, `check:runtime-contract`, `check:agent-office`, and `check-consistency.sh`.
-5. Add project templates that reset Agent Office project sessions cleanly between independent projects.
+1. Add Browser-visible evidence capture into Evidence Wall for every UI-facing node once the Browser/Chrome evidence source is standardized.
+2. Add a transcript mirror contract for real Codex subagent outputs without allowing HTML to launch agents directly.
+3. Wire those real evidence and transcript streams into the same `/codex/event` and trajectory path used by Agent Office.
 
 This turns Judgment from a strong workflow skill into a Codex-native project Controller that can supervise planning, execution, evidence, UI visibility, and review without losing safety boundaries.
 

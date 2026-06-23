@@ -1,8 +1,8 @@
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
-const url = require("node:url");
 const vm = require("node:vm");
+const { buildSummary, readJsonl } = require("./summarize-agent-office-trajectory.js");
 
 const args = process.argv.slice(2);
 
@@ -20,6 +20,7 @@ const requestsDir = path.join(runtimeDir, "requests");
 const eventsPath = path.join(runtimeDir, "events.jsonl");
 const statePath = path.join(runtimeDir, "runtime-state.json");
 const statusPath = path.join(runtimeDir, "bridge-status.json");
+const trajectoryPath = path.join(runtimeDir, "trajectory.jsonl");
 
 fs.mkdirSync(requestsDir, { recursive: true });
 
@@ -61,6 +62,10 @@ function sendText(res, status, text) {
     "Cache-Control": "no-store"
   });
   res.end(body);
+}
+
+function requestUrl(req) {
+  return new URL(req.url || "/", `http://${host}:${port}`);
 }
 
 function readBody(req, limitBytes = 1024 * 1024) {
@@ -291,6 +296,29 @@ function recentEvents(limit = 20) {
     })
     .filter(Boolean)
     .reverse();
+}
+
+function trajectorySummary(limit = 6) {
+  try {
+    return buildSummary(readJsonl(trajectoryPath, false), trajectoryPath, limit);
+  } catch (error) {
+    return {
+      generatedAt: new Date().toISOString(),
+      source: trajectoryPath,
+      totalEntries: 0,
+      firstTime: "",
+      lastTime: "",
+      lanes: [],
+      agents: [],
+      tools: [],
+      files: [],
+      evidence: [],
+      latestControllerDecision: "Trajectory ledger could not be read.",
+      latestResult: String(error.message || error),
+      latestNext: "Fix agent-office/runtime/trajectory.jsonl or run agent-office:trajectory with a valid entry.",
+      recent: []
+    };
+  }
 }
 
 function runCheck(label, file) {
@@ -560,9 +588,9 @@ function handleStatus(_req, res) {
 }
 
 function handleRequests(req, res) {
-  const parsed = url.parse(req.url || "/", true);
-  const status = parsed.query.status ? String(parsed.query.status) : "";
-  const limit = Number(parsed.query.limit || 50);
+  const parsed = requestUrl(req);
+  const status = parsed.searchParams.get("status") || "";
+  const limit = Number(parsed.searchParams.get("limit") || 50);
   const requests = allRequests()
     .filter((item) => !status || item.status === status)
     .slice(0, Number.isFinite(limit) && limit > 0 ? limit : 50);
@@ -579,6 +607,7 @@ function handleState(_req, res) {
     ok: true,
     service: "judgment-agent-office-bridge",
     state: loadRuntimeState(),
+    trajectorySummary: trajectorySummary(6),
     recentEvents: recentEvents(20),
     recentRequests: recentRequests().map((item) => ({
       id: item.id,
@@ -619,7 +648,7 @@ function serveStatic(req, res, pathname) {
 }
 
 const server = http.createServer((req, res) => {
-  const parsed = url.parse(req.url || "/");
+  const parsed = requestUrl(req);
   const pathname = parsed.pathname || "/";
   if (req.method === "OPTIONS") {
     sendJson(res, 200, { ok: true });

@@ -17,6 +17,7 @@
     "agent-office:session:status": "node scripts/controller-agent-office-inbox.js --session-action status",
     "agent-office:session:close": "node scripts/controller-agent-office-inbox.js --session-action close",
     "agent-office:session:new": "node scripts/controller-agent-office-inbox.js --session-action new",
+    "agent-office:session:new:template": "node scripts/controller-agent-office-inbox.js --session-action new --template agent-office/templates/project-session.template.json",
     "agent-office:gate:advance": "node scripts/controller-agent-office-inbox.js --gate-action advance"
   },
   "repository": {

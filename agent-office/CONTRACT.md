@@ -188,7 +188,7 @@ window.JUDGMENT_OFFICE_DATA = {
 
 - `POST /codex/request`：由 HTML 页面发起。输入是结构化 request packet，至少包含 `id`、`project`、`branch`、`gate`、`module`、`selectedAgent`、`request`；按钮联动还必须包含 `actionType`、`actionLabel`、`target`、`payload`。输出包含 `status`、`statusText`、`execution`、`requestPath`。
 - `POST /codex/event`：由 Codex 线程或本地验证脚本发起。输入事件字段为 `id`、`source`、`agentId`、`agent`、`lane`、`module`、`node`、`status`、`progress`、`text`、`tag`、`tone`、可选 `evidenceId` 和 `requestId`。
-- `GET /codex/state`：由页面轮询。输出包含 `state.activeRun`、`state.currentLane`、`state.laneProgress`、`state.blockers`、`state.evidence`、`state.controller`、`state.projectSession`、`recentEvents` 和 `recentRequests`。
+- `GET /codex/state`：由页面轮询。输出包含 `state.activeRun`、`state.currentLane`、`state.laneProgress`、`state.blockers`、`state.evidence`、`state.controller`、`state.projectSession`、`trajectorySummary`、`recentEvents` 和 `recentRequests`。
 - `GET /codex/requests`：由 Codex 线程读取，用于消费 HTML 提交的 action/request 队列。支持 `?status=queued&limit=20`。
 
 Codex 侧辅助脚本：
@@ -199,8 +199,10 @@ Codex 侧辅助脚本：
 - `scripts/controller-agent-office-inbox.js --session-action status`：只读查看当前 `projectSession`、Controller、activeRun、blockers 和 Bridge 队列。
 - `scripts/controller-agent-office-inbox.js --session-action close --reason "<原因>"`：由 Codex Controller 关闭当前项目会话，写入 `projectSession.lifecycle=closed`，清空 blockers，并把下一步置为等待新项目或停止。
 - `scripts/controller-agent-office-inbox.js --session-action new --project "<项目名>" --gate "<当前 Gate>" --next-gate "<下一 Gate>"`：创建新的项目会话，生成新的 `projectSession.id`，重置当前运行焦点和阻塞态。
+- `scripts/controller-agent-office-inbox.js --session-action new --template agent-office/templates/project-session.template.json`：使用项目模板创建干净的新项目会话，模板默认值仍可被命令行参数覆盖。
 - `scripts/controller-agent-office-inbox.js --gate-action advance --target-gate "<目标 Gate>" --next-gate "<后续 Gate>"`：由 Codex Controller 在 QA、555、证据墙和 Git/Worktree 核验通过后推进 Gate，清除 `gate.advance.review` blocker，并把原 Gate 请求标记为通过。
 - `scripts/post-agent-office-event.js`：把 Codex 执行、阻塞、完成或验证结果写回 `/codex/event`，页面在下一次轮询或自动刷新时显示。
+- `scripts/summarize-agent-office-trajectory.js`：读取 `agent-office/runtime/trajectory.jsonl` 并生成 Controller 轨迹摘要；bridge 会把摘要嵌入 `/codex/state`，右侧 Agent 状态区负责展示和点开查看。
 
 Controller / Project Session 状态约定：
 

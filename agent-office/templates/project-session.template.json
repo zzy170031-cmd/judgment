@@ -1,0 +1,20 @@
+{
+  "template": "agent-office-project-session.v1",
+  "project": "OpenClaw Platform",
+  "branch": "main",
+  "gate": "XB-1 需求冻结",
+  "nextGate": "XB-2 拆分编组",
+  "reason": "start a clean Agent Office project session",
+  "nextAction": "新项目已建立；先在页面流程推进入口提交第一步，Codex Controller 再读取队列并回写状态。",
+  "acceptanceCriteria": [
+    "每个 HTML 推进动作进入 Codex Bridge 队列或被 Controller 标记为只读闭环",
+    "Codex 执行真实文件、Git、测试或浏览器动作后必须回写 /codex/event 或 trajectory",
+    "Gate 推进必须有 QA、555、证据墙和 Git/Worktree 证据"
+  ],
+  "reviewChecklist": [
+    "确认 projectSession.id 已换新",
+    "确认 blockers 已清空或只保留新项目阻塞",
+    "确认当前 Gate 和下一 Gate 与项目计划一致",
+    "确认页面顶部运行条、右侧 Bridge、活动动态和 trajectory 摘要都能显示新项目状态"
+  ]
+}

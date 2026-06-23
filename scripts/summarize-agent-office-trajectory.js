@@ -201,9 +201,18 @@ function main() {
   writeOutput(output, toMarkdown(summary));
 }
 
-try {
-  main();
-} catch (error) {
-  console.error(error.message);
-  process.exit(1);
+module.exports = {
+  buildSummary,
+  readJsonl,
+  toMarkdown,
+  validateEntry
+};
+
+if (require.main === module) {
+  try {
+    main();
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
+  }
 }

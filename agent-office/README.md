@@ -13,7 +13,7 @@ npm run check:runtime-contract
 
 - `scripts/post-agent-office-event.js` writes visible `/codex/event` packets.
 - `scripts/record-agent-office-trajectory.js` appends a durable local trajectory ledger for Codex-side work.
-- `scripts/summarize-agent-office-trajectory.js` turns the raw trajectory ledger into a compact Controller summary.
+- `scripts/summarize-agent-office-trajectory.js` turns the raw trajectory ledger into a compact Controller summary. The bridge also returns this as `trajectorySummary` from `/codex/state`, and the right-side Agent panel exposes it as a clickable Controller trajectory card.
 - `agent-office/runtime-state.schema.json` fixes the bridge runtime snapshot shape.
 - `skill-artifacts/loop-engineering/schemas/*.schema.json` fixes worker packets, 555 verdicts, trajectory entries, loop state, request packets, events, and evidence.
 
@@ -93,10 +93,11 @@ Codex 侧项目会话入口：
 npm run agent-office:session:status
 npm run agent-office:session:close -- --reason "当前项目验收结束"
 npm run agent-office:session:new -- --project "OpenClaw Platform" --gate "XB-1 需求冻结" --next-gate "XB-2 拆分编组"
+npm run agent-office:session:new:template
 npm run agent-office:gate:advance -- --target-gate "XB-5 集成与审查" --next-gate "XB-6 发布准备"
 ```
 
-项目会话是项目制边界：一个项目结束后由 Codex Controller 写入 `projectSession.lifecycle=closed`；进入下一个项目时创建新的 `projectSession.id`，并清空当前阻塞态与运行焦点。HTML 页面只展示和提交申请，不直接关闭或创建项目。
+项目会话是项目制边界：一个项目结束后由 Codex Controller 写入 `projectSession.lifecycle=closed`；进入下一个项目时创建新的 `projectSession.id`，并清空当前阻塞态与运行焦点。`agent-office/templates/project-session.template.json` 是新项目模板，可通过 `npm run agent-office:session:new:template` 或 `npm run agent-office:session:new -- --template agent-office/templates/project-session.template.json` 使用。HTML 页面只展示和提交申请，不直接关闭或创建项目。
 
 Gate 推进是 Codex Controller 的验收动作：页面只能提交 `gate.advance.request`；Codex 完成 QA、555、证据墙和 Git/Worktree 核验后，运行 `agent-office:gate:advance` 写回当前 Gate、清除 Gate blocker，并把原请求标记为通过。
 

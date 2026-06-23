@@ -782,13 +782,19 @@
   function applyBridgeSnapshot(payload) {
     if (!payload?.ok) return false;
     const previousUpdatedAt = bridgeRuntime?.state?.updatedAt || "";
+    const previousTrajectoryKey = bridgeRuntime?.trajectorySummary
+      ? `${bridgeRuntime.trajectorySummary.totalEntries || 0}:${bridgeRuntime.trajectorySummary.lastTime || ""}:${bridgeRuntime.trajectorySummary.latestResult || ""}:${bridgeRuntime.trajectorySummary.latestNext || ""}`
+      : "";
     bridgeRuntime = payload;
+    const nextTrajectoryKey = payload.trajectorySummary
+      ? `${payload.trajectorySummary.totalEntries || 0}:${payload.trajectorySummary.lastTime || ""}:${payload.trajectorySummary.latestResult || ""}:${payload.trajectorySummary.latestNext || ""}`
+      : "";
     const blockerCount = payload.state?.blockers?.length || 0;
     codexBridgeStatus = blockerCount
       ? `Codex bridge 已连接，有 ${blockerCount} 个卡点`
       : "Codex bridge 已连接，运行状态同步中";
 
-    let changed = previousUpdatedAt !== (payload.state?.updatedAt || "");
+    let changed = previousUpdatedAt !== (payload.state?.updatedAt || "") || previousTrajectoryKey !== nextTrajectoryKey;
     (payload.recentRequests || []).forEach((request) => {
       changed = mergeBridgeRequest(request) || changed;
     });
@@ -2052,6 +2058,42 @@
     `;
   }
 
+  function trajectorySummaryView() {
+    const summary = bridgeRuntime?.trajectorySummary;
+    if (!summary || !Number(summary.totalEntries)) {
+      return {
+        entries: 0,
+        time: "--",
+        decision: "等待 Codex 轨迹",
+        result: codexBridgeStatus,
+        next: "用 agent-office:trajectory 记录 Codex 侧动作后，这里会显示 Controller 摘要。",
+        recent: []
+      };
+    }
+    return {
+      entries: Number(summary.totalEntries) || 0,
+      time: summary.lastTime ? eventTime(summary.lastTime) : "--",
+      decision: summary.latestControllerDecision || "已记录 Codex 侧轨迹",
+      result: summary.latestResult || "等待结果",
+      next: summary.latestNext || "等待下一步",
+      recent: Array.isArray(summary.recent) ? summary.recent : []
+    };
+  }
+
+  function renderTrajectorySummaryCard() {
+    const view = trajectorySummaryView();
+    return `
+      <button class="trajectory-summary-card" type="button" data-action="trajectory-summary">
+        <span>
+          <b>Controller 轨迹</b>
+          <em>${view.entries ? `${view.entries} 条 · ${escapeHtml(view.time)}` : "暂无轨迹"}</em>
+        </span>
+        <strong>${escapeHtml(view.result)}</strong>
+        <small>${escapeHtml(view.next)}</small>
+      </button>
+    `;
+  }
+
   function renderRightRail() {
     const activeRun = bridgeRuntime?.state?.activeRun;
     const runtimeBadge = activeRun
@@ -2085,6 +2127,7 @@
             <span class="source-dot ${bridgeRuntime ? "live" : "mirror"}"></span>
             <strong>${escapeHtml(runtimeBadge)}</strong>
           </div>
+          ${renderTrajectorySummaryCard()}
           <div class="agent-list">${agentCards}</div>
           <div class="selected-detail focus-card ${toneClass(selectedAgent.tone)}">
             <div>
@@ -2934,6 +2977,49 @@
     });
   }
 
+  function openTrajectorySummaryDetail() {
+    const summary = bridgeRuntime?.trajectorySummary;
+    const view = trajectorySummaryView();
+    const recent = view.recent.slice(0, 6).map((entry) => {
+      const bits = [
+        eventTime(entry.time),
+        entry.agent || "Codex",
+        entry.lane || "lane",
+        entry.action || "action"
+      ].filter(Boolean).join(" · ");
+      return `${bits}：${entry.result || entry.controllerDecision || "已记录"}；下一步 ${entry.next || "等待 Controller 决策"}`;
+    });
+    const evidence = Array.isArray(summary?.evidence) ? summary.evidence.slice(0, 6) : [];
+    const files = Array.isArray(summary?.files) ? summary.files.slice(0, 6) : [];
+
+    submitBridgeAction("trajectory.summary.inspect", "查看 Controller 轨迹摘要", {
+      id: "trajectory-summary",
+      name: "Controller 轨迹摘要",
+      type: "trajectory"
+    }, { summary });
+    openModal({
+      kicker: "Controller Timeline",
+      title: "Codex 轨迹摘要",
+      body: "这里汇总 Codex 当前线程写入的 trajectory ledger，用于说明最近做了什么、证据在哪里、下一步由谁推进。",
+      rows: [
+        { label: "轨迹条目", value: `${view.entries}` },
+        { label: "最新时间", value: view.time },
+        { label: "Controller 决策", value: view.decision },
+        { label: "最新结果", value: view.result },
+        { label: "下一步", value: view.next },
+        ...(evidence.length ? [{ label: "证据", value: evidence.join("；") }] : []),
+        ...(files.length ? [{ label: "文件", value: files.join("；") }] : [])
+      ],
+      list: recent.length ? recent : ["暂无 Codex 轨迹。运行 npm run agent-office:trajectory 记录当前执行后，这里会出现轨迹。"],
+      actions: [
+        { label: "查看当前执行", type: "action", value: "runtime-step", primary: true },
+        { label: "查看 Bridge 队列", type: "action", value: "focus-bridge-queue" },
+        { label: "定位流程入口", type: "action", value: "focus-codex-input" }
+      ]
+    });
+    pushActivity("Controller", "查看 Controller 轨迹摘要", "轨迹摘要", "cyan");
+  }
+
   function openReviewPackage() {
     submitBridgeAction("review.package.inspect", "检查 555 证据包", {
       id: "review-package",
@@ -3284,6 +3370,7 @@
         list: [...blockers, ...recent].slice(0, 8)
       });
     }
+    if (action === "trajectory-summary") openTrajectorySummaryDetail();
     if (action === "system-menu" || action === "system-health") openSystemHealth();
     if (action === "open-issues") {
       openModal(modalForIssueBoard());
