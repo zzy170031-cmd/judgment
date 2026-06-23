@@ -1,0 +1,12 @@
+{
+  "id": "verdict-example-001",
+  "project": "Judgment Runtime Contract",
+  "gate": "XB-7 Runtime Contract",
+  "verdict": "conditional-go",
+  "reviewer": "555 Review",
+  "evidence": ["check:runtime-contract passed", "check:agent-office passed"],
+  "risks": ["real subagent transcripts are still mirrored, not live embedded sessions"],
+  "requiredFollowups": ["connect transcript mirror only after worker packet validation"],
+  "stopCondition": "missing schema validation or unsafe HTML execution boundary",
+  "issuedAt": "2026-06-23T00:00:00.000Z"
+}

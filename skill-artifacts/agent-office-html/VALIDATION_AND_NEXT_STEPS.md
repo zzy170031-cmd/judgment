@@ -1,5 +1,19 @@
 # Validation And Next Steps
 
+## 2026-06-23 Runtime Contract Closure
+
+Completed in the Judgment runtime-contract upgrade:
+
+- `scripts/post-agent-office-event.js` is now a documented Codex-side event writer.
+- `agent-office/runtime-state.schema.json` fixes the Agent Office bridge runtime snapshot.
+- `scripts/record-agent-office-trajectory.js` writes Codex-side trajectory entries for later timeline and summary rendering.
+- `skill-artifacts/loop-engineering/schemas/worker-packet.schema.json`, `555-verdict.schema.json`, and `trajectory-entry.schema.json` formalize the worker/review/ledger packets.
+- `scripts/validate-runtime-contract.js` and `npm run check:runtime-contract` validate the runtime examples without requiring Python.
+- `scripts/lint-skills.js` and `npm run check:skills` check skill routing metadata, high-risk boundaries, and review/evidence closure.
+- `skills/judgment` is now an explicit alias over the canonical Judgment router stack.
+
+Remaining product evolution should focus on real transcript mirroring, Browser-visible evidence capture, CI wiring, and per-project Agent Office templates.
+
 ## 已验证
 
 本轮开发已验证：

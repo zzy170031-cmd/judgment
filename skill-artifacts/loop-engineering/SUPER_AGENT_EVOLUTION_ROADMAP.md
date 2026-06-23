@@ -316,14 +316,19 @@ Implemented in this upgrade:
 - `skill-artifacts/loop-engineering/schemas/`.
 - `scripts/validate-loop-state.py`.
 - Controller/authority references in `666`, `work-planner`, `work-splitter`, `555`, README, and Codex Bridge contract.
+- Runtime-state, worker-packet, 555-verdict, and trajectory schemas with checked examples.
+- `scripts/validate-runtime-contract.js` and `npm run check:runtime-contract` for Python-free runtime validation.
+- `scripts/record-agent-office-trajectory.js` for Codex-side trajectory ledger entries.
+- `scripts/lint-skills.js` and `npm run check:skills` for skill boundary and evidence lint.
+- `skills/judgment` as an explicit alias over the canonical Judgment router stack.
 
 The next concrete implementation should be:
 
-1. Wire Agent Office to read a real loop-state file or bridge state endpoint as the primary state source.
-2. Add skill lint focused on loop readiness, authority boundaries, and Controller routing.
-3. Add a trajectory ledger plus a compact Controller summary renderer.
-4. Add a helper command that writes validated `/codex/event` packets without hand-writing JSON.
-5. Add Browser-visible evidence capture into Evidence Wall for every UI-facing node.
+1. Add a compact Controller summary renderer over the raw trajectory ledger.
+2. Add Browser-visible evidence capture into Evidence Wall for every UI-facing node.
+3. Add a transcript mirror contract for real Codex subagent outputs without allowing HTML to launch agents directly.
+4. Add CI wiring for `check:skills`, `check:runtime-contract`, `check:agent-office`, and `check-consistency.sh`.
+5. Add project templates that reset Agent Office project sessions cleanly between independent projects.
 
 This turns Judgment from a strong workflow skill into a Codex-native project Controller that can supervise planning, execution, evidence, UI visibility, and review without losing safety boundaries.
 

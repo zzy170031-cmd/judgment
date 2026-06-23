@@ -25,7 +25,7 @@
     "node": { "type": "string", "minLength": 1 },
     "status": {
       "type": "string",
-      "enum": ["planned", "queued", "running", "blocked", "failed", "completed", "executed", "passed", "resolved", "accepted"]
+      "enum": ["planned", "queued", "running", "blocked", "failed", "completed", "executed", "pass", "passed", "resolved", "accepted"]
     },
     "progress": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
     "text": { "type": "string", "minLength": 1 },

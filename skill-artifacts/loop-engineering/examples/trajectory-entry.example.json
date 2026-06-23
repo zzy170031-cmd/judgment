@@ -1,0 +1,17 @@
+{
+  "time": "2026-06-23T00:00:00.000Z",
+  "controllerDecision": "Record schema validation as trajectory evidence before closing the runtime contract gate.",
+  "agent": "Judgment Controller",
+  "lane": "controller",
+  "action": "validate runtime contract examples",
+  "tool": "scripts/validate-loop-state.py",
+  "files": [
+    "agent-office/runtime-state.schema.json",
+    "skill-artifacts/loop-engineering/schemas/worker-packet.schema.json"
+  ],
+  "evidence": ["runtime-state.example.json", "worker-packet.example.json"],
+  "result": "validation command passed",
+  "next": "commit and push runtime contract upgrade",
+  "requestId": "codex-example-001",
+  "runId": "project-example"
+}

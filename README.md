@@ -188,6 +188,7 @@ GitHub Actions 会在 push 和 pull request 时运行同一检查。
 This repository is now a general Codex project workflow governance pack:
 
 - `666`: upstream workflow router. It decides whether a Codex project task should be answered directly, anchored read-only, routed to a narrow skill, sent to an auditor, challenged by Core Challenger behavior, escalated to `555`, dispatched across threads, or evaluated as a packaging candidate.
+- `judgment`: explicit compatibility alias for users who ask for Judgment by product name. It delegates to `666`, `work-planner`, `work-splitter`, or `555` without duplicating the governance rules.
 - `work-planner`: complete planning entrypoint. It aligns needs clarification, Codex Plan mode, decomposition, XA/XB gates, thread strategy, and 555 escalation decisions.
 - `needs-solution-designer`: needs clarification and solution-shaping agent. It turns fuzzy ideas into confirmed facts, assumptions, reuse decisions, and solution blueprints.
 - `work-splitter`: dedicated decomposition agent. It turns clear large work into XA/XB gates, lanes, Agent groups, subtask contracts, thread strategy, and 555 escalation decisions.
@@ -207,7 +208,10 @@ This repository is now a general Codex project workflow governance pack:
 - `rules/quick-launcher-rule.md`: local quick launcher and auto-use routing rule for `/p`, `/n`, `/d`, `/r`, planning, needs, split, and review phrases.
 - `rules/skill-quality-standard.md`: local quality standard for creating, splitting, auditing, or improving skills.
 - `scripts/render-project-agent-graph.py`: deterministic renderer for project-agent graph JSON into a standalone HTML cockpit with status cards, lane board, warnings, raw JSON, and a right-side agent conversation rail.
-- `scripts/validate-loop-state.py`: dependency-free validator for Judgment loop-state, request-packet, and Codex event JSON.
+- `scripts/validate-loop-state.py`: dependency-free validator for Judgment loop-state, request-packet, Codex event, runtime-state, worker-packet, 555-verdict, and trajectory JSON.
+- `scripts/validate-runtime-contract.js`: Node validator for the runtime contract examples, used by `npm run check:runtime-contract` on machines without Python.
+- `scripts/lint-skills.js`: skill lint for frontmatter, selection descriptions, high-risk boundaries, review/evidence closure, and maintainer-local path leakage.
+- `scripts/record-agent-office-trajectory.js`: appends Codex-side trajectory entries for Agent Office timelines and future Controller summaries.
 - `skill-artifacts/loop-engineering/SUPER_AGENT_EVOLUTION_ROADMAP.md`: roadmap for evolving Judgment toward a Codex-native super-agent pattern by connecting Markdown rules, Codex loop execution, and HTML observability.
 - `skill-artifacts/loop-engineering/schemas/`: JSON schemas for loop state, request packets, Codex events, and evidence items.
 - `plugins/work-splitter`: local plugin source for `work-splitter`, including `.codex-plugin/plugin.json`.
@@ -345,9 +349,15 @@ skills/
   555/
     SKILL.md                  # Codex project five-agent evidence loop
     agents/openai.yaml
+  judgment/
+    SKILL.md                  # Explicit Judgment alias over the canonical router skills
+    agents/openai.yaml
 scripts/
   check-consistency.sh
+  lint-skills.js
+  record-agent-office-trajectory.js
   render-project-agent-graph.py
+  validate-runtime-contract.js
   sync-plugin-skills.sh
 templates/
   project-agent-graph.example.json
@@ -370,6 +380,7 @@ skills/work-planner
 skills/needs-solution-designer
 skills/work-splitter
 skills/555
+skills/judgment
 ```
 
 ## Current Scope
@@ -381,6 +392,9 @@ The runtime skill logic stays in each `SKILL.md`. The README and `agents/openai.
 ```bash
 bash scripts/check-consistency.sh
 bash scripts/sync-plugin-skills.sh
+npm run check:skills
+npm run check:runtime-contract
+npm run check:agent-office
 ```
 
-The consistency check validates `plugin.json`, confirms root compatibility files match `skills/666`, confirms plugin-packaged skills match root skills, and blocks maintainer-local absolute paths from public repository files. The sync script copies canonical `skills/*` into the plugin package.
+The consistency check validates `plugin.json` with Node, confirms root compatibility files match `skills/666`, confirms plugin-packaged skills match root skills, and blocks maintainer-local absolute paths from public repository files. The sync script copies canonical `skills/*` into the plugin package. The npm checks cover skill lint, Agent Office syntax, runtime contract schemas, and example packet validation.

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgment.local/schemas/555-verdict.schema.json",
+  "title": "Judgment 555 Verdict",
+  "type": "object",
+  "required": ["id", "project", "gate", "verdict", "reviewer", "evidence", "risks", "requiredFollowups", "stopCondition", "issuedAt"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "project": { "type": "string", "minLength": 1 },
+    "gate": { "type": "string", "minLength": 1 },
+    "verdict": {
+      "type": "string",
+      "enum": ["go", "conditional-go", "no-go", "blocked"]
+    },
+    "reviewer": { "type": "string", "minLength": 1 },
+    "evidence": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "risks": { "type": "array", "items": { "type": "string" } },
+    "requiredFollowups": { "type": "array", "items": { "type": "string" } },
+    "stopCondition": { "type": "string", "minLength": 1 },
+    "issuedAt": { "type": "string", "minLength": 1 }
+  }
+}

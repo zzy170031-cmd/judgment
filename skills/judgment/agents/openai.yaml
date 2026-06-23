@@ -1,0 +1,3 @@
+display_name: "Judgment"
+short_description: "Alias for the local Judgment workflow pack and Controller route."
+default_prompt: "Use $judgment when a request mentions Judgment itself or the Judgment Controller; route through $666 and the relevant Judgment skills/rules before execution."

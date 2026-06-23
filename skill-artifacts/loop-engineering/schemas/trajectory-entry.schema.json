@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgment.local/schemas/trajectory-entry.schema.json",
+  "title": "Judgment Trajectory Entry",
+  "type": "object",
+  "required": ["time", "controllerDecision", "agent", "lane", "action", "tool", "files", "evidence", "result", "next"],
+  "properties": {
+    "time": { "type": "string", "minLength": 1 },
+    "controllerDecision": { "type": "string", "minLength": 1 },
+    "agent": { "type": "string", "minLength": 1 },
+    "lane": { "type": "string", "minLength": 1 },
+    "action": { "type": "string", "minLength": 1 },
+    "tool": { "type": "string" },
+    "files": { "type": "array", "items": { "type": "string" } },
+    "evidence": { "type": "array", "items": { "type": "string" } },
+    "result": { "type": "string", "minLength": 1 },
+    "next": { "type": "string", "minLength": 1 },
+    "requestId": { "type": "string" },
+    "runId": { "type": "string" }
+  }
+}

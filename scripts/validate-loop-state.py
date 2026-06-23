@@ -20,10 +20,14 @@ EVENT_STATUS = {
     "failed",
     "completed",
     "executed",
+    "pass",
     "passed",
     "resolved",
     "accepted",
 }
+RUNTIME_STATUS = {"running", "blocked", "failed", "completed", "closed", "stopped"}
+REVIEW_STATUS = {"pending", "not-required", "passed", "failed", "blocked"}
+VERDICT = {"go", "conditional-go", "no-go", "blocked"}
 
 
 def load_json(path: Path) -> Any:
@@ -167,10 +171,141 @@ def validate_event(data: Any) -> list[str]:
     return errors
 
 
+def validate_runtime_state(data: Any) -> list[str]:
+    errors: list[str] = []
+    expect(errors, isinstance(data, dict), "runtime root must be an object")
+    if not isinstance(data, dict):
+        return errors
+
+    require_keys(
+        errors,
+        data,
+        ["status", "activeRun", "currentNode", "currentLane", "laneProgress", "blockers", "evidence", "updatedAt"],
+        "runtime",
+    )
+    expect(errors, data.get("status") in RUNTIME_STATUS, "runtime.status is invalid")
+    expect(errors, isinstance(data.get("currentNode"), str) and bool(data.get("currentNode")), "runtime.currentNode must be a string")
+    expect(errors, isinstance(data.get("currentLane"), str) and bool(data.get("currentLane")), "runtime.currentLane must be a string")
+    expect(errors, isinstance(data.get("laneProgress"), dict), "runtime.laneProgress must be an object")
+    expect(errors, isinstance(data.get("blockers"), list), "runtime.blockers must be an array")
+    expect(errors, isinstance(data.get("evidence"), list), "runtime.evidence must be an array")
+
+    active = data.get("activeRun")
+    if active is not None:
+        expect(errors, isinstance(active, dict), "runtime.activeRun must be null or an object")
+        if isinstance(active, dict):
+            require_keys(errors, active, ["agent", "agentId", "module", "node", "lane", "status", "text", "time"], "runtime.activeRun")
+            expect(errors, active.get("status") in EVENT_STATUS or active.get("status") in RUNTIME_STATUS, "runtime.activeRun.status is invalid")
+
+    controller = data.get("controller")
+    if controller is not None:
+        expect(errors, isinstance(controller, dict), "runtime.controller must be an object")
+        if isinstance(controller, dict):
+            require_keys(errors, controller, ["role", "state", "sees", "decision", "waitsFor", "oracle", "stopCondition", "nextAction"], "runtime.controller")
+            expect(errors, controller.get("role") == "Judgment Controller", "runtime.controller.role must be Judgment Controller")
+
+    session = data.get("projectSession")
+    if session is not None:
+        expect(errors, isinstance(session, dict), "runtime.projectSession must be an object")
+        if isinstance(session, dict):
+            require_keys(errors, session, ["id", "project", "branch", "gate", "nextGate", "lifecycle", "status", "nextAction"], "runtime.projectSession")
+
+    return errors
+
+
+def validate_worker_packet(data: Any) -> list[str]:
+    errors: list[str] = []
+    expect(errors, isinstance(data, dict), "worker root must be an object")
+    if not isinstance(data, dict):
+        return errors
+
+    require_keys(
+        errors,
+        data,
+        [
+            "id",
+            "project",
+            "lane",
+            "agent",
+            "goal",
+            "inputs",
+            "allowedActions",
+            "forbiddenActions",
+            "oracles",
+            "downstreamReceiver",
+            "stopCondition",
+            "review",
+        ],
+        "worker",
+    )
+    for key in ["inputs", "allowedActions", "forbiddenActions", "oracles"]:
+        expect(errors, isinstance(data.get(key), list), f"worker.{key} must be an array")
+    expect(errors, isinstance(data.get("oracles"), list) and len(data.get("oracles", [])) > 0, "worker.oracles must not be empty")
+
+    review = data.get("review")
+    expect(errors, isinstance(review, dict), "worker.review must be an object")
+    if isinstance(review, dict):
+        require_keys(errors, review, ["required", "receiver", "status"], "worker.review")
+        expect(errors, review.get("status") in REVIEW_STATUS, "worker.review.status is invalid")
+
+    worktree = data.get("worktree")
+    if worktree is not None:
+        expect(errors, isinstance(worktree, dict), "worker.worktree must be an object")
+        if isinstance(worktree, dict):
+            require_keys(errors, worktree, ["required", "path", "branch", "baseRef"], "worker.worktree")
+
+    return errors
+
+
+def validate_verdict(data: Any) -> list[str]:
+    errors: list[str] = []
+    expect(errors, isinstance(data, dict), "verdict root must be an object")
+    if not isinstance(data, dict):
+        return errors
+
+    require_keys(
+        errors,
+        data,
+        ["id", "project", "gate", "verdict", "reviewer", "evidence", "risks", "requiredFollowups", "stopCondition", "issuedAt"],
+        "verdict",
+    )
+    expect(errors, data.get("verdict") in VERDICT, "verdict.verdict is invalid")
+    for key in ["evidence", "risks", "requiredFollowups"]:
+        expect(errors, isinstance(data.get(key), list), f"verdict.{key} must be an array")
+    expect(errors, isinstance(data.get("evidence"), list) and len(data.get("evidence", [])) > 0, "verdict.evidence must not be empty")
+
+    return errors
+
+
+def validate_trajectory(data: Any) -> list[str]:
+    errors: list[str] = []
+    expect(errors, isinstance(data, dict), "trajectory root must be an object")
+    if not isinstance(data, dict):
+        return errors
+
+    require_keys(
+        errors,
+        data,
+        ["time", "controllerDecision", "agent", "lane", "action", "tool", "files", "evidence", "result", "next"],
+        "trajectory",
+    )
+    for key in ["files", "evidence"]:
+        expect(errors, isinstance(data.get(key), list), f"trajectory.{key} must be an array")
+    return errors
+
+
 def infer_kind(path: Path, explicit: str) -> str:
     if explicit != "auto":
         return explicit
     name = path.name.lower()
+    if "runtime" in name:
+        return "runtime"
+    if "worker" in name:
+        return "worker"
+    if "verdict" in name or "555" in name:
+        return "verdict"
+    if "trajectory" in name:
+        return "trajectory"
     if "request" in name:
         return "request"
     if "event" in name:
@@ -181,7 +316,7 @@ def infer_kind(path: Path, explicit: str) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("json_path", type=Path)
-    parser.add_argument("--kind", choices=["auto", "loop", "request", "event"], default="auto")
+    parser.add_argument("--kind", choices=["auto", "loop", "request", "event", "runtime", "worker", "verdict", "trajectory"], default="auto")
     args = parser.parse_args()
 
     data = load_json(args.json_path)
@@ -190,8 +325,16 @@ def main() -> int:
         errors = validate_loop_state(data)
     elif kind == "request":
         errors = validate_request_packet(data)
-    else:
+    elif kind == "event":
         errors = validate_event(data)
+    elif kind == "runtime":
+        errors = validate_runtime_state(data)
+    elif kind == "worker":
+        errors = validate_worker_packet(data)
+    elif kind == "verdict":
+        errors = validate_verdict(data)
+    else:
+        errors = validate_trajectory(data)
 
     if errors:
         for error in errors:

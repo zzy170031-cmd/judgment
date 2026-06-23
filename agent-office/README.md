@@ -1,5 +1,22 @@
 # Judgment Agent Office
 
+## Runtime Contract Tools
+
+The Agent Office bridge now has an explicit runtime contract layer:
+
+```powershell
+npm run agent-office:event -- --agent "Controller" --status running --text "Controller accepted the next task"
+npm run agent-office:trajectory -- --controller-decision "continue" --agent "Controller" --lane "control" --action "verify gate" --result "passed" --next "advance"
+npm run check:runtime-contract
+```
+
+- `scripts/post-agent-office-event.js` writes visible `/codex/event` packets.
+- `scripts/record-agent-office-trajectory.js` appends a durable local trajectory ledger for Codex-side work.
+- `agent-office/runtime-state.schema.json` fixes the bridge runtime snapshot shape.
+- `skill-artifacts/loop-engineering/schemas/*.schema.json` fixes worker packets, 555 verdicts, trajectory entries, loop state, request packets, events, and evidence.
+
+HTML remains a request and observability surface. Codex remains responsible for execution, validation, Gate advancement, Git/Worktree mutation, and final project closure.
+
 静态可预览版本的 Judgment Agent Office 页面，用于展示 Agent 编组、办公室运行态、项目拓扑、证据闭环、555 审查、Git/Worktree 状态。
 
 ## 入口

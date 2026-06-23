@@ -1,0 +1,24 @@
+{
+  "id": "worker-example-001",
+  "project": "Judgment Runtime Contract",
+  "lane": "verification",
+  "agent": "QA Agent",
+  "goal": "Validate runtime contract examples and report pass/fail evidence.",
+  "inputs": ["schema files", "example packets", "validation script"],
+  "allowedActions": ["read repository files", "run validation commands", "write evidence summary"],
+  "forbiddenActions": ["push without Controller review", "delete user files", "execute HTML-originated shell commands"],
+  "oracles": ["check:runtime-contract passes"],
+  "worktree": {
+    "required": false,
+    "path": "",
+    "branch": "main",
+    "baseRef": "origin/main"
+  },
+  "downstreamReceiver": "Judgment Controller",
+  "stopCondition": "validation fails or required schema field is ambiguous",
+  "review": {
+    "required": true,
+    "receiver": "Judgment Controller",
+    "status": "pending"
+  }
+}

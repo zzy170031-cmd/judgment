@@ -1,0 +1,51 @@
+{
+  "status": "running",
+  "activeRun": {
+    "requestId": "codex-example-001",
+    "agent": "Judgment Controller",
+    "agentId": "controller",
+    "module": "Agent Office",
+    "node": "runtime-contract",
+    "lane": "controller",
+    "status": "running",
+    "progress": 50,
+    "text": "Runtime contract upgrade is being validated.",
+    "time": "2026-06-23T00:00:00.000Z",
+    "tone": "cyan"
+  },
+  "currentNode": "runtime-contract",
+  "currentLane": "controller",
+  "laneProgress": {
+    "controller": {
+      "progress": 50,
+      "status": "running",
+      "tone": "cyan",
+      "updatedAt": "2026-06-23T00:00:00.000Z"
+    }
+  },
+  "blockers": [],
+  "evidence": [],
+  "controller": {
+    "agentId": "judgment-controller",
+    "role": "Judgment Controller",
+    "state": "verify",
+    "sees": ["runtime-state", "schemas", "validation scripts"],
+    "decision": "validate runtime contracts before accepting loop-ready behavior",
+    "delegatesTo": "scripts/validate-loop-state.py",
+    "waitsFor": "schema and example validation",
+    "oracle": "check:runtime-contract passes",
+    "stopCondition": "schema validation fails or authority boundary is unclear",
+    "nextAction": "run runtime contract validation"
+  },
+  "projectSession": {
+    "id": "project-example",
+    "project": "Judgment Runtime Contract",
+    "branch": "main",
+    "gate": "XB-7 Runtime Contract",
+    "nextGate": "Project Close",
+    "lifecycle": "active",
+    "status": "running",
+    "nextAction": "validate contracts and record evidence"
+  },
+  "updatedAt": "2026-06-23T00:00:00.000Z"
+}

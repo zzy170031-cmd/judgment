@@ -261,7 +261,7 @@ When using external Codex companion from Bash on Windows:
 Resolve the companion path dynamically:
 
 ```bash
-CXC=$(ls C:/Users/*/.claude/plugins/cache/openai-codex/codex/*/scripts/codex-companion.mjs 2>/dev/null | head -1)
+CXC=$(ls "$HOME"/.claude/plugins/cache/openai-codex/codex/*/scripts/codex-companion.mjs 2>/dev/null | head -1)
 test -n "$CXC" || { echo CODEX_COMPANION_NOT_FOUND; exit 2; }
 node "$CXC" task --background --fresh --write "任务描述"
 ```

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://judgment.local/schemas/agent-office-runtime-state.schema.json",
+  "title": "Judgment Agent Office Runtime State",
+  "type": "object",
+  "required": ["status", "activeRun", "currentNode", "currentLane", "laneProgress", "blockers", "evidence", "updatedAt"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["running", "blocked", "failed", "completed", "closed", "stopped"]
+    },
+    "activeRun": {
+      "type": ["object", "null"],
+      "properties": {
+        "requestId": { "type": ["string", "null"] },
+        "agent": { "type": "string" },
+        "agentId": { "type": "string" },
+        "module": { "type": "string" },
+        "node": { "type": "string" },
+        "lane": { "type": "string" },
+        "status": { "type": "string" },
+        "progress": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+        "text": { "type": "string" },
+        "time": { "type": "string" },
+        "tone": { "type": "string" }
+      }
+    },
+    "currentNode": { "type": "string", "minLength": 1 },
+    "currentLane": { "type": "string", "minLength": 1 },
+    "laneProgress": { "type": "object" },
+    "blockers": { "type": "array" },
+    "evidence": { "type": "array" },
+    "controller": {
+      "type": "object",
+      "properties": {
+        "agentId": { "type": "string" },
+        "role": { "type": "string", "const": "Judgment Controller" },
+        "state": { "type": "string" },
+        "sees": { "type": "array", "items": { "type": "string" } },
+        "decision": { "type": "string" },
+        "delegatesTo": { "type": "string" },
+        "waitsFor": { "type": "string" },
+        "oracle": { "type": "string" },
+        "stopCondition": { "type": "string" },
+        "nextAction": { "type": "string" }
+      }
+    },
+    "projectSession": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "project": { "type": "string" },
+        "branch": { "type": "string" },
+        "gate": { "type": "string" },
+        "nextGate": { "type": "string" },
+        "lifecycle": { "type": "string" },
+        "status": { "type": "string" },
+        "nextAction": { "type": "string" }
+      }
+    },
+    "updatedAt": { "type": "string", "minLength": 1 }
+  }
+}
