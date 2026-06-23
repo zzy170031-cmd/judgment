@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "check:agent-office": "node --check agent-office/app.js && node --check agent-office/mockData.js && node --check scripts/agent-office-bridge.js && node --check scripts/controller-agent-office-inbox.js && node --check scripts/list-agent-office-requests.js",
-    "check:skills": "node scripts/lint-skills.js",
+    "check:skills": "node scripts/lint-skills.js && node scripts/smoke-skill-routes.js",
     "check:runtime-contract": "node --check scripts/post-agent-office-event.js && node --check scripts/record-agent-office-trajectory.js && node --check scripts/summarize-agent-office-trajectory.js && node --check scripts/lint-skills.js && node --check scripts/validate-runtime-contract.js && node scripts/validate-runtime-contract.js skill-artifacts/loop-engineering/examples/runtime-state.example.json --kind runtime && node scripts/validate-runtime-contract.js skill-artifacts/loop-engineering/examples/worker-packet.example.json --kind worker && node scripts/validate-runtime-contract.js skill-artifacts/loop-engineering/examples/555-verdict.example.json --kind verdict && node scripts/validate-runtime-contract.js skill-artifacts/loop-engineering/examples/trajectory-entry.example.json --kind trajectory && node scripts/summarize-agent-office-trajectory.js --input skill-artifacts/loop-engineering/examples/trajectory-ledger.example.jsonl --format json",
     "agent-office:requests": "node scripts/list-agent-office-requests.js",
     "agent-office:event": "node scripts/post-agent-office-event.js",

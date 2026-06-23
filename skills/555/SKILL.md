@@ -18,6 +18,8 @@ Use the local XA/XB standard as the default development gate reference when prod
 - Authority boundary standard: `rules/authority-boundary-standard.md` when Markdown, HTML, bridge queues, Codex execution, scripts/tests, and review/acceptance authority are mixed.
 - Controller state-machine standard: `rules/controller-state-machine-standard.md` when Judgment is acting as the main Controller for route, evidence, verification, persistence, and stop/next decisions.
 - Loop engineering standard: `rules/loop-engineering-standard.md` when repeated Codex work, Agent Office visibility, automation, heartbeat, worker cycle, or project-development loop readiness matters.
+- Context engineering standard: `rules/context-engineering-standard.md` when source freshness, compression, cross-thread handoff, worker context, or skill-evolution context matters.
+- Claim calibration standard: `rules/claim-calibration-standard.md` when decision-impacting claims, source adoption, release readiness, or anti-sycophancy checks matter.
 - Tool portfolio standard: `rules/tool-portfolio-standard.md` when choosing, installing, enabling, or reviewing plugins, skills, MCP servers, connectors, scripts, or automations.
 - Security review standard: `rules/security-review-standard.md` for auth, permissions, payments, user data, secrets, external-send, production, AI/Agent tools, and destructive actions.
 - Browser flow testing standard: `rules/browser-flow-testing-standard.md` for web UI, local previews, visual artifacts, responsive layout, and interaction flows.
@@ -38,6 +40,10 @@ Use exactly five seats for non-trivial project work:
 Core Challenger behavior belongs mainly to `A2` and `A3`; Audit Specialist behavior belongs mainly to `A4`. The main thread never treats its own judgment as sufficient for a milestone claim.
 
 When `rules/loop-engineering-standard.md` applies, `A0` is also the `Judgment Controller`: it must state what it sees across the project and skill subflows, what it decides, who receives the next task, what evidence it waits for, and which stop condition prevents uncontrolled looping. When `rules/controller-state-machine-standard.md` applies, `A0` must also name the current state: intake, orient, plan, split, route, execute, verify, review, persist, or next/stop.
+
+When `rules/claim-calibration-standard.md` applies, `A0` must downgrade or block decision-impacting claims that are not supported by evidence. `A2` challenges overconfident labels, `A3` checks whether `FRAME` or `GUESS` leaked into a decision, and `A4` verifies the actual file, command, artifact, or source behind the claim.
+
+When `rules/context-engineering-standard.md` applies, `A0` must keep a compact context packet: objective, newest constraint, active repo/gate, loaded sources, stale sources, decisions, assumptions, hard boundaries, next action, and stop condition.
 
 ## First Gate: Live State
 
@@ -67,6 +73,27 @@ Rules:
 - If a ledger exists, treat it as a clue, not authority. Re-check the underlying files, commands, artifacts, and Git state before closure.
 - When `git worktree`, parallel worker lanes, hotfixes during dirty work, clean review/test worktrees, or branch ownership conflicts matter, load `rules/git-worktree-standard.md`; include current worktree path, worktree list, branch owner, base ref, setup state, shared-file policy, integration owner, verification output, commit/push policy, force policy, and cleanup policy in controller/worker reports.
 - Do not accept a worker's worktree report as closed until the target worktree has a fresh `status -sb`, `HEAD`, changed-file list, verification evidence, and an explicit integration or handoff state.
+
+## Decision Claim Calibration
+
+Use this section before accepting a milestone, release, done, safety, source-adoption, root-cause, or project-state claim.
+
+```text
+Claim calibration:
+- claim:
+- label: KNOWN / COMPUTED / INFERRED / COMMON / FRAME / GUESS / UNKNOWN
+- confidence: HIGH / MED / LOW / VERY LOW / UNKNOWN
+- evidence:
+- missing evidence:
+- decision impact:
+```
+
+Seat pressure:
+
+- `A2` must challenge any `KNOWN`, `COMPUTED`, or `HIGH` claim without direct evidence.
+- `A3` must identify any `FRAME` or `GUESS` being treated as reality.
+- `A4` must inspect the file, command output, screenshot, source URL, log, test, or artifact before accepting evidence.
+- `A0` must close as `conditional go`, `no-go`, or `user decision` when decision-impacting evidence is missing.
 
 ## Context Pressure Before Loop
 
@@ -327,6 +354,19 @@ Trigger on `对抗审查`, `红队`, `Core Challenger`, release/milestone confid
    - Ask the user only unresolved decisions.
    - If no decisions remain, give the final verdict and next actions.
 
+## 555 Micro Review
+
+Use `templates/555-micro-review.md` when full five-seat closure is too heavy but the task still needs adversarial pressure and evidence verification.
+
+Use micro review for:
+
+- skill, rule, template, or script evolution;
+- external-source adoption into Judgment;
+- small done or readiness claims;
+- one-lane project changes with non-trivial evidence risk.
+
+Micro review is not enough for release, production, user data, security, payments, external-send, destructive actions, backend/shared contracts, AI/Agent tool behavior, or unresolved blocker-severity risk. Escalate those to full `555`.
+
 ## Copy-Ready Dispatch Format
 
 Controller-to-worker instructions must be in a `text` block and start with:
@@ -371,6 +411,8 @@ A0 may close the loop only after:
 - Live branch/HEAD/dirty state is known.
 - Context pressure was checked before any large loop or handoff-sensitive action.
 - The active route and allowed scope are stated.
+- Decision-impacting claims have calibration labels or are explicitly downgraded.
+- Context packet or handoff packet exists when source freshness, context pressure, or cross-thread work matters.
 - XA/XB flow and active gate are stated when product/game/AI/release work is involved.
 - AI/Agent behavior, tool, guardrail, human-approval, and monitoring requirements are checked when relevant.
 - Loop Engineering readiness and the Judgment Controller route are recorded when repeated or visible loop behavior is involved.
