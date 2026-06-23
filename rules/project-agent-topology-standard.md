@@ -17,6 +17,19 @@ Every project node must bite into adjacent nodes:
 
 No node may be marked `done` from confidence language alone.
 
+## Super-Agent Boundary
+
+Judgment may be evolved as a Codex-native super-agent, but only in this limited sense: a Controller role reads project state, chooses the next Codex surface, dispatches bounded workers or worker packets, waits for evidence, routes review, updates visible state, and stops when budget, safety, Git ownership, evidence, or user decision requires it.
+
+Do not treat a super-agent as:
+
+- a separate runtime outside Codex;
+- a daemon, hidden state machine, or always-on background authority;
+- a replacement for user approval, tests, Git truth, Browser evidence, or `555` review;
+- proof that subagents are running when no Codex delegation tool returned an id.
+
+Super-agent topology must still use the same graph rules below: real agent ids when spawned, `planned` status when only described, disjoint write scopes, evidence nodes, and explicit stop conditions.
+
 ## Codex UI Rule
 
 When real subagents are launched, the live Codex UI is the primary conversation surface.

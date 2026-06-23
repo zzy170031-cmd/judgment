@@ -50,6 +50,32 @@ const checks = [
     ],
   },
   {
+    file: "rules/codex-surface-governance-standard.md",
+    patterns: [
+      /Codex Pluginization And Super-Agentization/,
+      /Codex is the platform boundary/,
+      /Codex super-agent pattern/,
+      /HTML and dashboards are visibility\/request surfaces/,
+    ],
+  },
+  {
+    file: "rules/tool-portfolio-standard.md",
+    patterns: [
+      /Plugin And Super-Agent Gate/,
+      /Codex super-agent pattern/,
+      /external daemon/,
+      /plugin as packaging and the super-agent pattern as runtime governance/,
+    ],
+  },
+  {
+    file: "rules/project-agent-topology-standard.md",
+    patterns: [
+      /Super-Agent Boundary/,
+      /separate runtime outside Codex/,
+      /proof that subagents are running when no Codex delegation tool returned an id/,
+    ],
+  },
+  {
     file: "rules/context-engineering-standard.md",
     patterns: [
       /Context packet/,
@@ -104,10 +130,56 @@ const routeCases = [
   ["context pressure handoff", /context-engineering-standard\.md/],
   ["anti sycophancy claim review", /claim-calibration-standard\.md/],
   ["lightweight adversarial skill edit", /555-micro-review\.md/],
+  ["Codex plugin packaging", /Plugin/],
+  ["Codex super-agent topology", /project-agent-topology-standard\.md/],
 ];
 
 for (const [name, pattern] of routeCases) {
   if (!pattern.test(rootSkill)) failures.push(`route case not represented: ${name}`);
+}
+
+const textByFile = {
+  rootSkill,
+  surface: read("rules/codex-surface-governance-standard.md"),
+  authority: read("rules/authority-boundary-standard.md"),
+  topology: read("rules/project-agent-topology-standard.md"),
+  toolPortfolio: read("rules/tool-portfolio-standard.md"),
+  loop: read("rules/loop-engineering-standard.md"),
+  fiveAgent: read("skills/555/SKILL.md"),
+};
+
+const scenarioCases = [
+  {
+    name: "small task does not auto-trigger 555",
+    text: textByFile.rootSkill,
+    patterns: [/Do not auto-trigger for:[\s\S]*trivial single-file edits/, /Do not run full `555` for every small task/],
+  },
+  {
+    name: "HTML is not a shell or Git executor",
+    text: `${textByFile.authority}\n${textByFile.loop}`,
+    patterns: [/HTML can display and request/, /Do not let HTML execute local commands directly/, /Do not use an HTML page, bridge queue, or dashboard as an executor/],
+  },
+  {
+    name: "external runtimes are translated to Codex surfaces",
+    text: `${textByFile.surface}\n${textByFile.loop}\n${textByFile.rootSkill}`,
+    patterns: [/Codex-execution scoped/, /Do not create a multi-model runtime/, /Do not import external workflow runtimes/],
+  },
+  {
+    name: "pluginization stays a Codex surface decision",
+    text: `${textByFile.rootSkill}\n${textByFile.surface}\n${textByFile.toolPortfolio}`,
+    patterns: [/`Plugin` \| Bundle of skills/, /multiple bundled skills\? Consider `Plugin`/],
+  },
+  {
+    name: "super-agentization requires real Codex agents and evidence",
+    text: `${textByFile.topology}\n${textByFile.fiveAgent}`,
+    patterns: [/Do not claim real agents were created unless a real subagent\/thread tool was used successfully/, /A4.*files, logs, tests, or artifacts/s],
+  },
+];
+
+for (const scenario of scenarioCases) {
+  for (const pattern of scenario.patterns) {
+    if (!pattern.test(scenario.text)) failures.push(`scenario not protected: ${scenario.name} missing ${pattern}`);
+  }
 }
 
 if (failures.length) {

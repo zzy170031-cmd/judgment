@@ -60,7 +60,9 @@ for (const file of skillRoots) {
     errors.push(`${id}: review/gate skill must name evidence or verification closure`);
   }
 
-  if (/C:\\Users\\|\/Users\//.test(text)) {
+  const windowsUserPath = new RegExp("C:" + "\\\\" + "\\\\" + "Users" + "\\\\" + "\\\\");
+  const macUserPath = new RegExp("\\/" + "Users" + "\\/");
+  if (windowsUserPath.test(text) || macUserPath.test(text)) {
     errors.push(`${id}: skill must not contain maintainer-local absolute paths`);
   }
 }

@@ -4,6 +4,8 @@ Use this rule when deciding where a Codex capability, habit, instruction, workfl
 
 This rule is Codex-execution scoped, not Codex-idea scoped. Study strong patterns from Claude Code, Gemini CLI, ChatGPT/OpenAI agents, GLM/Z.ai, Git, GitHub, and similar agent systems, then translate the useful part into Codex surfaces that exist in this environment. Do not create a multi-model runtime, compatibility layer, or model-specific command set unless the user explicitly opens that separate design gate.
 
+Codex is the platform boundary. Pluginization, super-agentization, and workflow evolution must remain Codex-native: skills, plugins, connectors/MCP, scripts, Browser/Chrome/Computer Use, worktrees, automations, worker packets, project topology, Agent Office visibility, and `555` review.
+
 ## Core Rule
 
 Choose the smallest Codex surface that gives the right scope, persistence, evidence, and permission boundary.
@@ -62,6 +64,20 @@ Do not import:
 - external account side effects without connector auth, approval, and a security gate;
 - another tool's full runtime when a Codex rule, skill, script, connector, automation, or worker packet covers the job.
 
+## Codex Pluginization And Super-Agentization
+
+Use pluginization when the capability needs a distributable Codex bundle: multiple skills, marketplace metadata, MCP/app surfaces, assets, scripts, or approved lifecycle hooks. Do not create a plugin for a single narrow rule or skill unless packaging, sharing, or install visibility is the actual job.
+
+Use super-agentization when Judgment must coordinate a project as a Codex-native controller: `Judgment Controller` state, bounded worker/subagent lanes, worktree ownership, evidence nodes, project graph, Agent Office visibility, and `555` or A4 review for closure. A super-agent is not a daemon, separate platform, or autonomous authority. It is a governed Codex operating pattern.
+
+Required boundaries:
+
+- real subagents require a returned Codex agent/thread id; otherwise mark them `planned`;
+- every worker lane needs allowed files/tools, forbidden actions, evidence, stop condition, and handoff receiver;
+- HTML and dashboards are visibility/request surfaces, not execution authority;
+- plugin manifests, hooks, MCP/app connectors, and browser/desktop tools are side-effect surfaces when they can read accounts, write files, send externally, deploy, or alter permissions;
+- other skill content may evolve normally when it passes this surface decision, source freshness, permission, and verification gate.
+
 ## Surface Map
 
 | Surface | Use when | Avoid when |
@@ -72,6 +88,7 @@ Do not import:
 | `rules/*.md` | Reusable governance standard used by Judgment skills. | It is just an example or one-off note. |
 | `Skill` | Repeatable reasoning workflow with triggers, steps, gotchas, and optional references/scripts. | It mainly needs live external data or hooks. |
 | `Plugin` | Bundle of skills plus MCP servers, apps/connectors, hooks, assets, or marketplace metadata. | A single narrow skill is enough. |
+| Codex super-agent pattern | A Controller must coordinate real/planned Codex workers, evidence nodes, worktrees, project graph, and review gates. | A checklist, skill, script, or one worker packet is enough. |
 | MCP / connector / app | Structured access to private or external systems such as GitHub, Notion, Figma, browser, docs, or work apps. | Static docs, local files, or shell commands are enough. |
 | Script | Deterministic local operation that should not be rewritten each time. | The work is judgment-heavy or varies by context. |
 | Automation / heartbeat | Recurring monitor, reminder, follow-up, or scheduled artifact refresh. | The user only asked for a one-time action. |

@@ -127,7 +127,7 @@ simple:
 - root `skills/*` are the canonical source;
 - plugin-packaged `plugins/work-splitter/skills/*` are generated/synced copies;
 - root `SKILL.md` and `agents/openai.yaml` are compatibility copies of `666`;
-- `scripts/check-consistency.sh` must pass before commit;
+- `npm run check:consistency` must pass before commit;
 - use `scripts/sync-plugin-skills.sh` after changing packaged skills.
 
 ## Improvement Decision

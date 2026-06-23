@@ -16,7 +16,7 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
       - name: Validate skill and plugin consistency
-        run: bash scripts/check-consistency.sh
+        run: npm run check:consistency
       - name: Validate skill lint
         run: npm run check:skills
       - name: Validate Agent Office runtime contract

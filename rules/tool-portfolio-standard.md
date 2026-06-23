@@ -14,6 +14,7 @@ Tool forms:
 
 - `Skill`: repeatable instruction workflow, usually centered on `SKILL.md`, with optional references, templates, scripts, or assets.
 - `Plugin`: packaged capability that may bundle skills, MCP servers, apps/connectors, lifecycle hooks, and marketplace metadata.
+- `Codex super-agent pattern`: governed coordination of Codex Controller, workers/subagents, worktrees, evidence, project graph, Agent Office visibility, and `555` review. It is not a separate runtime or product platform.
 - `MCP / Connector`: structured access to an external system such as GitHub, Notion, Slack, Linear, Jira, Gmail, Figma, or a docs provider.
 - `Script`: deterministic local operation that should not be rewritten each time.
 - `Automation`: scheduled or recurring monitor, reminder, report, or follow-up.
@@ -27,7 +28,7 @@ Before adding or recommending a tool, answer:
 job_to_be_done:
 codex_surface:
 existing_coverage:
-candidate_form: skill / plugin / MCP-connector / script / automation / no-install
+candidate_form: skill / plugin / Codex-super-agent-pattern / MCP-connector / script / automation / no-install
 source_trust: official / curated / known-community / private / unknown
 required_permissions:
 side_effects:
@@ -42,6 +43,7 @@ Prefer:
 - existing installed tools before new tools;
 - Codex surface translation before installing a new tool for a borrowed external pattern;
 - a narrow skill before a broad plugin when no external service or hook is needed;
+- a Codex super-agent pattern before an external agent runtime when the job is project coordination;
 - an existing connector/plugin before hand-rolling an MCP integration;
 - official or repo-local documentation for API/framework facts;
 - scripts for fragile deterministic sync, validation, packaging, or smoke checks;
@@ -58,6 +60,19 @@ Prefer:
 - Require explicit user approval before installing, enabling, authenticating, publishing, deploying, sending, or granting new scopes.
 - Pin a branch, tag, commit, or internal marketplace source when repeatability matters.
 - After installing or changing tool availability, expect a new Codex thread or restart may be required before the tool list is current.
+
+## Plugin And Super-Agent Gate
+
+Choose `Plugin` only when at least one of these is true:
+
+- multiple skills should ship together;
+- MCP servers, apps/connectors, assets, scripts, approved hooks, or marketplace metadata are part of the capability;
+- the user needs install/share visibility in Codex;
+- repeatable project workflows need a packaged entrypoint rather than loose files.
+
+Choose `Codex super-agent pattern` only when the work needs a Controller to coordinate multiple lanes, real or planned subagents, worktrees, evidence nodes, project graph, Agent Office state, and independent review. Keep it inside Codex: no external daemon, hidden memory store, unattended auto-approval, or model-specific runtime.
+
+If both apply, use the plugin as packaging and the super-agent pattern as runtime governance. The plugin can bundle skills/scripts/templates; the Controller still executes through Codex tools, worker packets, tests, ledgers, and review gates.
 
 ## Freshness And Evidence
 

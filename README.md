@@ -172,7 +172,7 @@ Git 源仓库：
 仓库包含一个轻量检查脚本，用于防止根兼容入口、插件内嵌 skill 与根目录 skill 发生内容漂移，并阻止公开仓库重新出现维护者本机绝对路径：
 
 ```bash
-bash scripts/check-consistency.sh
+npm run check:consistency
 ```
 
 修改根目录 `skills/*` 后，可用下面的脚本同步插件内嵌副本：
@@ -354,6 +354,7 @@ skills/
     SKILL.md                  # Explicit Judgment alias over the canonical router skills
     agents/openai.yaml
 scripts/
+  check-consistency.js
   check-consistency.sh
   lint-skills.js
   record-agent-office-trajectory.js
@@ -392,7 +393,7 @@ The runtime skill logic stays in each `SKILL.md`. The README and `agents/openai.
 ## Quality Checks
 
 ```bash
-bash scripts/check-consistency.sh
+npm run check:consistency
 bash scripts/sync-plugin-skills.sh
 npm run check:skills
 npm run check:runtime-contract

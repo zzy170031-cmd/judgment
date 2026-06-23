@@ -342,6 +342,7 @@ Trigger on `对抗审查`, `红队`, `Core Challenger`, release/milestone confid
 
 4. `A4 证据验证席`
    - Must read/search actual files or artifacts before judging assumptions.
+   - Every bucket item must include an evidence pointer: file path, command result, log, screenshot, source URL, artifact, or explicit `missing evidence`.
    - Output exactly:
      - `必须改`
      - `建议`

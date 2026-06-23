@@ -29,6 +29,7 @@ Use `666` as the upstream Codex project workflow router. It decides what should 
 - whether context pressure requires a handoff before more work;
 - whether Git worktree isolation is needed for worker lanes, hotfixes, reviews, or dirty-state preservation;
 - whether repeated work deserves packaging as a skill, automation, subagent, extension, or skip;
+- whether Codex-only pluginization or super-agentization is the right surface, without importing an external runtime;
 - whether `rules/loop-engineering-standard.md` applies before turning repeated Codex work into a loop, automation, heartbeat, worker cycle, or Agent Office-visible run;
 - how to avoid overusing full five-agent flow on small tasks.
 
@@ -428,12 +429,15 @@ Decision order:
 1. Can an existing installed skill, plugin, connector, script, or repo command handle this?
 2. If not, is this a repeatable instruction workflow? Prefer `Skill`.
 3. Does it need MCP servers, app integrations, lifecycle hooks, marketplace distribution, or multiple bundled skills? Consider `Plugin`.
-4. Does it primarily need structured access to an external service? Prefer an existing connector/MCP over hand-rolled integration.
-5. Is it deterministic local work? Prefer `Script`.
-6. Is it recurring? Prefer `Automation`.
-7. Is it one-off or already covered? Choose `No install` or `Skip`.
+4. Does it need a Judgment Controller coordinating real/planned Codex workers, worktrees, evidence nodes, Agent Office state, and review gates? Consider a Codex super-agent pattern.
+5. Does it primarily need structured access to an external service? Prefer an existing connector/MCP over hand-rolled integration.
+6. Is it deterministic local work? Prefer `Script`.
+7. Is it recurring? Prefer `Automation`.
+8. Is it one-off or already covered? Choose `No install` or `Skip`.
 
 When external tools suggest model memories, slash commands, hooks, subagents, sandbox modes, checkpointing, MCP servers, browser agents, or GUI agents, translate them to the corresponding Codex surface before deciding whether any plugin or skill is needed.
+
+If the user asks for pluginization and super-agentization, keep the platform in Codex: use plugins for packaging/distribution, and use the super-agent pattern for Controller/worker/evidence orchestration. Do not import an external runtime, daemon, or hidden state store.
 
 Add source and permission checks before action:
 
