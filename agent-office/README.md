@@ -7,11 +7,13 @@ The Agent Office bridge now has an explicit runtime contract layer:
 ```powershell
 npm run agent-office:event -- --agent "Controller" --status running --text "Controller accepted the next task"
 npm run agent-office:trajectory -- --controller-decision "continue" --agent "Controller" --lane "control" --action "verify gate" --result "passed" --next "advance"
+npm run agent-office:trajectory:summary -- --format markdown
 npm run check:runtime-contract
 ```
 
 - `scripts/post-agent-office-event.js` writes visible `/codex/event` packets.
 - `scripts/record-agent-office-trajectory.js` appends a durable local trajectory ledger for Codex-side work.
+- `scripts/summarize-agent-office-trajectory.js` turns the raw trajectory ledger into a compact Controller summary.
 - `agent-office/runtime-state.schema.json` fixes the bridge runtime snapshot shape.
 - `skill-artifacts/loop-engineering/schemas/*.schema.json` fixes worker packets, 555 verdicts, trajectory entries, loop state, request packets, events, and evidence.
 

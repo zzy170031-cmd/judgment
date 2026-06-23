@@ -212,6 +212,7 @@ This repository is now a general Codex project workflow governance pack:
 - `scripts/validate-runtime-contract.js`: Node validator for the runtime contract examples, used by `npm run check:runtime-contract` on machines without Python.
 - `scripts/lint-skills.js`: skill lint for frontmatter, selection descriptions, high-risk boundaries, review/evidence closure, and maintainer-local path leakage.
 - `scripts/record-agent-office-trajectory.js`: appends Codex-side trajectory entries for Agent Office timelines and future Controller summaries.
+- `scripts/summarize-agent-office-trajectory.js`: summarizes raw trajectory JSONL into Controller-readable markdown or JSON for Agent Office and review.
 - `skill-artifacts/loop-engineering/SUPER_AGENT_EVOLUTION_ROADMAP.md`: roadmap for evolving Judgment toward a Codex-native super-agent pattern by connecting Markdown rules, Codex loop execution, and HTML observability.
 - `skill-artifacts/loop-engineering/schemas/`: JSON schemas for loop state, request packets, Codex events, and evidence items.
 - `plugins/work-splitter`: local plugin source for `work-splitter`, including `.codex-plugin/plugin.json`.
@@ -356,6 +357,7 @@ scripts/
   check-consistency.sh
   lint-skills.js
   record-agent-office-trajectory.js
+  summarize-agent-office-trajectory.js
   render-project-agent-graph.py
   validate-runtime-contract.js
   sync-plugin-skills.sh

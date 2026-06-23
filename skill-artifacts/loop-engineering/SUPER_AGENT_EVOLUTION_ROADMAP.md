@@ -319,12 +319,13 @@ Implemented in this upgrade:
 - Runtime-state, worker-packet, 555-verdict, and trajectory schemas with checked examples.
 - `scripts/validate-runtime-contract.js` and `npm run check:runtime-contract` for Python-free runtime validation.
 - `scripts/record-agent-office-trajectory.js` for Codex-side trajectory ledger entries.
+- `scripts/summarize-agent-office-trajectory.js` and `npm run agent-office:trajectory:summary` for compact Controller-readable trajectory summaries.
 - `scripts/lint-skills.js` and `npm run check:skills` for skill boundary and evidence lint.
 - `skills/judgment` as an explicit alias over the canonical Judgment router stack.
 
 The next concrete implementation should be:
 
-1. Add a compact Controller summary renderer over the raw trajectory ledger.
+1. Feed the trajectory summary into Agent Office as a visible Controller timeline panel.
 2. Add Browser-visible evidence capture into Evidence Wall for every UI-facing node.
 3. Add a transcript mirror contract for real Codex subagent outputs without allowing HTML to launch agents directly.
 4. Add CI wiring for `check:skills`, `check:runtime-contract`, `check:agent-office`, and `check-consistency.sh`.
