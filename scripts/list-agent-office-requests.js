@@ -4,8 +4,9 @@ const path = require("node:path");
 const args = process.argv.slice(2);
 
 function argValue(name, fallback) {
-  const index = args.indexOf(name);
-  if (index >= 0 && args[index + 1]) return args[index + 1];
+  for (let index = args.length - 2; index >= 0; index -= 1) {
+    if (args[index] === name && args[index + 1]) return args[index + 1];
+  }
   return fallback;
 }
 

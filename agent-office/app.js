@@ -279,7 +279,7 @@
     const qaLane = lanes.find((lane) => lane.id === "qa");
     const releaseLane = lanes.find((lane) => lane.id === "release");
     const blockers = bridgeRuntime?.state?.blockers || [];
-    const latest = codexRequests[0];
+    const latest = (bridgeRuntime?.recentRequests || [])[0] || codexRequests[0];
 
     if (blockers.length) {
       return {
@@ -2136,8 +2136,8 @@
   function bridgeQueueItems() {
     const seen = new Set();
     return [
-      ...codexRequests,
-      ...(bridgeRuntime?.recentRequests || [])
+      ...(bridgeRuntime?.recentRequests || []),
+      ...codexRequests
     ].filter((request) => {
       const id = request?.id || request?.requestId;
       if (!id || seen.has(id)) return false;
@@ -2146,9 +2146,55 @@
     }).slice(0, 8);
   }
 
+  function codexFeedbackSummary(latest, activeRun, controller, pendingCount) {
+    const status = String(latest?.status || activeRun?.status || "").toLowerCase();
+    if (!latest && !activeRun && !controller) {
+      return {
+        tone: "",
+        title: "等待 HTML 发起",
+        detail: "在流程推进入口、Gate 弹窗或 Agent 卡片提交下一步请求。"
+      };
+    }
+    if (["queued", "accepted"].includes(status)) {
+      return {
+        tone: "live",
+        title: "已进入 Codex Bridge",
+        detail: pendingCount
+          ? `${pendingCount} 条等待 Codex Controller 读取；Codex 侧运行 npm run agent-office:feedback。`
+          : "等待 Codex Controller 读取并回写。"
+      };
+    }
+    if (status === "blocked" || controller?.state === "review") {
+      return {
+        tone: "blocker",
+        title: "Codex 已接收，等待核验",
+        detail: controller?.nextAction || controller?.waitsFor || "需要 QA、555、证据墙或 Git/Worktree 证据。"
+      };
+    }
+    if (["completed", "executed", "resolved", "pass", "passed"].includes(status)) {
+      return {
+        tone: "live",
+        title: "Codex/Bridge 已回写页面",
+        detail: activeRun?.text || latest?.statusText || "查看活动动态、右侧 Agent 对话和 Gate 状态。"
+      };
+    }
+    if (["failed", "rejected"].includes(status)) {
+      return {
+        tone: "blocker",
+        title: "Codex 反馈失败或拒绝",
+        detail: latest?.statusText || activeRun?.text || "查看 Bridge 队列详情后补充任务包。"
+      };
+    }
+    return {
+      tone: controller ? "live" : "",
+      title: controller ? "Codex Controller 已承接" : "等待 Codex 反馈",
+      detail: controller?.nextAction || latest?.statusText || activeRun?.text || "提交后先看右侧 Bridge 队列，再看活动动态回写。"
+    };
+  }
+
   function renderCodexBridgeBox() {
     const bridgeRequests = bridgeRuntime?.recentRequests || [];
-    const latest = codexRequests[0] || bridgeRequests[0];
+    const latest = bridgeRequests[0] || codexRequests[0];
     const pendingRequests = bridgeRequests.filter((request) => ["queued", "accepted"].includes(request.status));
     const requestTone = latest?.status === "accepted" ? "green" : latest ? "yellow" : "purple";
     const activeRun = bridgeRuntime?.state?.activeRun;
@@ -2157,7 +2203,15 @@
     const project = effectiveProject();
     const blockerCount = bridgeRuntime?.state?.blockers?.length || 0;
     const statusTone = blockerCount ? "orange" : activeRun ? "cyan" : requestTone;
+    const feedback = codexFeedbackSummary(latest, activeRun, controller, pendingRequests.length);
     const bridgeFeed = [
+      `
+        <div class="codex-feed-row feedback ${feedback.tone}">
+          <span>点击反馈</span>
+          <strong>${escapeHtml(feedback.title)}</strong>
+          <em>${escapeHtml(feedback.detail)}</em>
+        </div>
+      `,
       projectSession ? `
         <div class="codex-feed-row live">
           <span>Project Session</span>
@@ -2228,16 +2282,19 @@
   }
 
   function renderCodexCommandDock() {
-    const latest = codexRequests[0];
+    const bridgeRequests = bridgeRuntime?.recentRequests || [];
+    const latest = bridgeRequests[0] || codexRequests[0];
     const activeRun = bridgeRuntime?.state?.activeRun;
     const controller = bridgeRuntime?.state?.controller;
     const projectSession = bridgeRuntime?.state?.projectSession;
-    const dockStatus = controller?.nextAction || projectSession?.nextAction || activeRun?.text || codexBridgeStatus;
+    const pendingRequests = bridgeRequests.filter((request) => ["queued", "accepted"].includes(request.status));
+    const feedback = codexFeedbackSummary(latest, activeRun, controller, pendingRequests.length);
+    const dockStatus = controller?.nextAction || projectSession?.nextAction || feedback.detail || activeRun?.text || codexBridgeStatus;
     const dockSource = controller
       ? `Controller ${controller.state || "route"}`
       : activeRun
         ? `${activeRun.agent || "Codex"} -> ${activeRun.node || activeRun.module || "runtime"}`
-        : "waiting runtime event";
+        : feedback.title;
     return `
       <section class="codex-command-dock ${toneClass(activeRun?.tone || selectedAgent.tone || "cyan")}">
         <div class="dock-head">
@@ -2819,11 +2876,12 @@
       rows: [
         { label: "当前请求", value: latest?.id || "gate.advance.request" },
         { label: "页面承接", value: "右侧 Codex Bridge 卡片查看队列；下方流程推进入口补充说明" },
-        { label: "Codex 承接", value: `在当前 Codex 线程确认 ${nextCode} 前置条件、执行核验并回写 Gate 结果` },
+        { label: "Codex 承接", value: `当前 Codex 线程先运行 npm run agent-office:feedback 接收，再确认 ${nextCode} 前置条件并回写 Gate 结果` },
         { label: "核验范围", value: "QA、555 审查、证据墙、Git / Worktree 状态" }
       ],
       list: [
-        "如果桥接服务在线，Controller 会读取这条请求并把执行状态回写到页面。",
+        "如果桥接服务在线，Codex 侧运行 npm run agent-office:feedback 可立即读取这条请求并把接收状态回写到页面。",
+        "需要持续接收时运行 npm run agent-office:watch，页面发起的新请求会自动进入 Controller 反馈流。",
         "如果桥接未连通，点复制任务包，把任务包交给当前 Codex 线程继续执行。",
         "Gate 不由 HTML 直接变更，必须等 Codex 侧验证通过后回写。"
       ],

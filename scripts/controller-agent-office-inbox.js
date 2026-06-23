@@ -4,8 +4,9 @@ const path = require("node:path");
 const args = process.argv.slice(2);
 
 function argValue(name, fallback) {
-  const index = args.indexOf(name);
-  if (index >= 0 && args[index + 1]) return args[index + 1];
+  for (let index = args.length - 2; index >= 0; index -= 1) {
+    if (args[index] === name && args[index + 1]) return args[index + 1];
+  }
   return fallback;
 }
 
@@ -743,49 +744,18 @@ function updateStatusFile(statusPath, root, runtimeDir, requestsDir, lastRequest
   });
 }
 
-function main() {
-  const root = path.resolve(argValue("--root", process.cwd()));
-  const runtimeDir = path.join(root, "agent-office", "runtime");
-  const requestsDir = path.join(runtimeDir, "requests");
-  const statePath = path.join(runtimeDir, "runtime-state.json");
-  const statusPath = path.join(runtimeDir, "bridge-status.json");
-  const eventsPath = path.join(runtimeDir, "events.jsonl");
-  const statuses = new Set(argValue("--statuses", "queued,accepted").split(",").map((item) => item.trim()).filter(Boolean));
-  const requestId = argValue("--request-id", "");
-  const limit = Math.max(1, Number(argValue("--limit", "20")) || 20);
-  const dryRun = args.includes("--dry-run");
-  const sessionAction = argValue("--session-action", "");
-  const gateAction = argValue("--gate-action", "");
-
-  if (sessionAction) {
-    handleSessionAction({
-      action: sessionAction,
-      root,
-      runtimeDir,
-      requestsDir,
-      statePath,
-      statusPath,
-      eventsPath,
-      statuses,
-      dryRun
-    });
-    return;
-  }
-
-  if (gateAction) {
-    handleGateAction({
-      action: gateAction,
-      root,
-      runtimeDir,
-      requestsDir,
-      statePath,
-      statusPath,
-      eventsPath,
-      dryRun
-    });
-    return;
-  }
-
+function processInbox({
+  root,
+  runtimeDir,
+  requestsDir,
+  statePath,
+  statusPath,
+  eventsPath,
+  statuses,
+  requestId,
+  limit,
+  dryRun
+}) {
   const requests = readRequests(requestsDir, statuses, requestId, limit);
   const queueStats = {
     matched: requests.length,
@@ -867,13 +837,112 @@ function main() {
     updateStatusFile(statusPath, root, runtimeDir, requestsDir, lastRequest || undefined);
   }
 
-  console.log(JSON.stringify({
+  return {
     ok: true,
     root,
     dryRun,
     matched: requests.length,
     results
+  };
+}
+
+function runOnce(context) {
+  const result = processInbox(context);
+  console.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
+function main() {
+  const root = path.resolve(argValue("--root", process.cwd()));
+  const runtimeDir = path.join(root, "agent-office", "runtime");
+  const requestsDir = path.join(runtimeDir, "requests");
+  const statePath = path.join(runtimeDir, "runtime-state.json");
+  const statusPath = path.join(runtimeDir, "bridge-status.json");
+  const eventsPath = path.join(runtimeDir, "events.jsonl");
+  const statuses = new Set(argValue("--statuses", "queued,accepted").split(",").map((item) => item.trim()).filter(Boolean));
+  const requestId = argValue("--request-id", "");
+  const limit = Math.max(1, Number(argValue("--limit", "20")) || 20);
+  const dryRun = args.includes("--dry-run");
+  const sessionAction = argValue("--session-action", "");
+  const gateAction = argValue("--gate-action", "");
+  const watch = args.includes("--watch");
+  const verbose = args.includes("--verbose");
+  const intervalMs = Math.max(1000, Number(argValue("--interval-ms", "5000")) || 5000);
+
+  if (sessionAction) {
+    handleSessionAction({
+      action: sessionAction,
+      root,
+      runtimeDir,
+      requestsDir,
+      statePath,
+      statusPath,
+      eventsPath,
+      statuses,
+      dryRun
+    });
+    return;
+  }
+
+  if (gateAction) {
+    handleGateAction({
+      action: gateAction,
+      root,
+      runtimeDir,
+      requestsDir,
+      statePath,
+      statusPath,
+      eventsPath,
+      dryRun
+    });
+    return;
+  }
+
+  const context = {
+    root,
+    runtimeDir,
+    requestsDir,
+    statePath,
+    statusPath,
+    eventsPath,
+    statuses,
+    requestId,
+    limit,
+    dryRun
+  };
+
+  if (!watch) {
+    runOnce(context);
+    return;
+  }
+
+  console.log(JSON.stringify({
+    ok: true,
+    watch: true,
+    root,
+    intervalMs,
+    statuses: [...statuses],
+    message: "Judgment Controller is watching HTML requests and writing Codex feedback events."
   }, null, 2));
+
+  const tick = () => {
+    try {
+      const result = processInbox(context);
+      if (verbose || result.matched) {
+        console.log(JSON.stringify({
+          time: new Date().toISOString(),
+          matched: result.matched,
+          results: result.results
+        }, null, 2));
+      }
+    } catch (error) {
+      console.error(error.stack || error.message);
+      process.exitCode = 1;
+    }
+  };
+
+  tick();
+  setInterval(tick, intervalMs);
 }
 
 main();

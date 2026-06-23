@@ -62,9 +62,11 @@ Codex 侧承接 HTML 队列：
 
 ```powershell
 node scripts\controller-agent-office-inbox.js --limit 20
+npm run agent-office:feedback
+npm run agent-office:watch
 ```
 
-这个脚本是 Judgment Controller 的收件箱。它读取 `queued/accepted` 请求，按 `intake -> orient -> route -> persist` 写回 Controller 决策、项目会话、下一步、oracle 和 stop condition。它不会由 HTML 触发文件、Git、安装、发布或删除动作。
+这个脚本是 Judgment Controller 的收件箱。它读取 `queued/accepted` 请求，按 `intake -> orient -> route -> persist` 写回 Controller 决策、项目会话、下一步、oracle 和 stop condition。`agent-office:feedback` 是单次接收反馈，适合用户刚点完 HTML 按钮后由当前 Codex 线程执行；`agent-office:watch` 是持续监听模式，适合演示或项目推进时让页面请求自动进入 Controller 反馈流。它不会由 HTML 触发文件、Git、安装、发布或删除动作。
 
 Codex 侧项目会话入口：
 
@@ -78,5 +80,12 @@ npm run agent-office:gate:advance -- --target-gate "XB-5 集成与审查" --next
 项目会话是项目制边界：一个项目结束后由 Codex Controller 写入 `projectSession.lifecycle=closed`；进入下一个项目时创建新的 `projectSession.id`，并清空当前阻塞态与运行焦点。HTML 页面只展示和提交申请，不直接关闭或创建项目。
 
 Gate 推进是 Codex Controller 的验收动作：页面只能提交 `gate.advance.request`；Codex 完成 QA、555、证据墙和 Git/Worktree 核验后，运行 `agent-office:gate:advance` 写回当前 Gate、清除 Gate blocker，并把原请求标记为通过。
+
+HTML 点击后的 Codex 反馈顺序：
+
+1. HTML 按钮提交 `/codex/request`，页面显示“已进入 Codex Bridge”。
+2. Codex 侧运行 `npm run agent-office:feedback` 或保持 `npm run agent-office:watch`，Controller 读取请求并写回“已接收 / 等待核验 / 已路由”。
+3. Codex 当前线程执行真实核验或修复，用 `scripts/post-agent-office-event.js` 或 Gate/session 命令写回结果。
+4. 页面通过 `/codex/state` 展示到顶部执行条、右侧 Bridge、活动动态、Agent 对话和 Gate 卡片。
 
 安全边界：HTML 不能直接执行任意文件、Git、网络、安装或发布动作。自由文本需求只进入队列；真实执行仍由 Codex 线程按权限、测试和证据 gate 推进。

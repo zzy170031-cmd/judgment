@@ -195,6 +195,7 @@ Codex 侧辅助脚本：
 
 - `scripts/list-agent-office-requests.js`：读取 `agent-office/runtime/requests` 中的 HTML 请求队列。
 - `scripts/controller-agent-office-inbox.js`：Judgment Controller 收件箱。读取 `queued/accepted` 请求，写回 Controller 决策、项目会话、下一步、oracle、stop condition 和运行事件；它只做 Codex 侧 intake/route/persist，不由 HTML 直接执行本地命令。
+- `scripts/controller-agent-office-inbox.js --watch --interval-ms 5000`：持续监听 HTML 请求队列。用于演示或项目推进时让 Codex Controller 自动给页面回写“已接收 / 待核验 / 已路由”反馈；它仍然不执行任意文件、Git、安装、发布或删除动作。
 - `scripts/controller-agent-office-inbox.js --session-action status`：只读查看当前 `projectSession`、Controller、activeRun、blockers 和 Bridge 队列。
 - `scripts/controller-agent-office-inbox.js --session-action close --reason "<原因>"`：由 Codex Controller 关闭当前项目会话，写入 `projectSession.lifecycle=closed`，清空 blockers，并把下一步置为等待新项目或停止。
 - `scripts/controller-agent-office-inbox.js --session-action new --project "<项目名>" --gate "<当前 Gate>" --next-gate "<下一 Gate>"`：创建新的项目会话，生成新的 `projectSession.id`，重置当前运行焦点和阻塞态。
@@ -209,6 +210,7 @@ Controller / Project Session 状态约定：
 - `state.projectSession.lifecycle` 使用 `active`、`review`、`closed` 或 `blocked`；HTML 只显示生命周期，不直接关闭或创建项目。
 - `state.projectSession.queue` 记录 Controller 看到的 Bridge 队列摘要，用于解释页面申请是否已经被 Codex 侧读取。
 - `state.projectSession.gateEvidence` 记录当前 Gate 推进使用的核验证据摘要；缺少证据时不能推进 Gate。
+- 页面显示优先级必须以真实 bridge runtime 为准：`recentRequests`、`state.controller`、`state.activeRun` 优先于页面本地临时队列，避免 HTML 已回写后仍显示旧的 queued 状态。
 
 运行状态约定：
 

@@ -3104,6 +3104,11 @@ button {
   background: rgba(255, 176, 69, 0.12);
 }
 
+.codex-feed-row.feedback {
+  grid-template-columns: minmax(70px, 0.55fr) minmax(0, 1fr);
+  align-items: start;
+}
+
 .codex-feed-row span,
 .codex-feed-row strong,
 .codex-feed-row em {
@@ -3125,6 +3130,16 @@ button {
 .codex-feed-row em {
   color: currentColor;
   font-style: normal;
+}
+
+.codex-feed-row.feedback strong,
+.codex-feed-row.feedback em {
+  white-space: normal;
+  line-height: 1.28;
+}
+
+.codex-feed-row.feedback em {
+  grid-column: 2;
 }
 
 .codex-request-form button[type="submit"] {
