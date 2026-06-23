@@ -14,6 +14,7 @@ const checks = [
       /555-micro-review\.md/,
       /Claim calibration/,
       /Context engineering/,
+      /one-shot/,
     ],
   },
   {
@@ -23,6 +24,7 @@ const checks = [
       /context-engineering-standard\.md/,
       /source-pattern-card\.md/,
       /555-micro-review\.md/,
+      /one-shot/,
     ],
   },
   {
@@ -60,9 +62,10 @@ const checks = [
     file: "templates/source-pattern-card.md",
     patterns: [
       /Source pattern card/,
+      /one-shot/,
       /what to import/,
       /what not to import/,
-      /decision: import \/ adapt \/ reject \/ defer/,
+      /decision: import \/ adapt \/ reject \/ defer-now/,
     ],
   },
   {

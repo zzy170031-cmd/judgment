@@ -257,6 +257,7 @@ Route effects:
 
 - Extract the external pattern first: what problem it solves, what safety boundary it assumes, and what not to import.
 - Use `templates/source-pattern-card.md` for non-trivial imports, reposts, social prompts, company practices, agent frameworks, or source sets that will change Judgment behavior.
+- Treat external knowledge import as one-shot by default: import/adapt/reject/defer-now inside the current research pass, with no future-fill backlog unless the user explicitly asks for ongoing refresh or a maintained knowledge base.
 - Translate the pattern into the smallest Codex surface: prompt/thread, `AGENTS.md`, Codex config/hook, `rules/*.md`, skill, plugin, MCP/connector/app, script, automation/heartbeat, Browser, Chrome, Computer Use, Git worktree, or `555`.
 - Prefer extending existing Judgment surfaces over creating a new asset.
 - Keep Judgment Codex-only at execution time. External tools are inspiration unless the user explicitly opens a separate integration/runtime gate.

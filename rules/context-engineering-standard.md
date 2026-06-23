@@ -88,11 +88,13 @@ When improving Judgment itself, add:
 ```text
 Skill evolution packet:
 - source problem:
+- import mode: one-shot / ongoing-explicit-only
 - existing Judgment surface:
 - gap:
 - proposed local surface: rule / template / script / skill edit / no change
 - verification:
 - rollback:
+- closure: imported / adapted / rejected / defer-now
 ```
 
 ## Interaction With Other Rules

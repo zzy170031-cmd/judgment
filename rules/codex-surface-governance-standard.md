@@ -27,6 +27,20 @@ what_not_to_import:
 decision:
 ```
 
+## One-Shot Import Boundary
+
+External knowledge import is one-shot by default. A research pass may produce a closed set of local changes, rejected ideas, and explicitly deferred items for the current task, but it must not create an open-ended "fill this knowledge later" backlog.
+
+Use this posture:
+
+- `import_mode: one-shot` for ordinary research, source comparison, prompt study, company-practice review, and skill evolution.
+- `import_mode: ongoing` only when the user explicitly asks for a maintained knowledge base, recurring refresh, monitor, automation, or future research loop.
+- Close every source pattern card as `import`, `adapt`, `reject`, or `defer-now`. `defer-now` means "not imported in this cycle", not "silently keep filling later".
+- If important evidence is missing, either fetch it during the current research pass, mark the claim `UNKNOWN`, or leave the idea out.
+- Do not create future placeholders, empty reference folders, or TODO knowledge slots unless they are tied to a user-approved project gate.
+
+When the user says the external knowledge should be a one-time addition, the final state must identify the imported surfaces and must not depend on future source filling.
+
 Good imports:
 
 - Persistent project instructions -> `AGENTS.md`, repo rules, or a skill trigger.
