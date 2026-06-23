@@ -1765,9 +1765,9 @@
       caption: "规划中心把 Gate、Controller、Planner、Splitter 三个责任点连成可回溯推进线。",
       nodes: [
         ...gates,
-        { id: "controller", label: "Controller", meta: "全局路线判断", progress: 100, tone: "cyan", x: 22, y: 86, agentId: "controller" },
-        { id: "planner", label: "Work Planner", meta: "路线已完成", progress: 100, tone: "green", x: 43, y: 86, agentId: "planner" },
-        { id: "splitter", label: "Work Splitter", meta: "编组已完成", progress: 100, tone: "green", x: 63, y: 86, agentId: "splitter" }
+        { id: "controller", label: "Controller", meta: "全局路线判断", progress: 100, tone: "cyan", x: 12, y: 76, agentId: "controller" },
+        { id: "planner", label: "Work Planner", meta: "路线已完成", progress: 100, tone: "green", x: 28, y: 76, agentId: "planner" },
+        { id: "splitter", label: "Work Splitter", meta: "编组已完成", progress: 100, tone: "green", x: 84, y: 76, agentId: "splitter" }
       ],
       edges: [
         { from: "xb1", to: "xb2", tone: "green" },
@@ -1791,14 +1791,14 @@
   function renderEvidenceModule() {
     const stats = issueStats();
     const evidencePositions = [
-      { x: 29, y: 29 },
-      { x: 45, y: 29 },
-      { x: 61, y: 29 },
-      { x: 77, y: 29 },
-      { x: 29, y: 65 },
-      { x: 45, y: 65 },
-      { x: 61, y: 65 },
-      { x: 77, y: 65 }
+      { x: 27, y: 29 },
+      { x: 43, y: 29 },
+      { x: 59, y: 29 },
+      { x: 75, y: 29 },
+      { x: 27, y: 65 },
+      { x: 43, y: 65 },
+      { x: 59, y: 65 },
+      { x: 75, y: 65 }
     ];
     const evidenceNodes = data.evidence.map((item, index) => ({
       id: item.id,
@@ -1819,9 +1819,9 @@
       className: "evidence-flow",
       caption: "测试证据模块把 QA、浏览器截图、测试报告、Git diff 与 555 审查入口连接在同一证据闭环。",
       nodes: [
-        { id: "qa", label: "QA Team", meta: "测试与质量保障", progress: 45, tone: "yellow", x: 13, y: 47, agentId: "qa-team", kind: "hub" },
+        { id: "qa", label: "QA Team", meta: "测试与质量保障", progress: 45, tone: "yellow", x: 9.5, y: 47, agentId: "qa-team", kind: "hub" },
         ...evidenceNodes,
-        { id: "review", label: "555 Review", meta: "等待补证据", progress: 20, tone: "orange", x: 91, y: 47, reviewPackage: true, kind: "review" }
+        { id: "review", label: "555 Review", meta: "等待补证据", progress: 20, tone: "orange", x: 91.5, y: 47, reviewPackage: true, kind: "review" }
       ],
       edges: [
         ...evidenceNodes.map((node) => ({ from: "qa", to: node.id, tone: node.tone })),
@@ -1995,12 +1995,12 @@
 
   function renderSettingsModule() {
     const settingsHealthPositions = [
-      { x: 16, y: 32 },
-      { x: 32, y: 32 },
-      { x: 16, y: 56 },
-      { x: 32, y: 56 },
-      { x: 16, y: 78 },
-      { x: 32, y: 78 }
+      { x: 15, y: 32 },
+      { x: 34, y: 32 },
+      { x: 15, y: 56 },
+      { x: 34, y: 56 },
+      { x: 15, y: 78 },
+      { x: 34, y: 78 }
     ];
     const healthNodes = (data.runtime?.health || []).map((item, index) => ({
       id: `health-${index}`,
@@ -2016,7 +2016,7 @@
       className: "settings-flow",
       caption: "系统设置展示当前 runtime 数据源、桥接模式、健康状态和安全控制，不直接执行外部命令。",
       nodes: [
-        { id: "source", label: data.runtime?.source || "mock-runtime", meta: data.runtime?.mode || "mirror", tone: "cyan", x: 48, y: 20, action: "system-health", kind: "hub" },
+        { id: "source", label: data.runtime?.source || "mock-runtime", meta: data.runtime?.mode || "mirror", tone: "cyan", x: 52, y: 20, action: "system-health", kind: "hub" },
         ...healthNodes,
         { id: "bridge", label: "Codex Bridge", meta: codexBridgeStatus, tone: "purple", x: 72, y: 39, action: "focus-codex-request", kind: "wide" },
         { id: "guard", label: "安全边界", meta: "外部动作需人工批准", tone: "yellow", x: 72, y: 66, action: "system-health", kind: "wide" }

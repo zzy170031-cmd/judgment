@@ -1968,10 +1968,10 @@ button {
 .conversation-row {
   position: relative;
   display: grid;
-  grid-template-columns: 44px 76px minmax(0, 1fr);
-  align-items: center;
+  grid-template-columns: 48px minmax(76px, 0.32fr) minmax(0, 1fr);
+  align-items: start;
   gap: 6px;
-  padding: 4px 7px;
+  padding: 5px 7px;
   border-radius: 7px;
   background: rgba(3, 12, 24, 0.44);
   border: 1px solid rgba(145, 196, 255, 0.09);
@@ -2007,12 +2007,14 @@ button {
   grid-column: auto;
   margin: 0;
   overflow: hidden;
-  display: block;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+  overflow-wrap: anywhere;
   color: #b8c8d9;
-  font-size: 10.5px;
-  line-height: 1.2;
+  font-size: 11px;
+  line-height: 1.28;
 }
 
 .primary-button {
@@ -2602,7 +2604,7 @@ button {
 .module-flow-map {
   position: relative;
   min-width: 0;
-  min-height: 360px;
+  min-height: 400px;
   overflow: hidden;
   border-radius: 8px;
   border: 1px solid rgba(126, 184, 235, 0.16);
@@ -2670,8 +2672,8 @@ button {
 .module-flow-node {
   position: absolute;
   z-index: 2;
-  width: 126px;
-  min-height: 76px;
+  width: 136px;
+  min-height: 80px;
   transform: translate(-50%, -50%);
   display: grid;
   grid-template-rows: auto auto auto 5px auto;
@@ -2698,8 +2700,8 @@ button {
 }
 
 .module-flow-node.node-hub {
-  width: 158px;
-  min-height: 86px;
+  width: 168px;
+  min-height: 90px;
   box-shadow:
     0 18px 50px rgba(0, 0, 0, 0.38),
     0 0 34px color-mix(in srgb, currentColor 22%, transparent);
@@ -2710,19 +2712,19 @@ button {
 }
 
 .evidence-flow .module-flow-node.node-evidence {
-  width: 138px;
-  min-height: 88px;
+  width: 148px;
+  min-height: 92px;
   gap: 4px;
   padding: 9px 10px 8px;
 }
 
 .evidence-flow .module-flow-node.node-review {
-  width: 132px;
-  min-height: 76px;
+  width: 142px;
+  min-height: 80px;
 }
 
 .split-flow .module-flow-node {
-  width: 100px;
+  width: 116px;
 }
 
 .stats-flow .module-flow-node:not(.node-hub) {
@@ -2731,43 +2733,43 @@ button {
 
 .worktree-flow .module-flow-node,
 .git-flow .module-flow-node {
-  width: 142px;
+  width: 156px;
 }
 
 .overview-flow .module-flow-node {
-  width: 136px;
+  width: 146px;
 }
 
 .overview-flow .module-flow-node.node-hub {
-  width: 158px;
-}
-
-.overview-flow .module-flow-node.node-wide {
   width: 168px;
 }
 
+.overview-flow .module-flow-node.node-wide {
+  width: 182px;
+}
+
 .planning-flow .module-flow-node {
-  width: 118px;
+  width: 126px;
 }
 
 .planning-flow .module-flow-node.node-hub {
-  width: 132px;
+  width: 142px;
 }
 
 .settings-flow .module-flow-node {
-  width: 116px;
-  min-height: 62px;
+  width: 124px;
+  min-height: 66px;
   gap: 3px;
   padding: 8px 9px 7px;
 }
 
 .settings-flow .module-flow-node.node-wide {
-  width: 150px;
+  width: 158px;
 }
 
 .settings-flow .module-flow-node.node-hub {
-  width: 136px;
-  min-height: 70px;
+  width: 150px;
+  min-height: 76px;
 }
 
 .settings-flow .module-flow-node strong {
@@ -2815,7 +2817,7 @@ button {
 .module-flow-node small {
   max-width: calc(100% - 18px);
   color: currentColor;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 760;
   text-transform: uppercase;
 }
@@ -2830,7 +2832,7 @@ button {
   overflow-wrap: anywhere;
   line-height: 1.18;
   color: #f3f9ff;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 780;
 }
 
@@ -2843,7 +2845,7 @@ button {
   overflow-wrap: break-word;
   word-break: normal;
   line-height: 1.14;
-  font-size: 11.5px;
+  font-size: 12px;
 }
 
 .evidence-flow .module-flow-node em {
@@ -2852,13 +2854,13 @@ button {
 
 .module-flow-node em {
   color: #9fb4c9;
-  font-size: 10px;
+  font-size: 10.5px;
 }
 
 .module-flow-node b {
   justify-self: end;
   color: #dfeeff;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 720;
 }
 
@@ -3519,51 +3521,59 @@ button {
   }
 
   .module-flow-node {
-    width: 106px;
-    min-height: 70px;
+    width: 112px;
+    min-height: 72px;
     padding: 8px 8px 7px;
   }
 
   .module-flow-node.node-hub {
-    width: 132px;
+    width: 140px;
   }
 
   .module-flow-node.node-wide {
-    width: 142px;
+    width: 152px;
   }
 
   .evidence-flow .module-flow-node.node-evidence {
-    width: 104px;
+    width: 120px;
     min-height: 82px;
   }
 
   .evidence-flow .module-flow-node.node-review {
-    width: 108px;
+    width: 120px;
+  }
+
+  .evidence-flow .module-flow-node strong {
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: initial;
+    font-size: 11.5px;
   }
 
   .split-flow .module-flow-node {
-    width: 90px;
+    width: 98px;
   }
 
   .planning-flow .module-flow-node {
-    width: 104px;
+    width: 112px;
   }
 
   .planning-flow .module-flow-node.node-hub {
-    width: 118px;
+    width: 126px;
   }
 
   .worktree-flow .module-flow-node,
   .git-flow .module-flow-node {
-    width: 118px;
+    width: 128px;
   }
 
   .settings-flow .module-flow-node {
-    width: 104px;
+    width: 112px;
   }
 
   .settings-flow .module-flow-node.node-wide {
-    width: 130px;
+    width: 140px;
   }
 }
 
@@ -3589,9 +3599,26 @@ button {
     padding: 6px 8px;
   }
 
+  .workflow-summary,
+  .workflow-roles {
+    gap: 1px;
+  }
+
+  .workflow-summary span {
+    font-size: 9.5px;
+    line-height: 1.1;
+  }
+
+  .workflow-summary strong {
+    font-size: 12px;
+    line-height: 1.16;
+    -webkit-line-clamp: 1;
+  }
+
   .workflow-summary em,
   .workflow-roles b {
     font-size: 10px;
+    line-height: 1.18;
   }
 
   .workflow-actions button {
@@ -3623,7 +3650,7 @@ button {
   }
 
   .center-stack {
-    grid-template-rows: 360px minmax(0, 1fr);
+    grid-template-rows: minmax(420px, 1fr) minmax(0, 108px);
     align-content: start;
     overflow: hidden;
     padding-right: 4px;
@@ -3634,7 +3661,7 @@ button {
   }
 
   .module-panel {
-    min-height: 360px;
+    min-height: 420px;
   }
 
   .module-flow-layout {
@@ -3648,25 +3675,25 @@ button {
   }
 
   .module-flow-node {
-    min-height: 66px;
+    min-height: 70px;
     grid-template-rows: auto auto auto 4px auto;
     gap: 4px;
     padding: 8px 9px 7px;
   }
 
   .module-flow-node.node-hub {
-    min-height: 74px;
+    min-height: 78px;
   }
 
   .module-flow-node strong {
-    font-size: 11.5px;
-    line-height: 1.14;
+    font-size: 12px;
+    line-height: 1.16;
   }
 
   .module-flow-node small,
   .module-flow-node em,
   .module-flow-node b {
-    font-size: 9.5px;
+    font-size: 10px;
   }
 
   .module-flow-node .progress-track {
@@ -3676,13 +3703,13 @@ button {
   .module-flow-caption {
     left: 10px;
     right: 10px;
-    bottom: 6px;
-    min-height: 22px;
-    max-height: 34px;
-    padding: 4px 9px;
-    overflow: hidden;
-    font-size: 11px;
-    line-height: 1.24;
+    bottom: 8px;
+    min-height: 26px;
+    max-height: none;
+    padding: 5px 10px;
+    overflow: visible;
+    font-size: 11.5px;
+    line-height: 1.3;
   }
 
   .office-map-panel {
@@ -3799,12 +3826,12 @@ button {
   }
 
   .right-rail {
-    grid-template-rows: minmax(0, 1fr) 164px;
+    grid-template-rows: minmax(0, 1fr) 118px;
   }
 
   .agent-panel {
-    grid-template-rows: 28px 24px minmax(124px, 1fr) 80px minmax(96px, 0.52fr) 72px;
-    gap: 6px;
+    grid-template-rows: 28px 24px minmax(64px, 0.8fr) 124px minmax(82px, 0.8fr) 60px;
+    gap: 5px;
   }
 
   .selected-detail {
