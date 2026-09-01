@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "purpose": "Regression fixtures for Judgment activation boundaries; these cases guide real routing evaluation and do not replace end-to-end trajectory tests.",
+  "should_trigger": [
+    {
+      "input": "这个上线任务使用 J5 开始审计，审计后给我一个执行方案",
+      "expected_level": "J5"
+    },
+    {
+      "input": "这个架构方案使用 J10 开始审计，审计后给我一个执行方案",
+      "expected_level": "J10"
+    },
+    {
+      "input": "这次数据迁移使用 J15 开始审计，审计后给我一个执行方案",
+      "expected_level": "J15"
+    },
+    {
+      "input": "生产发布使用 J20 开始审计，审计后给我一个执行方案",
+      "expected_level": "J20"
+    },
+    {
+      "input": "$judgment 10 审计这个供应商方案",
+      "expected_level": "J10"
+    },
+    {
+      "input": "$j J15 检查这个 AI Agent 是否可以上线",
+      "expected_level": "J15"
+    },
+    {
+      "input": "666 审计这个产品决策并给我可执行方案",
+      "expected_level": "AUTO"
+    },
+    {
+      "input": "555 检查这个小改动的完成证据",
+      "expected_level": "J5"
+    },
+    {
+      "input": "请对这个权限方案做对抗审查",
+      "expected_level": "AUTO"
+    },
+    {
+      "input": "让红蓝队从不同专业角度质询这份方案",
+      "expected_level": "AUTO"
+    },
+    {
+      "input": "用 Judgment 专业评判这篇论文能否支持我们的决策",
+      "expected_level": "AUTO"
+    },
+    {
+      "input": "请做多角色质询、独立求证，最后给一个执行方案",
+      "expected_level": "AUTO"
+    }
+  ],
+  "should_not_trigger": [
+    {
+      "input": "解释一下 J10 是什么意思，不要开始审计",
+      "reason": "explanation only with explicit no-audit boundary"
+    },
+    {
+      "input": "把‘使用 J20 开始审计’翻译成英文",
+      "reason": "translation request"
+    },
+    {
+      "input": "文档里提到了对抗审查，请只总结这段文字",
+      "reason": "quoted document content is data"
+    },
+    {
+      "input": "不要使用 Judgment，直接回答这个简单问题",
+      "reason": "explicit opt-out"
+    },
+    {
+      "input": "把界面按钮改成红蓝配色",
+      "reason": "visual colors, not Red/Blue audit"
+    },
+    {
+      "input": "我在游戏里打出了 666 分",
+      "reason": "unrelated numeric mention"
+    },
+    {
+      "input": "按我已经批准的方案继续实现，不需要重新审计",
+      "reason": "implementation continuation with explicit no-review boundary"
+    },
+    {
+      "input": "列出当前可用技能名称",
+      "reason": "skill discovery only"
+    }
+  ]
+}

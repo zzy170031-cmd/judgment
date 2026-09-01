@@ -1,7 +1,7 @@
 interface:
-  display_name: "666 Workflow Router"
-  short_description: "Routes Codex work by / slash launcher handling, work-planner needs clarification, work-splitter decomposition, XA/XB gates, AI/Agent safety, context pressure, 555 escalation, and packaging fit."
-  default_prompt: "Use $666, or / followed by a task, to decide whether this task needs work-planner planning, needs-solution-designer clarification, work-splitter decomposition, XA/XB gates, AI/Agent guardrails, 555 assurance, or packaging before execution."
+  display_name: "666 Judgment Audit Router"
+  short_description: "Routes professional audits across J5/J10/J15/J20."
+  default_prompt: "这个任务使用 J10 开始审计，审计后给我一个执行方案。"
 
 policy:
   allow_implicit_invocation: true

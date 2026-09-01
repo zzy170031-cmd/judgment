@@ -2,184 +2,451 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
-const read = (rel) => fs.readFileSync(path.join(root, rel), "utf8");
+const absolute = (rel) => path.join(root, rel);
+const read = (rel) => fs.readFileSync(absolute(rel), "utf8");
+const failures = [];
 
-const checks = [
+const required = [
   {
     file: "SKILL.md",
     patterns: [
-      /claim-calibration-standard\.md/,
-      /context-engineering-standard\.md/,
-      /source-pattern-card\.md/,
-      /555-micro-review\.md/,
-      /Claim calibration/,
-      /Context engineering/,
-      /one-shot/,
-    ],
-  },
-  {
-    file: "skills/666/SKILL.md",
-    patterns: [
-      /claim-calibration-standard\.md/,
-      /context-engineering-standard\.md/,
-      /source-pattern-card\.md/,
-      /555-micro-review\.md/,
-      /one-shot/,
+      /666 Professional Audit Router/,
+      /J5[\s\S]*J10[\s\S]*J15[\s\S]*J20/,
+      /Bare `555` maps to `J5`/,
+      /Bare `666` or `judgment` normally maps to[\s\S]*`J10`/,
+      /Route Into 555/,
+      /\[555 professional audit engine\]\(skills\/555\/SKILL\.md\)/,
+      /<task> 使用 J5\|J10\|J15\|J20 开始审计，审计后给我一个执行方案/,
+      /requested execution plan is the audit deliverable, not execution authority/,
+      /Red\/Blue cross-examination/,
+      /ordered executable plan/,
     ],
   },
   {
     file: "skills/555/SKILL.md",
     patterns: [
-      /claim-calibration-standard\.md/,
-      /context-engineering-standard\.md/,
-      /555-micro-review\.md/,
-      /Decision Claim Calibration/,
+      /555 Professional Audit Engine/,
+      /audit-angle-registry\.md/,
+      /audit-profiles\.md/,
+      /evidence-standard\.md/,
+      /对抗审查\.md/,
+      /design-basis\.md/,
+      /Freeze The Real Question/,
+      /Generate Professional Roles/,
+      /Blind Review Before Discussion/,
+      /Red\/Blue Cross-Examination/,
+      /Independent Evidence Verification/,
+      /claim-evidence[\s\S]*provenance or shared origin/,
+      /Never infer whole-scope coverage from a sample/,
+      /blocker \| required \| advisory \| observation/,
+      /Do not decide by eloquence or majority vote/,
+      /real independent review only when the delegation tool returned a real/,
+      /audit ends at an executable plan/,
     ],
   },
   {
-    file: "rules/claim-calibration-standard.md",
+    file: "skills/judgment/SKILL.md",
     patterns: [
-      /KNOWN/,
-      /COMPUTED/,
-      /INFERRED/,
-      /FRAME/,
-      /GUESS/,
-      /UNKNOWN/,
-      /Rules I broke/,
-      /555 Integration/,
+      /\$judgment 5 <question>[\s\S]*J5/,
+      /\$judgment 10 <question>[\s\S]*J10/,
+      /\$judgment 15 <question>[\s\S]*J15/,
+      /\$judgment 20 <question>[\s\S]*J20/,
+      /Primary Natural-Language Invocation/,
+      /\[666 audit router\]\(\.\.\/\.\.\/SKILL\.md\)/,
+      /<task> 使用 J5 开始审计，审计后给我一个执行方案/,
+      /named level wins; do not silently[\s\S]*upgrade or downgrade/,
+      /professional verdict and an ordered executable plan/,
+      /not permission to execute it/,
     ],
   },
   {
-    file: "rules/codex-surface-governance-standard.md",
+    file: "skills/j/SKILL.md",
     patterns: [
-      /Codex Pluginization And Super-Agentization/,
-      /Codex is the platform boundary/,
-      /Codex super-agent pattern/,
-      /HTML and dashboards are visibility\/request surfaces/,
+      /\$j J5\|J10\|J15\|J20/,
+      /\$j 5\|10\|15\|20 <question>[\s\S]*matching Judgment level/,
+      /<task> 使用 J5\|J10\|J15\|J20 开始审计，审计后给我一个执行方案/,
+      /not implementation authorization/,
     ],
   },
   {
-    file: "rules/tool-portfolio-standard.md",
+    file: "skills/555/references/audit-angle-registry.md",
     patterns: [
-      /Plugin And Super-Agent Gate/,
-      /Codex super-agent pattern/,
-      /external daemon/,
-      /plugin as packaging and the super-agent pattern as runtime governance/,
+      /Challenge Unit Contract/,
+      /Dynamic Role Generation/,
+      /Selection And Substitution/,
     ],
   },
   {
-    file: "rules/project-agent-topology-standard.md",
+    file: "skills/555/references/audit-profiles.md",
     patterns: [
-      /Super-Agent Boundary/,
-      /separate runtime outside Codex/,
-      /proof that subagents are running when no Codex delegation tool returned an id/,
+      /Progressive Loading Rule/,
+      /一个主 Profile/,
+      /最多两个/,
+      /只读取对应的 Profile 文件/,
+      /profiles\/code-change\.md/,
+      /profiles\/research-claim-paper\.md/,
+      /profiles\/ai-agent-skill\.md/,
+      /profiles\/security-privacy-authority\.md/,
+      /profiles\/data-metrics-ml\.md/,
+      /profiles\/product-business-process\.md/,
+      /profiles\/content-design-accessibility\.md/,
+      /profiles\/operations-release-incident\.md/,
+      /profiles\/regulated-high-stakes\.md/,
     ],
   },
   {
-    file: "rules/context-engineering-standard.md",
+    file: "skills/555/references/profiles/code-change.md",
+    patterns: [/P01 Code \/ Change Review/, /base, candidate, diff range/, /real target-environment observation/],
+  },
+  {
+    file: "skills/555/references/profiles/research-claim-paper.md",
+    patterns: [/P02 Research \/ Claim \/ Paper/, /origin group/, /search cutoff/],
+  },
+  {
+    file: "skills/555/references/profiles/ai-agent-skill.md",
+    patterns: [/P03 AI \/ Agent \/ Skill/, /near-miss/, /real trajectory/, /prompt injection/],
+  },
+  {
+    file: "skills/555/references/profiles/security-privacy-authority.md",
+    patterns: [/P04 Security \/ Privacy \/ Authority/, /trust boundaries/, /least[\s\S]*privilege/],
+  },
+  {
+    file: "skills/555/references/profiles/data-metrics-ml.md",
+    patterns: [/P05 Data \/ Metrics \/ ML Evaluation/, /target population/, /label leakage/],
+  },
+  {
+    file: "skills/555/references/profiles/product-business-process.md",
+    patterns: [/P06 Product \/ Business \/ Process/, /current baseline/, /acceptance[\s\S]*evidence/],
+  },
+  {
+    file: "skills/555/references/profiles/content-design-accessibility.md",
+    patterns: [/P07 Content \/ Design \/ Accessibility/, /original assets/, /full versus sampled review/],
+  },
+  {
+    file: "skills/555/references/profiles/operations-release-incident.md",
+    patterns: [/P08 Operations \/ Release \/ Incident/, /rollback/, /post-release observation window/],
+  },
+  {
+    file: "skills/555/references/profiles/regulated-high-stakes.md",
+    patterns: [/P09 Regulated \/ Legal \/ Financial \/ Medical Decision/, /jurisdiction/, /licensed/],
+  },
+  {
+    file: "skills/555/references/evidence-standard.md",
     patterns: [
-      /Context packet/,
-      /Handoff packet/,
-      /Skill evolution packet/,
-      /Source Freshness/,
+      /Claim-Evidence Matrix/,
+      /E0 testimony/,
+      /E3 reproducible outcome/,
+      /origin group/,
+      /总体、抽样与覆盖/,
+      /blocker/,
+      /Finding Lifecycle/,
+      /AI \/ Skill 行为证据附加门/,
+      /near-miss/,
+      /Evidence Sufficiency And Stop/,
     ],
   },
   {
-    file: "templates/source-pattern-card.md",
+    file: "skills/555/references/对抗审查.md",
     patterns: [
-      /Source pattern card/,
-      /one-shot/,
-      /what to import/,
-      /what not to import/,
-      /decision: import \/ adapt \/ reject \/ defer-now/,
+      /红蓝交叉质询/,
+      /独立/,
+      /证据/,
+      /audit-profiles\.md/,
+      /evidence-standard\.md/,
+      /共同补齐证据/,
+      /私有事件核/,
+      /Codex Multi-Agent V2 一层运行适配/,
+      /fork_turns=none/,
+      /spawn_agent \/ send_message \/ followup_task \/ wait_agent/,
+      /通常最多三席一批/,
+      /single-controller pre-audit/,
+    ],
+  },
+  {
+    file: "skills/555/references/design-basis.md",
+    patterns: [
+      /Agentic Design Patterns/,
+      /Agent Design Pattern Catalogue/,
+      /Anthropic/,
+      /Google Cloud \/ ADK/,
+      /Cloudflare/,
+      /Trail of Bits/,
+      /Multi-Agent Debate \/ ChatEval/,
+      /OpenAI skill and model guidance/,
+      /OpenAI Multi-agent guidance and Codex MultiAgentV2 source/,
+      /ModelScope ms-agent/,
+      /NIST AI RMF and TEVV/,
+      /OWASP agentic AI threat modeling/,
+      /UK AISI Inspect \/ Inspect Evals/,
+      /never let majority vote replace/,
     ],
   },
   {
     file: "templates/555-micro-review.md",
     patterns: [
-      /555 micro review/,
-      /A2 Core Challenger/,
-      /A4 Audit Specialist/,
-      /Escalate To Full 555/,
+      /Judgment Audit Record/,
+      /Dynamic Role Roster/,
+      /Issue Tree/,
+      /Blind Review And Cross-Examination/,
+      /Claim-Evidence Matrix/,
+      /Finding Register/,
+      /Dissent Register/,
+      /Professional Verdict/,
+      /Executable Plan/,
+      /Final Boundary/,
     ],
+  },
+  {
+    file: "skills/judgment/agents/openai.yaml",
+    patterns: [/^interface:/m, /Judgment Professional Audit/, /allow_implicit_invocation: true/],
+  },
+  {
+    file: "skills/555/agents/openai.yaml",
+    patterns: [/^interface:/m, /555 Professional Audit/, /allow_implicit_invocation: false/],
   },
 ];
 
-const failures = [];
-
-for (const check of checks) {
-  const abs = path.join(root, check.file);
-  if (!fs.existsSync(abs)) {
+for (const check of required) {
+  if (!fs.existsSync(absolute(check.file))) {
     failures.push(`${check.file}: missing`);
     continue;
   }
-  const text = read(check.file);
+  const content = read(check.file);
   for (const pattern of check.patterns) {
-    if (!pattern.test(text)) failures.push(`${check.file}: missing ${pattern}`);
+    if (!pattern.test(content)) failures.push(`${check.file}: missing ${pattern}`);
   }
 }
 
 const rootSkill = read("SKILL.md");
-const nestedSkill = read("skills/666/SKILL.md");
-if (rootSkill !== nestedSkill) {
-  failures.push("SKILL.md and skills/666/SKILL.md differ");
+if (fs.existsSync(absolute("skills/666"))) {
+  failures.push("skills/666 must stay absent; root SKILL.md is the unique 666 entrypoint");
 }
 
-const routeCases = [
-  ["search external AI company practices", /codex-surface-governance-standard\.md/],
-  ["context pressure handoff", /context-engineering-standard\.md/],
-  ["anti sycophancy claim review", /claim-calibration-standard\.md/],
-  ["lightweight adversarial skill edit", /555-micro-review\.md/],
-  ["Codex plugin packaging", /Plugin/],
-  ["Codex super-agent topology", /project-agent-topology-standard\.md/],
-];
-
-for (const [name, pattern] of routeCases) {
-  if (!pattern.test(rootSkill)) failures.push(`route case not represented: ${name}`);
-}
-
-const textByFile = {
-  rootSkill,
-  surface: read("rules/codex-surface-governance-standard.md"),
-  authority: read("rules/authority-boundary-standard.md"),
-  topology: read("rules/project-agent-topology-standard.md"),
-  toolPortfolio: read("rules/tool-portfolio-standard.md"),
-  loop: read("rules/loop-engineering-standard.md"),
-  fiveAgent: read("skills/555/SKILL.md"),
+const lineBudgets = {
+  "SKILL.md": 180,
+  "skills/555/SKILL.md": 220,
+  "skills/judgment/SKILL.md": 120,
+  "skills/j/SKILL.md": 60,
 };
 
-const scenarioCases = [
-  {
-    name: "small task does not auto-trigger 555",
-    text: textByFile.rootSkill,
-    patterns: [/Do not auto-trigger for:[\s\S]*trivial single-file edits/, /Do not run full `555` for every small task/],
-  },
-  {
-    name: "HTML is not a shell or Git executor",
-    text: `${textByFile.authority}\n${textByFile.loop}`,
-    patterns: [/HTML can display and request/, /Do not let HTML execute local commands directly/, /Do not use an HTML page, bridge queue, or dashboard as an executor/],
-  },
-  {
-    name: "external runtimes are translated to Codex surfaces",
-    text: `${textByFile.surface}\n${textByFile.loop}\n${textByFile.rootSkill}`,
-    patterns: [/Codex-execution scoped/, /Do not create a multi-model runtime/, /Do not import external workflow runtimes/],
-  },
-  {
-    name: "pluginization stays a Codex surface decision",
-    text: `${textByFile.rootSkill}\n${textByFile.surface}\n${textByFile.toolPortfolio}`,
-    patterns: [/`Plugin` \| Bundle of skills/, /multiple bundled skills\? Consider `Plugin`/],
-  },
-  {
-    name: "super-agentization requires real Codex agents and evidence",
-    text: `${textByFile.topology}\n${textByFile.fiveAgent}`,
-    patterns: [/Do not claim real agents were created unless a real subagent\/thread tool was used successfully/, /A4.*files, logs, tests, or artifacts/s],
-  },
+for (const [file, budget] of Object.entries(lineBudgets)) {
+  const lines = read(file).split(/\r?\n/).length;
+  if (lines > budget) failures.push(`${file}: ${lines} lines exceeds ${budget}-line budget`);
+}
+
+const progressiveReferenceBudgets = {
+  "skills/555/references/audit-profiles.md": 80,
+  "skills/555/references/profiles/code-change.md": 50,
+  "skills/555/references/profiles/research-claim-paper.md": 50,
+  "skills/555/references/profiles/ai-agent-skill.md": 55,
+  "skills/555/references/profiles/security-privacy-authority.md": 50,
+  "skills/555/references/profiles/data-metrics-ml.md": 50,
+  "skills/555/references/profiles/product-business-process.md": 50,
+  "skills/555/references/profiles/content-design-accessibility.md": 55,
+  "skills/555/references/profiles/operations-release-incident.md": 55,
+  "skills/555/references/profiles/regulated-high-stakes.md": 50,
+};
+
+for (const [file, budget] of Object.entries(progressiveReferenceBudgets)) {
+  const lines = read(file).split(/\r?\n/).length;
+  if (lines > budget) failures.push(`${file}: ${lines} lines exceeds ${budget}-line progressive-load budget`);
+}
+
+const descriptionBudgets = {
+  "SKILL.md": 420,
+  "skills/555/SKILL.md": 360,
+  "skills/judgment/SKILL.md": 420,
+  "skills/j/SKILL.md": 360,
+};
+
+for (const [file, budget] of Object.entries(descriptionBudgets)) {
+  const match = read(file).match(/^description:\s*(.+)$/m);
+  if (!match) {
+    failures.push(`${file}: missing one-line frontmatter description`);
+    continue;
+  }
+  const description = match[1].replace(/^['"]|['"]$/g, "");
+  if (description.length > budget) {
+    failures.push(`${file}: ${description.length}-character description exceeds ${budget}-character budget`);
+  }
+}
+
+const retiredDefaultSections = [
+  "## Codex Maxxing Overlay",
+  "## Packaging Candidate Gate",
+  "## Tool Portfolio Gate",
+  "## Browser Flow Testing Gate",
+  "## Git Worktree Gate",
+  "## Low-Frequency Routes: Explicit Only",
 ];
 
-for (const scenario of scenarioCases) {
-  for (const pattern of scenario.patterns) {
-    if (!pattern.test(scenario.text)) failures.push(`scenario not protected: ${scenario.name} missing ${pattern}`);
+for (const heading of retiredDefaultSections) {
+  if (rootSkill.includes(heading)) failures.push(`666 still bulk-loads retired default section: ${heading}`);
+}
+
+const registry = read("skills/555/references/audit-angle-registry.md");
+const angleCodes = [...registry.matchAll(/^\|\s*`(A\d{2})`\s*\|/gm)].map((match) => match[1]);
+const expectedAngles = Array.from({ length: 20 }, (_, index) => `A${String(index + 1).padStart(2, "0")}`);
+if (JSON.stringify(angleCodes) !== JSON.stringify(expectedAngles)) {
+  failures.push(`angle registry must contain A01-A20 exactly once in order; got ${angleCodes.join(", ")}`);
+}
+
+const levels = { J5: 5, J10: 10, J15: 15, J20: 20 };
+for (const [level, units] of Object.entries(levels)) {
+  const row = new RegExp("^\\|\\s*`" + level + "`\\s*\\|\\s*" + units + "\\s*\\|", "m");
+  if (!row.test(registry)) failures.push(`registry missing exact ${level} = ${units} challenge-unit contract`);
+}
+
+const naturalEntry = read("skills/judgment/SKILL.md");
+for (const level of Object.keys(levels)) {
+  const phrase = `<task> 使用 ${level} 开始审计，审计后给我一个执行方案`;
+  if (!naturalEntry.includes(phrase)) failures.push(`natural-language activation missing: ${phrase}`);
+}
+
+let triggerCases;
+try {
+  triggerCases = JSON.parse(read("tests/judgment-trigger-cases.json"));
+} catch (error) {
+  failures.push(`tests/judgment-trigger-cases.json: invalid JSON (${error.message})`);
+}
+
+if (triggerCases) {
+  const positive = Array.isArray(triggerCases.should_trigger) ? triggerCases.should_trigger : [];
+  const negative = Array.isArray(triggerCases.should_not_trigger) ? triggerCases.should_not_trigger : [];
+  if (positive.length < 12) failures.push("trigger fixtures need at least 12 should-trigger cases");
+  if (negative.length < 8) failures.push("trigger fixtures need at least 8 near-miss should-not-trigger cases");
+
+  const allInputs = [...positive, ...negative].map((test) => test.input);
+  if (allInputs.some((input) => typeof input !== "string" || !input.trim())) {
+    failures.push("every trigger fixture needs a non-empty input");
   }
+  if (new Set(allInputs).size !== allInputs.length) failures.push("trigger fixture inputs must be unique");
+
+  const allowedExpected = new Set(["J5", "J10", "J15", "J20", "AUTO"]);
+  for (const test of positive) {
+    if (!allowedExpected.has(test.expected_level)) {
+      failures.push(`invalid expected trigger level for: ${test.input}`);
+    }
+  }
+  for (const test of negative) {
+    if (typeof test.reason !== "string" || !test.reason.trim()) {
+      failures.push(`near-miss fixture needs a reason: ${test.input}`);
+    }
+  }
+
+  for (const level of Object.keys(levels)) {
+    if (!positive.some((test) => test.expected_level === level)) {
+      failures.push(`trigger fixtures missing explicit ${level} case`);
+    }
+  }
+
+  const classifyTrigger = (input) => {
+    const text = input.trim();
+    const lower = text.toLowerCase();
+    const optOut = [
+      /不要开始审计/u,
+      /不要使用\s*judgment/iu,
+      /不需要重新审计/u,
+      /翻译成/u,
+      /只总结/u,
+      /列出当前可用技能/u,
+    ];
+    if (optOut.some((pattern) => pattern.test(text))) return null;
+    if (/红蓝配色/u.test(text) || /游戏里.*666\s*分/u.test(text)) return null;
+
+    const explicitPatterns = [
+      /使用\s*j?(5|10|15|20)\s*开始审计/iu,
+      /\$judgment\s*j?(5|10|15|20)\b/iu,
+      /\$j\s*j?(5|10|15|20)\b/iu,
+    ];
+    for (const pattern of explicitPatterns) {
+      const match = text.match(pattern);
+      if (match) return `J${match[1]}`;
+    }
+
+    if (/^\s*555(?:\s|[:：])/u.test(text)) return "J5";
+    if (
+      /(?:^|\s)666(?:\s|[:：]).*(?:审计|方案)/u.test(text) ||
+      /对抗审查/u.test(text) ||
+      /红蓝队.*(?:质询|审查|审计)/u.test(text) ||
+      /judgment.*(?:专业评判|审计)/iu.test(text) ||
+      /多角色质询.*(?:独立求证|执行方案)/u.test(text)
+    ) return "AUTO";
+
+    return null;
+  };
+
+  for (const test of positive) {
+    const actual = classifyTrigger(test.input);
+    if (actual !== test.expected_level) {
+      failures.push(`trigger classifier mismatch: ${test.input} -> ${actual}, expected ${test.expected_level}`);
+    }
+  }
+  for (const test of negative) {
+    const actual = classifyTrigger(test.input);
+    if (actual !== null) {
+      failures.push(`near-miss classifier must not trigger: ${test.input} -> ${actual}`);
+    }
+  }
+}
+
+const metadataPrompts = {
+  "agents/openai.yaml": "这个任务使用 J10 开始审计，审计后给我一个执行方案。",
+  "skills/judgment/agents/openai.yaml": "这个任务使用 J10 开始审计，审计后给我一个执行方案。",
+  "skills/j/agents/openai.yaml": "这个任务使用 J10 开始审计，审计后给我一个执行方案。",
+  "skills/555/agents/openai.yaml": "这个任务使用 J5 开始审计，审计后给我一个执行方案。",
+};
+
+for (const [file, prompt] of Object.entries(metadataPrompts)) {
+  if (!read(file).includes(prompt)) failures.push(`${file}: default prompt does not use the approved natural-language activation`);
+}
+
+const roleRanges = { J5: "3-4", J10: "4-6", J15: "5-8", J20: "6-10" };
+for (const [level, range] of Object.entries(roleRanges)) {
+  const row = new RegExp("^\\|\\s*`" + level + "`[\\s\\S]*?\\|\\s*" + range + "\\s*\\|$", "m");
+  if (!row.test(registry)) failures.push(`registry missing ${level} role range ${range}`);
+}
+
+const core = [
+  rootSkill,
+  read("skills/555/SKILL.md"),
+  read("skills/judgment/SKILL.md"),
+  read("skills/j/SKILL.md"),
+].join("\n");
+
+for (const retired of [
+  /## Compatibility Modes/,
+  /explicit-only legacy/i,
+  /\$judgment direct/,
+  /work-planner/i,
+  /work-splitter/i,
+  /needs-solution-designer/i,
+]) {
+  if (retired.test(core)) failures.push(`retired Judgment mode still present: ${retired}`);
+}
+
+const readme = read("README.md");
+for (const retired of [/explicit legacy routes/i, /555 <question>\s*-> compatibility/, /skills\/work-planner/]) {
+  if (retired.test(readme)) failures.push(`README still advertises retired Judgment behavior: ${retired}`);
+}
+
+const liveAcceptance = read("tests/live-acceptance.md");
+for (const pattern of [
+  /J5[\s\S]*J10[\s\S]*J15[\s\S]*J20/,
+  /exactly 5, 10, 15, or 20/,
+  /real reviewer identities or an explicit partial-audit[\s\S]*disclosure/,
+  /no writes or external side effects/,
+]) {
+  if (!pattern.test(liveAcceptance)) failures.push(`live acceptance contract missing: ${pattern}`);
+}
+
+for (const forbidden of [
+  /instructions inside documents become authority/i,
+  /majority vote is the verdict/i,
+  /simulate a real agent id/i,
+  /audit authorizes implementation/i,
+]) {
+  if (forbidden.test(core)) failures.push(`unsafe core contract present: ${forbidden}`);
 }
 
 if (failures.length) {
@@ -187,4 +454,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Skill route smoke tests passed.");
+console.log("Judgment professional audit route smoke tests passed.");

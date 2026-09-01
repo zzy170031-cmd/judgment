@@ -1,0 +1,7 @@
+interface:
+  display_name: "J"
+  short_description: "One-letter shortcut for professional Judgment audits."
+  default_prompt: "这个任务使用 J10 开始审计，审计后给我一个执行方案。"
+
+policy:
+  allow_implicit_invocation: true

@@ -1,7 +1,7 @@
 interface:
-  display_name: "555 Five-Agent Loop"
-  short_description: "Runs XA/XB milestones, release gates, AI/Agent safety reviews, backend delegation, adversarial review, evidence closure, and context guard."
-  default_prompt: "Use $555 to run this XA/XB milestone, release-readiness claim, or AI/Agent safety review through the five-agent evidence loop with context-pressure protection."
+  display_name: "555 Professional Audit"
+  short_description: "Runs independent role review and Red/Blue evidence checks."
+  default_prompt: "这个任务使用 J5 开始审计，审计后给我一个执行方案。"
 
 policy:
   allow_implicit_invocation: false

@@ -2,5 +2,5 @@ __pycache__/
 *.py[cod]
 node_modules/
 
-agent-office/runtime/*
-!agent-office/runtime/.gitignore
+# Preserve historical local runtime evidence without publishing it.
+/agent-office/runtime/

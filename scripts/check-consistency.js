@@ -16,30 +16,8 @@ function rel(file) {
   return path.relative(root, file).replaceAll(path.sep, "/");
 }
 
-function readBuffer(relPath) {
-  return fs.readFileSync(abs(relPath));
-}
-
-function assertJson(relPath) {
-  try {
-    JSON.parse(fs.readFileSync(abs(relPath), "utf8"));
-  } catch (error) {
-    fail(`${relPath}: invalid JSON (${error.message})`);
-  }
-}
-
-function assertSame(left, right, message) {
-  const leftPath = abs(left);
-  const rightPath = abs(right);
-  if (!fs.existsSync(leftPath)) {
-    fail(`${left}: missing`);
-    return;
-  }
-  if (!fs.existsSync(rightPath)) {
-    fail(`${right}: missing`);
-    return;
-  }
-  if (!readBuffer(left).equals(readBuffer(right))) fail(message);
+function assertAbsent(relPath, message) {
+  if (fs.existsSync(abs(relPath))) fail(message);
 }
 
 function walk(dir, files = []) {
@@ -56,50 +34,21 @@ function walk(dir, files = []) {
   return files;
 }
 
-assertJson("plugins/work-splitter/.codex-plugin/plugin.json");
-
-assertSame(
-  "SKILL.md",
-  "skills/666/SKILL.md",
-  "root SKILL.md must match skills/666/SKILL.md"
+assertAbsent(
+  "skills/666",
+  "skills/666 must stay absent; the repository root is the unique 666 entrypoint"
 );
-assertSame(
-  "agents/openai.yaml",
-  "skills/666/agents/openai.yaml",
-  "root agents/openai.yaml must match skills/666/agents/openai.yaml"
-);
-
-for (const skill of [
-  "slash-work-planner",
-  "work-planner",
-  "needs-solution-designer",
-  "work-splitter",
-]) {
-  assertSame(
-    `skills/${skill}/SKILL.md`,
-    `plugins/work-splitter/skills/${skill}/SKILL.md`,
-    `plugin copy for ${skill}/SKILL.md is out of sync; run scripts/sync-plugin-skills.sh`
-  );
-  assertSame(
-    `skills/${skill}/agents/openai.yaml`,
-    `plugins/work-splitter/skills/${skill}/agents/openai.yaml`,
-    `plugin copy for ${skill}/agents/openai.yaml is out of sync; run scripts/sync-plugin-skills.sh`
-  );
-}
 
 const scanRoots = [
-  "AGENTS.md",
   "README.md",
   "SKILL.md",
   "agents",
-  "plugins",
-  "rules",
   "skills",
   "scripts",
   "templates",
+  "tests",
   ".github",
   "package.json",
-  "package-lock.json",
 ];
 
 const windowsUsers = new RegExp("[A-Za-z]:[\\\\/]+Users[\\\\/]+[^\\\\/\\s'\"`]+");

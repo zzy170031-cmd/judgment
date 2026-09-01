@@ -1,3 +1,7 @@
-display_name: "Judgment"
-short_description: "Alias for the local Judgment workflow pack and Controller route."
-default_prompt: "Use $judgment when a request mentions Judgment itself or the Judgment Controller; route through $666 and the relevant Judgment skills/rules before execution."
+interface:
+  display_name: "Judgment Professional Audit"
+  short_description: "Dynamic expert roles, Red/Blue questioning, evidence, and plans."
+  default_prompt: "这个任务使用 J10 开始审计，审计后给我一个执行方案。"
+
+policy:
+  allow_implicit_invocation: true

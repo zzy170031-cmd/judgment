@@ -1,4 +1,4 @@
-name: Consistency
+name: Judgment Skill Checks
 
 on:
   pull_request:
@@ -12,14 +12,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - name: Install Node dependencies
-        run: npm ci
-      - name: Validate skill and plugin consistency
-        run: npm run check:consistency
-      - name: Validate skill lint
+      - name: Validate professional Judgment skills
         run: npm run check:skills
-      - name: Validate Agent Office runtime contract
-        run: npm run check:runtime-contract
-      - name: Validate Agent Office syntax
-        run: npm run check:agent-office
