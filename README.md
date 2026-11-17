@@ -1,8 +1,58 @@
 # Judgment Skills Pack
 
+## 统一版 1.1
+
+本仓库统一维护 Judgment 专业审计与原
+[five-agent-governance-skill](https://github.com/zzy170031-cmd/five-agent-governance-skill)
+的五代理闭环治理，并整合 Impeccable、Hallmark、Taste Skill 中适用的审计方法。
+入口仍为 Judgment → 666 → 555；五代理名称作为兼容入口，读取同一份规则和证据记录。
+
+- **专业审计**：保留 J5/J10/J15/J20、动态专业角色、独立盲审、红蓝质询和证据核验。
+- **五代理治理**：明确请求时使用 Maxwell、Dirac、Parfit、Wegener、Popper，
+  配合 Core Challenger、按需 Audit Specialist 及已授权的修复复查。
+- **设计与界面审计**：区分可复现缺陷、可用性假设与风格偏好，绑定真实对象，
+  先后对照内容与交互，按需检查可访问性、响应式、动效、主题和性能。
+- **可选网页观测工具**：在真实浏览器中取得自动可访问性、窄屏溢出、坏图与
+  DOM 保留情况的证据；工具结果不替代专业裁决或完整 WCAG 验收。
+
+~~~text
+$judgment J5 检查这个页面在手机上是否能完成报名；只审计，保留品牌和原文。
+$judgment J10 审计并修复本地页面的可访问性问题，保留文案和表单字段。
+$five-agent-closed-loop-governance 对这个项目检查点启用真实五代理治理。
+~~~
+
+第二个例子包含具体修复授权；审计请求、通过结论和执行方案本身不授予修复、
+安装、发送、提交或发布权限。现有用户授权继续有效。
+
+### 可选浏览器检查
+
+需要 Node 22.12+ 和已安装的 Chrome/Edge，仅在需要该工具且安装已获授权时准备依赖：
+
+~~~text
+npm ci --prefix skills/555 --ignore-scripts
+npm run audit:web -- --url http://127.0.0.1:3000 --viewport 390x844 --viewport 1440x900
+npm run test:web
+npm run check:skills
+npm run check:links
+~~~
+
+依赖仅安装在 skills/555 内，不下载浏览器。--allow-remote 指向已获授权的
+远程目标；--out 或 --baseline 写入新的任务证据文件，--compare 读取修改前
+报告；需要保留全部可见文字时使用 --preserve-copy。完整选项见
+[设计审计协议](skills/555/references/design-audit.md)。
+
+返回 checked 只表示选定检查完成且没有发现；findings 是待确认观察，
+incomplete/setup-error 表示证据或环境不齐。它们都不是 J 档位或发布通过。
+其他领域的审计不依赖这个工具。各来源的采用范围及授权见
+[整合来源](skills/555/references/integration-sources.md)。
+
+当前 CI 只运行原有结构检查。更改网页工具或交付整合版之前，还须实际运行
+check:links 与 test:web，并记录候选摘要、命令、退出码、Node/浏览器/axe 版本
+及未覆盖范围。局部文件链接检查不验证所有锚点或引用式链接。
+
 This repository contains a professional Judgment audit skill for Codex. Its default path is now question decomposition, assurance-level selection, dynamic specialist roles, independent blind review, Red/Blue cross-examination, evidence verification, and an executable decision plan.
 
-Judgment is a bounded audit skill, not a general workflow runtime. It keeps
+Judgment is a bounded audit and explicitly requested governance skill, not a general workflow runtime. It keeps
 authority, evidence, independent-review, and execution boundaries explicit.
 
 ## License And Use
@@ -11,7 +61,7 @@ This repository is not open source. It is a proprietary personal/internal Codex 
 
 ## 中文说明
 
-这个仓库现在只把 **Judgment 专业审计** 作为对外主能力：
+这个仓库以 **Judgment** 统一专业审计、设计审查和明确请求的五代理治理：
 
 - `judgment` / `J`：用户入口，接收问题和指定档位。
 - `666`：轻量审计路由器，拆解问题、判断风险、选择 `J5/J10/J15/J20`，再把冻结后的审计包交给 `555`。
@@ -82,12 +132,15 @@ $j J15 <问题>          -> Judgment J15
 
 ### 安装路径
 
-推荐从子目录安装：
+统一版需要完整仓库结构。将本仓库作为一个完整技能包安装到宿主认可的位置，
+保留根 SKILL.md、skills、templates、scripts 及配套文件；不要只复制子目录中的
+SKILL.md。以下为源码入口位置，不是相互独立、自含的发布包：
 
 ```text
 skills/judgment
 skills/j
 skills/555
+skills/five-agent-closed-loop-governance
 ```
 
 仓库根目录就是唯一的 `666` 入口，避免安装后出现两个同名技能：
@@ -207,18 +260,32 @@ templates/
 
 ## Install Paths
 
-```text
-skills/judgment
-skills/j
-skills/555
-```
+Install the complete repository as one pack, preserving this layout; the
+child entrypoints are not independent folders to copy on their own:
+
+~~~text
+<skill-root>/
+  SKILL.md                         # 666
+  agents/
+  skills/judgment/SKILL.md
+  skills/j/SKILL.md
+  skills/555/SKILL.md
+  skills/555/references/
+  skills/555/scripts/
+  skills/555/package.json
+  skills/555/package-lock.json
+  skills/five-agent-closed-loop-governance/SKILL.md
+  templates/
+  scripts/
+~~~
 
 ## Current Scope
 
-The active audit logic lives in the four `SKILL.md` entrypoints and the three
-`skills/555/references/*` protocols. Other repository material is not part of
-the Judgment audit route unless a separate skill is explicitly invoked outside
-Judgment.
+The five entrypoints share the single 666/555 protocol. Domain references load
+only when selected; the council reference loads only for an explicit/required
+council checkpoint. The optional browser observer is an evidence producer,
+not an assurance engine or automatic editor. Install the complete pack so
+relative entry, template and helper links remain resolvable.
 
 ## Quality Checks
 

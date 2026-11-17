@@ -1,6 +1,6 @@
 ---
 name: "j"
-description: One-letter alias for professional Judgment audits. Use when the user writes $j, J:, j:, or "<task> 使用 J5/J10/J15/J20 开始审计，审计后给我一个执行方案". Preserve the selected level and route to the sibling judgment skill; do not authorize implementation.
+description: One-letter alias for professional Judgment audits. Use when the user writes $j, J:, j:, or "任务使用 J5/J10/J15/J20 开始审计，审计后给我一个执行方案". Preserve the selected level and route to the sibling judgment skill; do not authorize implementation.
 ---
 
 # J

@@ -1,11 +1,14 @@
 {
   "name": "judgment-src",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Professional Judgment audit skills for J5/J10/J15/J20 dynamic-role review, Red/Blue cross-examination, evidence verification, and executable decision plans.",
   "main": "index.js",
   "scripts": {
     "check:consistency": "node scripts/check-consistency.js",
-    "check:skills": "node scripts/lint-skills.js && node scripts/smoke-skill-routes.js && node scripts/check-consistency.js"
+    "check:skills": "node scripts/lint-skills.js && node scripts/smoke-skill-routes.js && node scripts/check-consistency.js",
+    "audit:web": "node skills/555/scripts/audit-web.mjs",
+    "test:web": "node --test --test-concurrency=1 tests/web-audit.test.mjs",
+    "check:links": "node scripts/check-local-links.js"
   },
   "repository": {
     "type": "git",

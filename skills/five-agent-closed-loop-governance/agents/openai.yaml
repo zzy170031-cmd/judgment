@@ -1,0 +1,7 @@
+interface:
+  display_name: "Judgment Five-Agent Governance"
+  short_description: "Named council and bounded recheck within Judgment."
+  default_prompt: "Use $five-agent-closed-loop-governance within Judgment to review this project checkpoint and return an evidence-backed decision."
+
+policy:
+  allow_implicit_invocation: true

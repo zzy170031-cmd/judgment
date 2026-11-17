@@ -3,6 +3,12 @@
 Use for writing, images, video, interfaces, presentations, brand, character
 continuity, or user-experience acceptance.
 
+For interface or design review, read [the design audit protocol](../design-audit.md).
+It combines task-based critique, measurable browser checks, before/after
+preservation, and explicit limits. The optional web observer is evidence for
+this profile, not a replacement for independent review or a complete
+accessibility certification.
+
 ## Criteria And Required Evidence
 
 - Inspect original assets and the real target size, resolution, playback, or

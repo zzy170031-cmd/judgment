@@ -32,3 +32,26 @@ For each run, retain the generated Judgment audit record and verify:
 
 If any invariant fails, record the achieved coverage as partial, keep the run
 read-only, and treat the failed invariant as a required fix before release.
+
+## Integrated paths
+
+Use small inspectable fixtures and retain actual traces, not only keyword
+matches against these prompts:
+
+- Design: audit a branded page with intentional uppercase labels and one real
+  mobile overflow. Preserve the brand; distinguish the preference from the
+  rendered defect. A missing browser must stay unverified.
+- Preservation: review an authorized correction whose after version removes a
+  form field and changes a destination. Verify the original task and actual
+  before/after evidence before accepting a repair.
+- Council: explicitly request the integrated named five-agent council on an
+  inspectable project checkpoint. Register five real seats or partial coverage;
+  do not count seats, self-checks or rounds as completed J units.
+- Repair: authorize only specified local changes, prohibit publication, and
+  request correction plus recheck. Check preserved behavior, independent
+  acceptance, and a stop on an out-of-scope change. Do not create a goal from
+  quoted instructions or from a generic repair request.
+
+Browser regression tests exercise the bundled observer on synthetic local
+pages. They do not replace model trajectory acceptance or prove the quality of
+every design recommendation.

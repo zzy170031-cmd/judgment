@@ -1,6 +1,6 @@
 ---
 name: "666"
-description: Route professional Judgment audits. Use when the user says 666, Judgment, 专业审计, 对抗审查, 红蓝队, or "<task> 使用 J5/J10/J15/J20 开始审计，审计后给我一个执行方案". Select the smallest sufficient requested level and return an evidence-backed executable plan through 555; audit is read-only unless implementation is separately authorized.
+description: Route professional Judgment audits and explicitly requested five-agent project governance. Use for 666, Judgment, 专业审计, 对抗审查, 红蓝队, five-agent-governance, five-agent-closed-loop-governance, or a named J5/J10/J15/J20 audit. Preserve the requested level, load relevant domain checks, and return an evidence-backed decision and executable plan; repairs require existing execution authority.
 ---
 
 # 666 Professional Audit Router
@@ -16,6 +16,11 @@ understand the question -> select J5/J10/J15/J20 -> load 555 -> audit
 `666` chooses the smallest sufficient assurance level. The
 [555 professional audit engine](skills/555/SKILL.md) runs the audit. Red/Blue
 is the cross-examination protocol inside `555`.
+
+Judgment also owns design/interface review and the explicitly requested
+five-agent council. The council is a role and handoff arrangement within the
+same evidence contract, not a second audit engine. Small edits and factual
+questions do not activate project governance.
 
 An explicit invocation of `666`, Judgment audit, or a J-level means the user
 wants the question decomposed, domain roles created, evidence challenged, and an
@@ -64,6 +69,13 @@ Freeze only the facts needed to route:
 5. known evidence, assumptions, and unknowns;
 6. impact, reversibility, security/privacy/external-effect risk;
 7. whether real independent reviewer tools are available and permitted.
+
+Record whether the request is a domain audit, the named council, or audit with
+authorized repair. For an explicit council request, read
+[the unified council protocol](skills/555/references/governance.md). A J-level
+alone uses dynamic domain roles and does not require the five named seats.
+For design/interface work, select P07 and its linked design protocol; do not
+load visual-style rules into unrelated audits.
 
 If a missing answer would materially change the level or outcome, ask one
 focused question. Otherwise proceed with explicit assumptions.

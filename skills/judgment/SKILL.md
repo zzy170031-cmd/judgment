@@ -1,11 +1,16 @@
 ---
 name: "judgment"
-description: Front door for professional Judgment audits. Use when the user writes $judgment, judgment:, Judgment审计, 专业评判, or "<task> 使用 J5/J10/J15/J20 开始审计，审计后给我一个执行方案". Preserve the named level and return an evidence-backed executable plan; audit is read-only unless implementation is separately authorized.
+description: Front door for professional Judgment audits. Use when the user writes $judgment, judgment:, Judgment审计, 专业评判, or "任务使用 J5/J10/J15/J20 开始审计，审计后给我一个执行方案". Preserve the named level and return an evidence-backed executable plan; audit is read-only unless implementation is separately authorized.
 ---
 
 # Judgment
 
 Use this as the short front door to the professional audit system.
+
+This is also the shared front door for design/interface audits and explicitly
+requested five-agent governance. Route through `666` once; use its domain and
+council references rather than starting another audit engine. A request to
+integrate or discuss a skill does not itself invoke its full audit procedure.
 
 ```text
 $judgment <question>

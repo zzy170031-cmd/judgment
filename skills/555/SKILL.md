@@ -55,6 +55,10 @@ After selecting a level:
   [the adversarial protocol](references/对抗审查.md);
 - read [the design basis](references/design-basis.md) only when evolving or
   explaining this protocol.
+- for P07 interface/design work, also read the linked
+  [design audit protocol](references/design-audit.md); for an explicit named
+  council request, read [unified governance](references/governance.md).
+  Those references specialize the same audit, not a second assurance count.
 
 ## Required Workflow
 
@@ -165,6 +169,12 @@ The audit ends at an executable plan. Implementation begins only when the user
 separately approves execution or the original request already authorized that
 specific work.
 
+When repair is already authorized, continue with
+[bounded repair and recheck](references/repair-and-recheck.md). Preserve one
+finding register and target history. Reports and transient tool state do not
+authorize changes to the audited target; persistent evidence uses only an
+already authorized task location.
+
 ## Stop And Recheck
 
 - One blind phase and one cross-examination phase per `Qxx`.
@@ -174,8 +184,12 @@ specific work.
   with duplicate or immaterial questions.
 - After a correction, recheck only affected units plus route and evidence
   coverage.
-- A changed goal, core proposal, target seal, or risk boundary starts a new
-  audit.
+- A changed goal, core proposal, material criterion, or material risk boundary
+  starts a new audit.
+- A tracked correction within unchanged boundaries receives a new target seal.
+  Recheck affected units and preserve the explicit mapping to still-valid
+  unaffected evidence; a new hash alone does not restart the whole audit.
+  Unexplained candidate drift invalidates acceptance until resolved.
 - Do not rerun the same full level to manufacture a better-looking consensus.
 
 ## Forbidden
