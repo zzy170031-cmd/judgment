@@ -50,6 +50,10 @@ incomplete/setup-error 表示证据或环境不齐。它们都不是 J 档位或
 check:links 与 test:web，并记录候选摘要、命令、退出码、Node/浏览器/axe 版本
 及未覆盖范围。局部文件链接检查不验证所有锚点或引用式链接。
 
+使用目录联接作为本机入口时，可以把 Markdown 文件引用映射为安装包中的绝对路径。
+路由自检核对引用实际解析到的规范文件，支持源码相对路径与本机绝对路径，
+并用真实文件用例拒绝缺失、远程、错误目标和混有错误项的重复引用。
+
 This repository contains a professional Judgment audit skill for Codex. Its default path is now question decomposition, assurance-level selection, dynamic specialist roles, independent blind review, Red/Blue cross-examination, evidence verification, and an executable decision plan.
 
 Judgment is a bounded audit and explicitly requested governance skill, not a general workflow runtime. It keeps

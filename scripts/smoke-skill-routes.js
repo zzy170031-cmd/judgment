@@ -1,10 +1,61 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const os = require("node:os");
 
 const root = path.resolve(__dirname, "..");
 const absolute = (rel) => path.join(root, rel);
 const read = (rel) => fs.readFileSync(absolute(rel), "utf8");
 const failures = [];
+
+function linksToFile(markdown, label, fromDirectory, expectedFile) {
+  const links = [...markdown.matchAll(/\[([^\]\r\n]+)\]\(([^\)\r\n]+)\)/g)]
+    .filter((match) => match[1] === label);
+  return links.length > 0 && links.every((match) => {
+    let href = match[2].trim();
+    if (href.startsWith("<") && href.endsWith(">")) href = href.slice(1, -1);
+    if (/^[a-z][a-z0-9+.-]*:/i.test(href) && !path.isAbsolute(href) || href.startsWith("//")) return false;
+    try {
+      const target = path.resolve(fromDirectory, decodeURIComponent(href.split("#")[0]));
+      return fs.realpathSync(target) === fs.realpathSync(expectedFile);
+    } catch { return false; }
+  });
+}
+
+for (const [file, label, target] of [
+  ["SKILL.md", "555 professional audit engine", "skills/555/SKILL.md"],
+  ["skills/judgment/SKILL.md", "666 audit router", "SKILL.md"],
+]) {
+  if (!linksToFile(read(file), label, path.dirname(absolute(file)), absolute(target))) {
+    failures.push(`${file}: ${label} must resolve to the canonical ${target}`);
+  }
+}
+
+const linkFixtureDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "judgment-link-check-"));
+const linkExpected = path.join(linkFixtureDirectory, "expected.md");
+const linkWrong = path.join(linkFixtureDirectory, "wrong.md");
+fs.writeFileSync(linkExpected, "canonical target\n");
+fs.writeFileSync(linkWrong, "different target\n");
+const linkFixtures = [
+  ["relative", "[engine](expected.md)", true],
+  ["absolute", `[engine](${linkExpected.replace(/\\/g, "/")})`, true],
+  ["wrapped absolute", `[engine](<${linkExpected.replace(/\\/g, "/")}>)`, true],
+  ["missing", "[engine](missing.md)", false],
+  ["wrong existing file", "[engine](wrong.md)", false],
+  ["remote", "[engine](https://example.com/expected.md)", false],
+  ["wrong label", "[another](expected.md)", false],
+  ["one wrong duplicate", "[engine](expected.md) [engine](wrong.md)", false],
+];
+try {
+  for (const [name, markdown, expected] of linkFixtures) {
+    if (linksToFile(markdown, "engine", linkFixtureDirectory, linkExpected) !== expected) {
+      failures.push(`canonical link fixture failed: ${name}`);
+    }
+  }
+} finally {
+  fs.unlinkSync(linkExpected);
+  fs.unlinkSync(linkWrong);
+  fs.rmdirSync(linkFixtureDirectory);
+}
 
 const required = [
   {
@@ -15,7 +66,6 @@ const required = [
       /Bare `555` maps to `J5`/,
       /Bare `666` or `judgment` normally maps to[\s\S]*`J10`/,
       /Route Into 555/,
-      /\[555 professional audit engine\]\(skills\/555\/SKILL\.md\)/,
       /<task> 使用 J5\|J10\|J15\|J20 开始审计，审计后给我一个执行方案/,
       /requested execution plan is the audit deliverable, not execution authority/,
       /Red\/Blue cross-examination/,
@@ -52,7 +102,6 @@ const required = [
       /\$judgment 15 <question>[\s\S]*J15/,
       /\$judgment 20 <question>[\s\S]*J20/,
       /Primary Natural-Language Invocation/,
-      /\[666 audit router\]\(\.\.\/\.\.\/SKILL\.md\)/,
       /<task> 使用 J5 开始审计，审计后给我一个执行方案/,
       /named level wins; do not silently[\s\S]*upgrade or downgrade/,
       /professional verdict and an ordered executable plan/,
@@ -455,3 +504,4 @@ if (failures.length) {
 }
 
 console.log("Judgment professional audit route smoke tests passed.");
+console.log(`Canonical link targets verified; ${linkFixtures.length} filesystem fixtures passed.`);
